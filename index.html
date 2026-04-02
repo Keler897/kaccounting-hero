@@ -7,17 +7,18 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="記帳勇者傳說">
 <meta name="theme-color" content="#ffffff">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%231a1a1a'/><text y='.9em' font-size='72' x='12'>⚔️</text></svg>">
 <title>記帳勇者傳說</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang TC','Microsoft JhengHei',sans-serif;color:#1a1a1a;background:#f5f4f0;min-height:100vh;}
-.app{max-width:480px;margin:0 auto;background:#fff;min-height:100vh;}
+.app{max-width:480px;margin:0 auto;background:#fff;min-height:100vh;position:relative;}
 .header{background:#fff;border-bottom:1px solid #eee;padding:14px 16px 0;position:sticky;top:0;z-index:10;}
 .header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
 .app-title{font-size:16px;font-weight:700;}
-.version-tag{font-size:10px;color:#aaa;font-weight:400;margin-left:5px;}
+.version-tag{font-size:10px;color:#aaa;margin-left:5px;}
 .coin-pill{display:inline-flex;align-items:center;gap:4px;font-size:13px;font-weight:600;background:#fff8e6;color:#b8860b;border:1px solid #f0d080;padding:3px 10px;border-radius:20px;}
-.tabs{display:flex;gap:0;overflow-x:auto;scrollbar-width:none;}
+.tabs{display:flex;overflow-x:auto;scrollbar-width:none;}
 .tabs::-webkit-scrollbar{display:none;}
 .tab{flex-shrink:0;padding:8px 14px;font-size:12px;font-weight:500;color:#888;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;background:none;border-top:none;border-left:none;border-right:none;}
 .tab.active{color:#2c2c2c;border-bottom-color:#2c2c2c;font-weight:600;}
@@ -25,7 +26,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang TC','Micr
 .section{display:none;}.section.active{display:block;}
 .card{background:#fff;border:1px solid #ebebeb;border-radius:14px;padding:14px 16px;margin-bottom:12px;}
 .card-title{font-size:11px;font-weight:600;color:#999;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;}
-select,input[type=text],input[type=number],input[type=url]{width:100%;padding:10px 12px;border:1px solid #e0e0e0;border-radius:10px;font-size:14px;background:#fafafa;color:#1a1a1a;outline:none;font-family:inherit;}
+select,input[type=text],input[type=number]{width:100%;padding:10px 12px;border:1px solid #e0e0e0;border-radius:10px;font-size:14px;background:#fafafa;color:#1a1a1a;outline:none;font-family:inherit;}
 select:focus,input:focus{border-color:#888;background:#fff;}
 .row{display:flex;gap:8px;margin-bottom:10px;}
 .row select,.row input{flex:1;}
@@ -84,6 +85,7 @@ select:focus,input:focus{border-color:#888;background:#fff;}
 .cat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px;}
 .cat-card{background:#fff;border:1px solid #ebebeb;border-radius:12px;padding:12px;cursor:pointer;}
 .cat-card.sel{border:2px solid #1a1a1a;}
+.cat-header{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
 .cat-bar-bg{background:#f0f0f0;border-radius:99px;height:4px;overflow:hidden;margin-bottom:4px;}
 .cat-bar-fill{height:100%;border-radius:99px;}
 .cat-foot{font-size:10px;color:#aaa;}
@@ -126,11 +128,12 @@ select:focus,input:focus{border-color:#888;background:#fff;}
 .bchar-hp{font-size:11px;color:#aaa;margin-top:3px;}
 .bchar-stats{font-size:10px;color:#aaa;margin-top:2px;}
 .battle-log{background:#f8f8f8;border-radius:10px;padding:10px 12px;font-size:12px;color:#555;height:110px;overflow-y:auto;line-height:1.9;white-space:pre-wrap;margin-bottom:12px;}
-.battle-btns{display:grid;gap:8px;margin-bottom:8px;}
-.bbtn{padding:12px;border-radius:12px;font-size:13px;font-weight:600;cursor:pointer;text-align:center;line-height:1.4;}
+.battle-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
+.bbtn{padding:12px;border-radius:12px;font-size:13px;font-weight:600;cursor:pointer;text-align:center;line-height:1.4;border:none;}
 .bbtn:disabled{opacity:.35;cursor:not-allowed;}
 .bbtn-atk{background:#fff1ee;color:#c0392b;border:1.5px solid #f5c0b0;}
 .bbtn-def{background:#eef0ff;color:#3344cc;border:1.5px solid #c0c8f8;}
+.bbtn-thr{background:#eefff2;color:#1D9E75;border:1.5px solid #9FE1CB;}
 .bbtn-thr{background:#eefff2;color:#1D9E75;border:1.5px solid #9FE1CB;}
 .flee-btn{width:100%;padding:10px;background:#f5f5f5;color:#888;border:1px solid #e8e8e8;border-radius:10px;font-size:13px;cursor:pointer;font-weight:500;}
 .defeat-screen{text-align:center;padding:32px 16px;}
@@ -140,84 +143,86 @@ select:focus,input:focus{border-color:#888;background:#fff;}
 .defeat-btn{display:inline-block;padding:14px 32px;background:#1a1a1a;color:#fff;border:none;border-radius:14px;font-size:15px;font-weight:700;cursor:pointer;}
 .dying-banner{background:#fff0f0;border:1px solid #f5c0b0;border-radius:12px;padding:10px 14px;font-size:13px;color:#c0392b;margin-bottom:12px;}
 .info-box{background:#f8f8f8;border-radius:12px;padding:12px 14px;font-size:12px;color:#888;line-height:2;margin-top:10px;}
-/* Login overlay */
-.ov{position:fixed;top:0;left:0;right:0;bottom:0;z-index:200;display:flex;align-items:center;justify-content:center;padding:24px;}
-.login-bg{background:#fff;flex-direction:column;text-align:center;}
-.login-logo{font-size:72px;margin-bottom:16px;}
-.login-title{font-size:26px;font-weight:800;margin-bottom:8px;}
-.login-sub{font-size:14px;color:#888;margin-bottom:32px;line-height:1.7;}
-.login-btn{display:flex;align-items:center;justify-content:center;gap:10px;padding:14px 28px;background:#fff;border:1.5px solid #e0e0e0;border-radius:14px;font-size:15px;font-weight:600;cursor:pointer;color:#1a1a1a;width:100%;max-width:280px;}
-.login-btn:hover{background:#f5f5f5;}
-.login-btn:active{transform:scale(.98);}
-.login-status{font-size:13px;color:#888;margin-top:16px;min-height:18px;}
-/* Changelog overlay */
-.cl-bg{background:rgba(0,0,0,0.55);}
-.cl-card{background:#fff;border-radius:20px;padding:24px;width:100%;max-width:400px;max-height:75vh;overflow-y:auto;}
-.cl-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
-.cl-title{font-size:18px;font-weight:800;}
-.cl-ver{font-size:12px;font-weight:600;background:#1a1a1a;color:#fff;padding:3px 10px;border-radius:20px;}
-.cl-item{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid #f0f0f0;}
-.cl-item:last-child{border-bottom:none;}
-.cl-dot{width:8px;height:8px;border-radius:50%;background:#1a1a1a;flex-shrink:0;margin-top:5px;}
-.cl-text{font-size:13px;color:#444;line-height:1.6;}
-.cl-close{width:100%;padding:13px;background:#1a1a1a;color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;margin-top:16px;}
-/* Edit modal */
+.import-row{display:flex;gap:8px;}
+.import-row input{flex:1;}
+.import-btn{padding:10px 16px;background:#1a1a1a;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;}
+/* 設定畫面 */
+.overlay{position:fixed;top:0;left:0;right:0;bottom:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:24px;}
+.setup-overlay{background:#fff;}
+.setup-box{width:100%;max-width:400px;}
+.setup-logo{font-size:56px;text-align:center;margin-bottom:12px;}
+.setup-title{font-size:22px;font-weight:800;text-align:center;margin-bottom:6px;}
+.setup-sub{font-size:13px;color:#888;text-align:center;margin-bottom:24px;line-height:1.7;}
+.setup-label{font-size:11px;font-weight:600;color:#555;margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em;}
+.setup-input{width:100%;padding:12px 14px;border:1.5px solid #e0e0e0;border-radius:10px;font-size:13px;background:#fff;outline:none;margin-bottom:10px;font-family:inherit;}
+.setup-input:focus{border-color:#1a1a1a;}
+.setup-btn{width:100%;padding:14px;background:#1a1a1a;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;}
+.setup-steps{font-size:12px;color:#aaa;line-height:2.1;margin-top:14px;}
+.setup-steps strong{color:#555;}
+.setup-err{font-size:12px;color:#c0392b;min-height:16px;margin-bottom:8px;}
+/* 改版說明 */
+.changelog-overlay{background:rgba(0,0,0,.5);}
+.changelog-card{background:#fff;border-radius:20px;padding:24px;width:100%;max-width:400px;max-height:80vh;overflow-y:auto;}
+.changelog-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.changelog-title{font-size:18px;font-weight:800;}
+.changelog-ver{font-size:12px;font-weight:600;background:#1a1a1a;color:#fff;padding:3px 10px;border-radius:20px;}
+.changelog-item{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid #f0f0f0;}
+.changelog-item:last-child{border-bottom:none;}
+.changelog-dot{width:8px;height:8px;border-radius:50%;background:#1a1a1a;flex-shrink:0;margin-top:5px;}
+.changelog-text{font-size:13px;color:#444;line-height:1.6;}
+.changelog-close{width:100%;padding:13px;background:#1a1a1a;color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;margin-top:16px;}
+
 .edit-modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:300;display:flex;align-items:center;justify-content:center;padding:24px;}
 .edit-card{background:#fff;border-radius:16px;padding:20px;width:100%;max-width:400px;}
 .edit-title{font-size:15px;font-weight:700;margin-bottom:16px;}
-.edit-row{margin-bottom:12px;}
 .edit-label{font-size:12px;color:#888;margin-bottom:4px;font-weight:500;}
+.edit-row{margin-bottom:12px;}
 .edit-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px;}
 .edit-save{padding:11px;background:#1a1a1a;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;}
 .edit-cancel{padding:11px;background:#f5f5f5;color:#666;border:1px solid #e0e0e0;border-radius:10px;font-size:13px;cursor:pointer;}
-/* Sync indicator */
-.sync-dot{width:7px;height:7px;border-radius:50%;background:#2a7a4f;display:inline-block;margin-left:6px;}
-.sync-dot.syncing{background:#b8860b;animation:pulse 1s infinite;}
-@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
 </style>
 </head>
 <body>
-
-<!-- 改版說明 -->
-<div id="cl-overlay" class="ov cl-bg" style="display:none;">
-  <div class="cl-card">
-    <div class="cl-header"><div class="cl-title">更新內容 🎉</div><div class="cl-ver" id="cl-ver">v2.0</div></div>
-    <div id="cl-list"></div>
-    <button class="cl-close" onclick="closeChangelog()">知道了，開始冒險！</button>
-  </div>
-</div>
-
-<!-- 登入畫面 -->
-<div id="login-overlay" class="ov login-bg" style="display:none;flex-direction:column;">
-  <div class="login-logo">⚔️</div>
-  <div class="login-title">記帳勇者傳說</div>
-  <div class="login-sub">用 Google 帳號登入<br>資料自動同步，跨裝置使用</div>
-  <button class="login-btn" onclick="signInWithGoogle()">
-    <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z"/></svg>
-    使用 Google 登入
-  </button>
-  <div class="login-status" id="login-status"></div>
-</div>
-
-<!-- 編輯記帳 modal -->
-<div id="edit-modal" class="edit-modal" style="display:none;">
-  <div class="edit-card">
-    <div class="edit-title">✏️ 編輯記帳</div>
-    <div class="edit-row"><div class="edit-label">類型</div><select id="edit-type" onchange="updateEditCats()"><option value="expense">支出</option><option value="income">收入</option></select></div>
-    <div class="edit-row"><div class="edit-label">金額</div><input type="number" id="edit-amount" min="1"></div>
-    <div class="edit-row"><div class="edit-label">類別</div><select id="edit-cat"></select></div>
-    <div class="edit-row"><div class="edit-label">備註</div><input type="text" id="edit-note" placeholder="備註（可選）"></div>
-    <div class="edit-btns"><button class="edit-save" onclick="saveEdit()">儲存</button><button class="edit-cancel" onclick="closeEdit()">取消</button></div>
-  </div>
-</div>
-
 <div class="app">
+
+  <!-- 改版說明視窗 -->
+  <div id="changelog-overlay" class="overlay changelog-overlay" style="display:none;">
+    <div class="changelog-card">
+      <div class="changelog-header">
+        <div class="changelog-title">更新內容</div>
+        <div class="changelog-ver" id="cl-ver">v1.0</div>
+      </div>
+      <div id="cl-list"></div>
+      <button class="changelog-close" onclick="closeChangelog()">知道了，開始冒險！</button>
+    </div>
+  </div>
+
+  <!-- 初次設定視窗 -->
+  <div id="setup-overlay" class="overlay setup-overlay" style="display:none;">
+    <div class="setup-box">
+      <div class="setup-logo">⚔️</div>
+      <div class="setup-title">記帳勇者傳說</div>
+      <div class="setup-sub">歡迎！請輸入你的<br>Google Sheets API 網址</div>
+      <div class="setup-label">Apps Script 網址</div>
+      <input class="setup-input" id="setup-input" type="url" placeholder="https://script.google.com/macros/s/...">
+      <div class="setup-err" id="setup-err"></div>
+      <button class="setup-btn" onclick="saveApiUrl()">開始使用</button>
+      <div class="setup-steps">
+        <strong>還沒有網址？</strong><br>
+        1. Google Sheets → 擴充功能 → Apps Script<br>
+        2. 貼上 Code.gs → 儲存<br>
+        3. 部署 → 新增部署 → 網頁應用程式<br>
+        4. 執行身分：我 ／ 存取權：任何人<br>
+        5. 複製網址貼到上方
+      </div>
+    </div>
+  </div>
+
   <div class="header">
     <div class="header-top">
       <div style="display:flex;align-items:baseline;">
         <div class="app-title">記帳勇者傳說</div>
-        <span class="version-tag" id="version-tag"></span>
-        <span class="sync-dot" id="sync-dot" title="資料同步中"></span>
+        <span class="version-tag" id="ver-tag"></span>
       </div>
       <div class="coin-pill">🪙 <span id="coin-display">0</span> 金幣</div>
     </div>
@@ -228,11 +233,13 @@ select:focus,input:focus{border-color:#888;background:#fff;}
       <button class="tab" onclick="switchTab('mastery',this)">熟練度</button>
       <button class="tab" onclick="switchTab('shop',this)">商店</button>
       <button class="tab" onclick="switchTab('boss',this)">Boss戰</button>
-      <button class="tab" onclick="switchTab('connect',this)">設定</button>
+      <button class="tab" onclick="switchTab('connect',this)">試算表</button>
     </div>
   </div>
+
   <div class="content">
 
+  <!-- 記帳 -->
   <div id="tab-record" class="section active">
     <div class="card">
       <div class="card-title">新增記帳</div>
@@ -244,55 +251,68 @@ select:focus,input:focus{border-color:#888;background:#fff;}
     <div class="card"><div class="card-title">最近記帳</div><div id="log-list"><div style="font-size:13px;color:#aaa">尚無紀錄</div></div></div>
   </div>
 
+  <!-- 玩家 -->
   <div id="tab-player" class="section">
     <div id="dying-banner" class="dying-banner" style="display:none">⚠️ 瀕死狀態！本月支出超過收入！</div>
     <div class="card">
       <div class="player-header">
         <div class="avatar" id="job-icon">⚔️</div>
-        <div style="flex:1;"><input class="player-name-input" id="name-input" value="冒險者" maxlength="12" oninput="onNameChange(this.value)"><div class="job-label" id="job-label">職業：菜鳥記帳師</div><div style="margin-top:8px;"><span id="combo-text" style="font-size:13px;font-weight:600;color:#aaa">0 天連擊</span></div></div>
+        <div style="flex:1;"><input class="player-name-input" id="name-input" value="冒險者" maxlength="12" oninput="state.name=this.value"><div class="job-label" id="job-label">菜鳥記帳師</div><div style="margin-top:8px;"><span id="combo-text" style="font-size:13px;font-weight:600;color:#aaa">0 天連擊</span></div></div>
         <div class="level-badge"><div class="level-tag">Lv.</div><div class="level-num" id="hero-lv">1</div></div>
       </div>
       <div class="progress-label"><span id="exp-label">0 / 100 EXP</span><span id="next-lv-label">Lv.2</span></div>
       <div class="progress-bar" style="margin-top:4px;"><div class="progress-fill" id="exp-bar" style="width:0%;background:#1a1a1a;"></div></div>
     </div>
     <div class="stat-grid" id="stat-grid"></div>
-    <div class="card" style="text-align:center;"><div class="card-title">角色</div><svg id="pixel-char" width="96" height="112" viewBox="0 0 64 80" style="image-rendering:pixelated;display:block;margin:0 auto 4px;"></svg><div id="pixel-label" style="font-size:11px;color:#aaa;margin-bottom:2px;"></div></div>
+    <div class="card" style="text-align:center;">
+      <div class="card-title">角色</div>
+      <svg id="pixel-char" width="96" height="112" viewBox="0 0 64 80" style="image-rendering:pixelated;display:block;margin:0 auto 4px;"></svg>
+      <div id="pixel-label" style="font-size:11px;color:#aaa;margin-bottom:2px;"></div>
+    </div>
     <div class="card"><div class="card-title">裝備槽</div><div class="equip-slots" id="equip-slots"></div><div style="font-size:11px;color:#aaa;">到商店購買裝備以提升屬性</div></div>
-    <div class="card"><div class="card-title">HP 狀態 — 本月收入 − 支出</div><div class="progress-label"><span id="hp-detail">收入 $0 − 支出 $0</span><span id="hp-net" style="font-weight:600;">$0 / $0</span></div><div class="progress-bar" style="margin-top:6px;"><div class="progress-fill" id="hp-bar" style="width:0%;background:#2a7a4f;"></div></div></div>
+    <div class="card">
+      <div class="card-title">HP 狀態 — 本月收入 − 支出</div>
+      <div class="progress-label"><span id="hp-detail">收入 $0 − 支出 $0</span><span id="hp-net" style="font-weight:600;">$0 / $0</span></div>
+      <div class="progress-bar" style="margin-top:6px;"><div class="progress-fill" id="hp-bar" style="width:0%;background:#2a7a4f;"></div></div>
+    </div>
     <div class="card"><div class="card-title">每日任務</div><div id="task-list"></div></div>
     <div class="card"><div class="card-title">稱號 &amp; 成就</div><div class="badge-wrap" id="badge-wrap"></div></div>
   </div>
 
+  <!-- 屬性 -->
   <div id="tab-stats" class="section">
     <div class="card"><div class="card-title">角色屬性</div><div id="attr-list"></div></div>
     <div class="card"><div class="card-title">金幣記錄</div><div id="coin-log"></div></div>
-    <div class="info-box">📅 每日記帳 +50金幣・🔥 7天連擊 +200・30天 +1000<br>🏆 小成就 +100・中成就 +300・大成就 +500・⚔️ 擊敗Boss +100</div>
+    <div class="info-box">📅 每日記帳 → +50金幣 ・ 🔥 7天連擊 → +200 ・ 30天 → +1000<br>🏆 小成就 +100 ・ 中成就 +300 ・ 大成就 +500 ・ ⚔️ 擊敗Boss → +100</div>
   </div>
 
+  <!-- 熟練度 -->
   <div id="tab-mastery" class="section">
     <div class="card"><div class="card-title">本月支出佔比</div><div class="pie-section"><canvas id="pie-canvas" width="110" height="110" style="flex-shrink:0;"></canvas><div class="pie-legend" id="pie-legend"></div></div></div>
     <div class="card"><div class="card-title">分類熟練度</div><div class="cat-grid" id="cat-grid"></div></div>
     <div id="mastery-detail"></div>
   </div>
 
+  <!-- 商店 -->
   <div id="tab-shop" class="section">
     <div class="card" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;"><div><div class="card-title" style="margin-bottom:2px;">裝備商店</div><div style="font-size:12px;color:#aaa;">購買裝備提升屬性</div></div><div class="coin-pill">🪙 <span id="shop-coin">0</span></div></div>
     <div class="shop-grid" id="shop-grid"></div>
   </div>
 
+  <!-- Boss戰 -->
   <div id="tab-boss" class="section">
     <div id="boss-select-area">
-      <div class="card" style="margin-bottom:12px;"><div class="card-title">選擇 Boss 挑戰</div><div style="font-size:12px;color:#aaa;">可無限重挑！</div></div>
+      <div class="card" style="margin-bottom:12px;"><div class="card-title">選擇 Boss 挑戰</div><div style="font-size:12px;color:#aaa;">可無限重挑！攻擊力直接造成傷害，Boss攻擊 − 防禦 = 實際傷害</div></div>
       <div class="boss-grid" id="boss-grid"></div>
     </div>
     <div id="battle-area" style="display:none;">
       <div class="battle-wrap">
         <div class="battle-title" id="battle-title">戰鬥中</div>
         <div class="battle-chars">
-          <div class="bchar"><div class="bchar-em" id="p-avatar">⚔️</div><div class="bchar-nm" id="p-name">玩家</div><div class="progress-bar"><div class="progress-fill" id="p-hpbar" style="width:100%;background:#2a7a4f;"></div></div><div class="bchar-hp" id="p-hplabel">100/100</div><div class="bchar-stats" id="p-stats"></div></div>
-          <div class="bchar"><div class="bchar-em" id="b-avatar">👹</div><div class="bchar-nm" id="b-name">Boss</div><div class="progress-bar"><div class="progress-fill" id="b-hpbar" style="width:100%;background:#c0392b;"></div></div><div class="bchar-hp" id="b-hplabel">500/500</div></div>
+          <div class="bchar"><div class="bchar-em" id="p-avatar">⚔️</div><div class="bchar-nm" id="p-name">玩家</div><div class="progress-bar"><div class="progress-fill" id="p-hpbar" style="width:100%;background:#2a7a4f;"></div></div><div class="bchar-hp" id="p-hplabel"></div><div class="bchar-stats" id="p-stats"></div></div>
+          <div class="bchar"><div class="bchar-em" id="b-avatar">👹</div><div class="bchar-nm" id="b-name">Boss</div><div class="progress-bar"><div class="progress-fill" id="b-hpbar" style="width:100%;background:#c0392b;"></div></div><div class="bchar-hp" id="b-hplabel"></div></div>
         </div>
-        <div class="battle-log" id="battle-log">準備戰鬥！</div>
+        <div class="battle-log" id="battle-log"></div>
         <div class="battle-btns" style="grid-template-columns:1fr 1fr 1fr;">
           <button class="bbtn bbtn-atk" id="btn-atk" onclick="doAction('attack')">⚔️ 攻擊<br><span style="font-size:10px;font-weight:400;" id="atk-hint"></span></button>
           <button class="bbtn bbtn-def" id="btn-def" onclick="doAction('defend')">🛡️ 防禦<br><span style="font-size:10px;font-weight:400;" id="def-hint"></span></button>
@@ -315,274 +335,74 @@ select:focus,input:focus{border-color:#888;background:#fff;}
       </div>
     </div>
     <div id="defeat-area" style="display:none;">
-      <div class="battle-wrap"><div class="defeat-screen"><div class="defeat-em">💀</div><div class="defeat-title">戰敗了...</div><div class="defeat-sub" id="defeat-msg">被 Boss 擊倒了。</div><button class="defeat-btn" onclick="backToBossSelect()">回到 Boss 選擇</button></div></div>
+      <div class="battle-wrap">
+        <div class="defeat-screen">
+          <div class="defeat-em">💀</div>
+          <div class="defeat-title">戰敗了...</div>
+          <div class="defeat-sub" id="defeat-msg"></div>
+          <button class="defeat-btn" onclick="backToBossSelect()">回到 Boss 選擇</button>
+        </div>
+      </div>
     </div>
   </div>
 
+  <!-- 試算表 -->
   <div id="tab-connect" class="section">
     <div class="card">
-      <div class="card-title">帳號</div>
-      <div id="user-info" style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
-        <img id="user-avatar" src="" width="40" height="40" style="border-radius:50%;display:none;">
-        <div><div id="user-name" style="font-size:14px;font-weight:600;"></div><div id="user-email" style="font-size:12px;color:#888;"></div></div>
-      </div>
-      <button onclick="signOut()" style="width:100%;padding:10px;background:#f5f5f5;color:#888;border:1px solid #e0e0e0;border-radius:10px;font-size:13px;cursor:pointer;">登出</button>
+      <div class="card-title">Google Sheets 雙向同步</div>
+      <div style="font-size:13px;color:#888;margin-bottom:14px;line-height:1.7;">已連結你的 Google Sheets，可即時同步資料。</div>
+      <button id="sync-btn" onclick="syncFromSheets()" style="width:100%;padding:14px;background:#1a1a1a;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:10px;">從 Google Sheets 同步資料</button>
+      <div id="sync-status" style="font-size:13px;color:#888;text-align:center;min-height:18px;"></div>
+      <div class="info-box">⬇️ 同步：把歷史資料讀進來<br>⬆️ 記帳：每筆自動寫入 Sheets<br>🔄 開啟 App 時自動同步</div>
+      <button onclick="resetApiUrl()" style="width:100%;margin-top:10px;padding:10px;background:#f5f5f5;color:#888;border:1px solid #e0e0e0;border-radius:10px;font-size:12px;cursor:pointer;">重設 API 網址</button>
     </div>
     <div class="card">
-      <div class="card-title">匯入舊資料（Google Sheets）</div>
-      <p style="font-size:13px;color:#888;margin-bottom:12px;line-height:1.7;">將舊的 Google Sheets 資料一次性匯入 Firebase。匯入後不需要再連結 Sheets。</p>
-      <div style="font-size:12px;color:#888;margin-bottom:10px;line-height:1.8;">Google Sheets → 檔案 → 下載 → 逗號分隔值 (.csv)</div>
-      <div id="drop-zone" style="border:2px dashed #e0e0e0;border-radius:12px;padding:24px;text-align:center;cursor:pointer;" ondragover="event.preventDefault();this.style.borderColor='#1a1a1a';" ondragleave="this.style.borderColor='#e0e0e0';" ondrop="handleDrop(event);" onclick="document.getElementById('csv-file').click()">
-        <div style="font-size:24px;margin-bottom:6px;">📂</div>
-        <div style="font-size:13px;font-weight:600;color:#555;">拖入或點此選擇 CSV</div>
+      <div class="card-title">方法二：拖入 CSV 檔案</div>
+      <div style="font-size:12px;color:#888;margin-bottom:12px;line-height:1.8;">Google Sheets → 檔案 → 下載 → 逗號分隔值 (.csv)</div>
+      <div id="drop-zone" style="border:2px dashed #e0e0e0;border-radius:12px;padding:28px 16px;text-align:center;cursor:pointer;" ondragover="event.preventDefault();this.style.borderColor='#1a1a1a';" ondragleave="this.style.borderColor='#e0e0e0';" ondrop="handleDrop(event);" onclick="document.getElementById('csv-file').click()">
+        <div style="font-size:28px;margin-bottom:8px;">📂</div>
+        <div style="font-size:13px;font-weight:600;color:#555;">拖入 CSV 或點此選擇</div>
       </div>
       <input type="file" id="csv-file" accept=".csv" style="display:none;" onchange="handleFileInput(this)">
       <div id="import-status" style="margin-top:10px;font-size:13px;color:#666;min-height:18px;"></div>
     </div>
   </div>
 
-  </div>
-</div>
+  </div><!-- end content -->
+</div><!-- end app -->
 
-<script type="module">
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut as fbSignOut } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-import { getFirestore, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc, collection, query, orderBy, getDocs, onSnapshot, writeBatch, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
-
-const firebaseConfig = {
-  apiKey: "AIzaSyBdCv_o8QUlWulbpTiuTh_lgEvgPZDPPjU",
-  authDomain: "kaccounting-hero.firebaseapp.com",
-  projectId: "kaccounting-hero",
-  storageBucket: "kaccounting-hero.firebasestorage.app",
-  messagingSenderId: "857958284972",
-  appId: "1:857958284972:web:479cbb29d4892e4626e909"
-};
-
-const fbApp  = initializeApp(firebaseConfig);
-const auth   = getAuth(fbApp);
-const db     = getFirestore(fbApp);
-const provider = new GoogleAuthProvider();
-
-let currentUser = null;
-let unsubRecords = null;
-
-// ── 同步指示燈 ──
-function setSyncing(on) {
-  const dot = document.getElementById('sync-dot');
-  if (dot) dot.className = 'sync-dot' + (on ? ' syncing' : '');
-}
-
-// ── 登入/登出 ──
-window.signInWithGoogle = async function() {
-  const status = document.getElementById('login-status');
-  status.textContent = '登入中...';
-  try {
-    await signInWithPopup(auth, provider);
-  } catch(e) {
-    status.textContent = '登入失敗：' + e.message;
-  }
-};
-
-window.signOut = async function() {
-  if (unsubRecords) { unsubRecords(); unsubRecords = null; }
-  await fbSignOut(auth);
-};
-
-// ── Auth 狀態監聽 ──
-onAuthStateChanged(auth, async (user) => {
-  if (user) {
-    currentUser = user;
-    document.getElementById('login-overlay').style.display = 'none';
-    // 顯示帳號資訊
-    const avatar = document.getElementById('user-avatar');
-    avatar.src = user.photoURL || '';
-    avatar.style.display = user.photoURL ? 'block' : 'none';
-    document.getElementById('user-name').textContent = user.displayName || '';
-    document.getElementById('user-email').textContent = user.email || '';
-    // 載入 profile 並啟動
-    await loadProfile();
-    subscribeRecords();
-    checkVersionAndLaunch();
-  } else {
-    currentUser = null;
-    if (unsubRecords) { unsubRecords(); unsubRecords = null; }
-    document.getElementById('login-overlay').style.display = 'flex';
-  }
-});
-
-// ── Profile 讀寫（角色設定、金幣、裝備等）──
-async function loadProfile() {
-  if (!currentUser) return;
-  const ref = doc(db, 'users', currentUser.uid, 'profile', 'data');
-  const snap = await getDoc(ref);
-  if (snap.exists()) {
-    const d = snap.data();
-    state.name         = d.name         || '冒險者';
-    state.coins        = d.coins        || 0;
-    state.ownedEquips  = d.ownedEquips  || [];
-    state.beatenBosses = d.beatenBosses || [];
-    state.claimedAch   = d.claimedAch   || [];
-    state.claimedCombos= d.claimedCombos|| [];
-    state.dailyClaimed = d.dailyClaimed || null;
-    state.coinLog      = d.coinLog      || [];
-  }
-}
-
-async function saveProfile() {
-  if (!currentUser) return;
-  setSyncing(true);
-  try {
-    const ref = doc(db, 'users', currentUser.uid, 'profile', 'data');
-    await setDoc(ref, {
-      name:          state.name,
-      coins:         state.coins,
-      ownedEquips:   state.ownedEquips,
-      beatenBosses:  state.beatenBosses,
-      claimedAch:    state.claimedAch,
-      claimedCombos: state.claimedCombos,
-      dailyClaimed:  state.dailyClaimed,
-      coinLog:       state.coinLog.slice(0,30),
-    });
-  } finally { setSyncing(false); }
-}
-
-// ── Records 即時監聽 ──
-function subscribeRecords() {
-  if (!currentUser) return;
-  if (unsubRecords) unsubRecords();
-  setSyncing(true);
-  const q = query(collection(db, 'users', currentUser.uid, 'records'), orderBy('date','asc'));
-  unsubRecords = onSnapshot(q, (snap) => {
-    state.records = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    state.totalRecords = state.records.length;
-    recalcRPG();
-    renderLog();
-    renderPlayer();
-    setSyncing(false);
-  }, () => setSyncing(false));
-}
-
-// ── 記帳寫入 Firebase ──
-async function fbAddRecord(record) {
-  if (!currentUser) return null;
-  setSyncing(true);
-  try {
-    const ref = await addDoc(collection(db, 'users', currentUser.uid, 'records'), {
-      type: record.type, amount: record.amount,
-      category: record.category, note: record.note || '',
-      date: record.date, createdAt: serverTimestamp()
-    });
-    return ref.id;
-  } finally { setSyncing(false); }
-}
-
-async function fbUpdateRecord(id, data) {
-  if (!currentUser || !id) return;
-  setSyncing(true);
-  try {
-    await updateDoc(doc(db, 'users', currentUser.uid, 'records', id), data);
-  } finally { setSyncing(false); }
-}
-
-async function fbDeleteRecord(id) {
-  if (!currentUser || !id) return;
-  setSyncing(true);
-  try {
-    await deleteDoc(doc(db, 'users', currentUser.uid, 'records', id));
-  } finally { setSyncing(false); }
-}
-
-// ── 批次匯入（CSV）──
-async function fbBatchImport(records) {
-  if (!currentUser) return 0;
-  setSyncing(true);
-  try {
-    const col = collection(db, 'users', currentUser.uid, 'records');
-    let count = 0;
-    // Firestore batch 最多 500 筆
-    for (let i = 0; i < records.length; i += 400) {
-      const batch = writeBatch(db);
-      const chunk = records.slice(i, i + 400);
-      for (const r of chunk) {
-        batch.set(doc(col), { ...r, createdAt: serverTimestamp() });
-        count++;
-      }
-      await batch.commit();
-    }
-    return count;
-  } finally { setSyncing(false); }
-}
-
-// ── 版本管理 ──
-const APP_VERSION = 'v2.0';
+<script>
+// ── 版本管理（每次更新改這裡）──
+const APP_VERSION = 'v1.0';
 const CHANGELOG = {
-  'v2.0': [
-    '🔥 改用 Firebase 架構，資料即時同步',
-    '🔐 Google 帳號登入，跨裝置使用',
-    '🗑️ 支援刪除記帳記錄並同步',
-    '✏️ 支援編輯記帳記錄並同步',
-    '⚔️ Boss 戰升級：剪刀石頭布策略系統',
-    '🎮 像素風角色，根據裝備即時變化',
+  'v1.0': [
+    '🎮 記帳勇者傳說正式上線！',
+    '⚔️ RPG 記帳：記帳升等、屬性成長、Boss 戰',
+    '🛍️ 裝備商店：一般到神話共 14 件裝備',
+    '📈 熟練度系統：6 個等級、100/300 筆新門檻',
+    '👑 職業擴展至 Lv.999、11 種職業稱號',
+    '🌌 新增史詩/神話/虛空 Boss（共 7 隻）',
+    '🔗 雙向連動 Google Sheets',
+    '📱 支援安裝到手機主畫面（PWA）',
   ],
 };
 
-function showChangelog() {
-  const items = CHANGELOG[APP_VERSION] || ['本次版本更新'];
-  document.getElementById('cl-ver').textContent = APP_VERSION;
-  document.getElementById('version-tag').textContent = APP_VERSION;
-  document.getElementById('cl-list').innerHTML = items.map(item =>
-    '<div class="cl-item"><div class="cl-dot"></div><div class="cl-text">'+item+'</div></div>'
-  ).join('');
-  document.getElementById('cl-overlay').style.display = 'flex';
-}
-window.closeChangelog = function() {
-  document.getElementById('cl-overlay').style.display = 'none';
-  localStorage.setItem('rpg_seen_version', APP_VERSION);
+// ── API 設定 ──
+let API_URL = localStorage.getItem('rpg_api_url') || '';
+
+// ── 遊戲狀態 ──
+let state = {
+  name:'冒險者',level:1,exp:0,combo:0,coins:0,
+  lastDate:null,records:[],totalRecords:0,selCat:null,
+  ownedEquips:[],beatenBosses:[],
+  claimedAch:[],claimedCombos:[],dailyClaimed:null,coinLog:[]
 };
+let battle = null;
 
-function checkVersionAndLaunch() {
-  document.getElementById('version-tag').textContent = APP_VERSION;
-  const seen = localStorage.getItem('rpg_seen_version');
-  if (seen !== APP_VERSION) showChangelog();
-  syncCats(); renderLog(); renderPlayer();
-}
-
-// ── 名字修改節流 ──
-let nameTimer = null;
-window.onNameChange = function(val) {
-  state.name = val;
-  clearTimeout(nameTimer);
-  nameTimer = setTimeout(saveProfile, 1500);
-};
-
-// ── 重新計算 RPG 數值（每次 records 更新後）──
-function recalcRPG() {
-  state.exp = 0; state.level = 1; state.combo = 0; state.lastDate = null;
-  const dateSet = new Set();
-  for (const r of state.records) { state.exp += 15; dateSet.add(r.date); }
-  while (state.level < EXP_TABLE.length-1 && state.exp >= EXP_TABLE[state.level]) state.level++;
-  if (state.records.length) {
-    const sorted = [...state.records].sort((a,b) => a.date.localeCompare(b.date));
-    state.lastDate = sorted[sorted.length-1].date;
-    const dates = [...dateSet].sort();
-    let maxCombo = 1, cur = 1;
-    for (let i = 1; i < dates.length; i++) {
-      const diff = Math.round((new Date(dates[i]) - new Date(dates[i-1])) / 86400000);
-      cur = diff === 1 ? cur + 1 : 1;
-      if (cur > maxCombo) maxCombo = cur;
-    }
-    state.combo = maxCombo;
-  }
-  checkAch(); checkCombo();
-}
-
-// ══════════════════════════════════════════
-//  遊戲資料
-// ══════════════════════════════════════════
+// ── 資料表 ──
 const EXP_BASE=[0,100,250,450,700,1000,1400,1900,2500,3200,4200,5500,7000,9000,11500,14500,18000,22500,28000,35000];
-function getExpRequired(lv){if(lv<EXP_BASE.length)return EXP_BASE[lv];return Math.floor(EXP_BASE[EXP_BASE.length-1]*Math.pow(1.15,lv-EXP_BASE.length+1));}
-const EXP_TABLE=Array.from({length:1000},(_,i)=>getExpRequired(i));
-const EXP_TABLE=Array.from({length:1000},(_,i)=>getExpRequired(i));
+function getExpReq(lv){if(lv<EXP_BASE.length)return EXP_BASE[lv];return Math.floor(EXP_BASE[EXP_BASE.length-1]*Math.pow(1.15,lv-EXP_BASE.length+1));}
+const EXP_TABLE=Array.from({length:1000},(_,i)=>getExpReq(i));
 
 const JOBS=[
   {min:1,name:'菜鳥記帳師',icon:'⚔️'},{min:3,name:'節儉見習生',icon:'🛡️'},
@@ -609,6 +429,7 @@ const ACH=[
   {id:'equip3',label:'裝備收藏家',size:'mid',cond:s=>s.ownedEquips.length>=3},
   {id:'equip8',label:'神話收藏家',size:'big',cond:s=>s.ownedEquips.length>=8},
 ];
+const ACH_COINS={small:100,mid:300,big:500};
 const COMBO_MS=[{days:7,coins:200},{days:30,coins:1000}];
 const SHOP_EQUIPS=[
   {id:'sword',name:'鐵製短劍',emoji:'🗡️',rarity:'common',cost:200,bonuses:{atk:10}},
@@ -637,6 +458,7 @@ const BOSS_DROPS=[
   {id:'d6',name:'年終惡魔之核',emoji:'💜',bonuses:{atk:100,crit:10,agi:8}},
   {id:'d7',name:'虛空帳本聖器',emoji:'🌌',bonuses:{hp:500,atk:150,def:80,agi:10,crit:12}},
 ];
+const ALL_EQUIPS=[...SHOP_EQUIPS,...BOSS_DROPS];
 const BOSSES=[
   {id:'b1',name:'衝動購物怪獸',emoji:'🛍️',hp:300,atk:20,diff:'初級',dc:'#2a7a4f',dropId:'d1'},
   {id:'b2',name:'信用卡帳單怪',emoji:'💳',hp:500,atk:35,diff:'中級',dc:'#5533cc',dropId:'d2'},
@@ -654,6 +476,7 @@ const STAT_RULES=[
   {cats:['精品','結婚'],stat:'crit',bonus:1,label:'暴擊%'},
   {cats:['收入'],stat:'all',bonus:1,label:'全屬性'},
 ];
+const BASE={hp:100,atk:10,def:5,agi:5,crit:5};
 const ECATS=[
   {key:'食物',emoji:'🍽️',color:'#D85A30',skills:[{lv:1,name:'吃貨見習'},{lv:3,name:'美食探索者'},{lv:5,name:'米其林常客'},{lv:8,name:'饕客宗師'},{lv:12,name:'傳說饕餮神'},{lv:16,name:'虛空美食神'}]},
   {key:'飲品',emoji:'🥤',color:'#EF9F27',skills:[{lv:1,name:'飲料新手'},{lv:3,name:'手搖達人'},{lv:5,name:'品飲師'},{lv:8,name:'飲品傳說'},{lv:12,name:'神飲鑑賞家'},{lv:16,name:'飲界至尊'}]},
@@ -668,11 +491,254 @@ const ECATS=[
   {key:'其他',emoji:'🛠️',color:'#888780',skills:[{lv:1,name:'雜項達人'},{lv:3,name:'生活管家'},{lv:5,name:'萬能記帳師'},{lv:8,name:'帳本之主'},{lv:12,name:'傳說萬能者'},{lv:16,name:'虛空帳神'}]},
 ];
 const ICATS=[{key:'收入',emoji:'💵',color:'#1D9E75',skills:[{lv:1,name:'薪水族'},{lv:3,name:'穩定收入者'},{lv:5,name:'財富累積者'},{lv:8,name:'財神降臨'},{lv:12,name:'傳說富翁'},{lv:16,name:'宇宙財神王'}]}];
-const ALL_EQUIPS=[...SHOP_EQUIPS,...BOSS_DROPS];
 const ALL_CATS=[...ECATS,...ICATS];
 const THRESHOLDS=[1,5,15,30,100,300];
-const BASE={hp:100,atk:10,def:5,agi:5,crit:5};
 
+// ── 工具函數 ──
+function getJob(lv){let j=JOBS[0];for(let x of JOBS)if(lv>=x.min)j=x;return j;}
+function today(){return new Date().toISOString().slice(0,10);}
+function calcMonthly(){const m=today().slice(0,7);let income=0,expense=0;for(let r of state.records)if(r.date.startsWith(m)){if(r.type==='income')income+=r.amount;else expense+=r.amount;}return{income,expense,hp:Math.max(0,income-expense),net:income-expense,maxHp:income};}
+function getCatCount(key,type='expense'){return state.records.filter(r=>r.category===key&&r.type===type).length;}
+function getCatLv(n){if(n>=300)return 16;if(n>=100)return 12;if(n>=30)return 8;if(n>=15)return 5;if(n>=5)return 3;if(n>=1)return 1;return 0;}
+function getNextT(n){for(let t of THRESHOLDS)if(n<t)return t;return 300;}
+function updateCombo(){if(!state.lastDate)return;if(Math.round((new Date(today())-new Date(state.lastDate))/86400000)>1)state.combo=0;}
+function calcStats(){const s={...BASE};for(let rule of STAT_RULES){for(let cat of rule.cats){const isInc=cat==='收入';const count=isInc?getCatCount(cat,'income'):getCatCount(cat,'expense');const lv=getCatLv(count);if(lv===0)continue;if(rule.stat==='all'){s.hp+=lv;s.atk+=lv;s.def+=lv;s.agi+=lv;s.crit+=lv;}else s[rule.stat]+=rule.bonus*lv;}}for(let eid of state.ownedEquips){const eq=ALL_EQUIPS.find(e=>e.id===eid);if(!eq)continue;for(let[k,v] of Object.entries(eq.bonuses))s[k]=(s[k]||0)+v;}return s;}
+function addCoins(amt,reason){state.coins+=amt;state.coinLog.unshift({amount:amt,reason,date:today()});if(state.coinLog.length>30)state.coinLog.pop();}
+function checkAch(){const msgs=[];for(let a of ACH){if(!state.claimedAch.includes(a.id)&&a.cond(state)){state.claimedAch.push(a.id);const c=ACH_COINS[a.size];addCoins(c,`成就「${a.label}」`);msgs.push(`🏆 ${a.label} +${c}金幣`);}}return msgs;}
+function checkCombo(){const msgs=[];for(let m of COMBO_MS){const key=`c${m.days}`;if(state.combo>=m.days&&!state.claimedCombos.includes(key)){state.claimedCombos.push(key);addCoins(m.coins,`連擊 ${m.days} 天`);msgs.push(`🔥 連擊${m.days}天 +${m.coins}金幣`);}}if(state.combo<7)state.claimedCombos=state.claimedCombos.filter(k=>k!=='c7');if(state.combo<30)state.claimedCombos=state.claimedCombos.filter(k=>k!=='c30');return msgs;}
+function checkDaily(){const t=today();if(state.dailyClaimed===t)return[];if(state.records.some(r=>r.date===t)){state.dailyClaimed=t;addCoins(50,'每日任務完成');return['📅 每日任務 +50金幣'];}return[];}
+function syncCats(){const type=document.getElementById('type-select').value;const cats=type==='expense'?ECATS:ICATS;document.getElementById('cat-select').innerHTML=cats.map(c=>`<option value="${c.key}">${c.emoji} ${c.key}</option>`).join('');}
+
+// ── 版本管理 ──
+function showChangelog(){
+  const items=CHANGELOG[APP_VERSION]||['本次版本更新'];
+  document.getElementById('cl-ver').textContent=APP_VERSION;
+  document.getElementById('ver-tag').textContent=APP_VERSION;
+  document.getElementById('cl-list').innerHTML=items.map(t=>`<div class="changelog-item"><div class="changelog-dot"></div><div class="changelog-text">${t}</div></div>`).join('');
+  document.getElementById('changelog-overlay').style.display='flex';
+}
+function closeChangelog(){
+  document.getElementById('changelog-overlay').style.display='none';
+  localStorage.setItem('rpg_seen_ver',APP_VERSION);
+  launchApp();
+}
+function checkVersion(){
+  document.getElementById('ver-tag').textContent=APP_VERSION;
+  if(localStorage.getItem('rpg_seen_ver')!==APP_VERSION){showChangelog();}
+  else{launchApp();}
+}
+
+// ── 啟動流程 ──
+function launchApp(){
+  if(!API_URL){document.getElementById('setup-overlay').style.display='flex';}
+  else{startApp();}
+}
+function saveApiUrl(){
+  const val=document.getElementById('setup-input').value.trim();
+  const err=document.getElementById('setup-err');
+  if(!val.startsWith('https://script.google.com/macros/s/')){err.textContent='請貼上正確的 Apps Script 網址';return;}
+  API_URL=val;localStorage.setItem('rpg_api_url',val);
+  document.getElementById('setup-overlay').style.display='none';
+  startApp();
+}
+function resetApiUrl(){localStorage.removeItem('rpg_api_url');API_URL='';location.reload();}
+function startApp(){
+  syncCats();renderLog();renderPlayer();
+  (async function autoSync(){
+    const st=document.getElementById('sync-status');
+    if(st){st.textContent='正在自動同步...';st.style.color='#888';}
+    try{
+      const res=await fetch(API_URL+'?action=read');
+      const data=await res.json();
+      if(data.error||!data.records)throw new Error(data.error||'無資料');
+      loadRecords(data.records);
+      if(st){st.textContent='自動同步完成！共 '+data.records.length+' 筆';st.style.color='#2a7a4f';}
+    }catch(e){
+      if(st){st.textContent='自動同步失敗，請手動同步';st.style.color='#c0392b';}
+    }
+  })();
+}
+function loadRecords(records){
+  state.records=[];state.totalRecords=0;state.exp=0;state.level=1;
+  state.combo=0;state.lastDate=null;state.claimedAch=[];state.claimedCombos=[];state.dailyClaimed=null;
+  const dateSet=new Set();
+  for(let r of records){state.records.push({...r});state.totalRecords++;state.exp+=15;dateSet.add(r.date);}
+  while(state.level<EXP_TABLE.length-1&&state.exp>=EXP_TABLE[state.level])state.level++;
+  if(state.records.length){
+    const sorted=[...state.records].sort((a,b)=>a.date.localeCompare(b.date));
+    state.lastDate=sorted[sorted.length-1].date;
+    const dates=[...dateSet].sort();let maxCombo=1,cur=1;
+    for(let i=1;i<dates.length;i++){const diff=Math.round((new Date(dates[i])-new Date(dates[i-1]))/86400000);cur=diff===1?cur+1:1;if(cur>maxCombo)maxCombo=cur;}
+    state.combo=maxCombo;
+  }
+  checkAch();checkCombo();renderLog();renderPlayer();
+}
+
+// ── Sheets 同步 ──
+async function syncFromSheets(){
+  const btn=document.getElementById('sync-btn');const st=document.getElementById('sync-status');
+  btn.disabled=true;st.textContent='同步中...';st.style.color='#888';
+  try{
+    const res=await fetch(API_URL+'?action=read');const data=await res.json();
+    if(data.error||!data.records)throw new Error(data.error||'無資料');
+    loadRecords(data.records);
+    st.textContent='同步完成！共 '+data.records.length+' 筆';st.style.color='#2a7a4f';
+  }catch(e){st.textContent='同步失敗：'+e.message;st.style.color='#c0392b';}
+  btn.disabled=false;
+}
+async function writeToSheets(record, idx){
+  try{
+    const params=new URLSearchParams({action:'write',type:record.type,amount:record.amount,category:record.category,note:record.note||''});
+    const res=await fetch(API_URL+'?'+params.toString());
+    const data=await res.json();
+    if(data.error){console.log('寫入失敗：',data.error);}
+    else if(data.rowId && idx >= 0 && idx < state.records.length){
+      state.records[idx].rowId = data.rowId;
+    }
+  }catch(e){console.log('寫入失敗：',e.message);}
+}
+
+// ── CSV 匯入 ──
+function stripEmoji(str){return str.replace(/[^\u4E00-\u9FFF\u3400-\u4DBFa-zA-Z0-9\s]/g,'').trim();}
+function parseDate(raw){raw=(raw||'').trim().replace('上午','AM').replace('下午','PM').replace(/\//g,'-');const d=new Date(raw);if(!isNaN(d))return d;const m=raw.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);if(m)return new Date(+m[1],+m[2]-1,+m[3]);return new Date(NaN);}
+function parseCSV(text,statusEl){
+  const rows=text.trim().split('\n').slice(1);let count=0;const dateSet=new Set();
+  for(let row of rows){
+    const cols=[];let cur='',inQ=false;
+    for(let ch of row){if(ch==='"')inQ=!inQ;else if(ch===','&&!inQ){cols.push(cur.trim());cur='';}else cur+=ch;}cols.push(cur.trim());
+    const amount=parseInt((cols[1]||'').replace(/[^0-9\-]/g,''));
+    const category=stripEmoji(cols[2]||'')||'其他';const note=cols[3]||'';
+    if(isNaN(amount)||amount===0)continue;
+    const dateObj=parseDate(cols[0]);if(isNaN(dateObj))continue;
+    const date=dateObj.getFullYear()+'-'+String(dateObj.getMonth()+1).padStart(2,'0')+'-'+String(dateObj.getDate()).padStart(2,'0');
+    const type=(amount<0||category.includes('收入'))?'income':'expense';
+    state.records.push({type,amount:Math.abs(amount),category,note,date});state.totalRecords++;state.exp+=15;dateSet.add(date);count++;
+  }
+  while(state.level<EXP_TABLE.length-1&&state.exp>=EXP_TABLE[state.level])state.level++;
+  if(state.records.length){const sorted=[...state.records].sort((a,b)=>a.date.localeCompare(b.date));state.lastDate=sorted[sorted.length-1].date;const dates=[...dateSet].sort();let maxCombo=1,cur=1;for(let i=1;i<dates.length;i++){const diff=Math.round((new Date(dates[i])-new Date(dates[i-1]))/86400000);cur=diff===1?cur+1:1;if(cur>maxCombo)maxCombo=cur;}state.combo=maxCombo;}
+  checkAch();checkCombo();statusEl.textContent='成功匯入 '+count+' 筆！';renderLog();renderPlayer();
+}
+function handleDrop(e){e.preventDefault();document.getElementById('drop-zone').style.borderColor='#e0e0e0';const file=e.dataTransfer.files[0];if(!file)return;readCSVFile(file,document.getElementById('import-status'));}
+function handleFileInput(input){const file=input.files[0];if(!file)return;readCSVFile(file,document.getElementById('import-status'));}
+function readCSVFile(file,statusEl){statusEl.textContent='讀取中...';const reader=new FileReader();reader.onload=e=>{try{parseCSV(e.target.result,statusEl);}catch(err){statusEl.textContent='解析失敗：'+err.message;}};reader.readAsText(file,'UTF-8');}
+
+// ── 渲染：玩家 ──
+function renderPlayer(){
+  updateCombo();const lv=state.level;const job=getJob(lv);
+  const{income,expense,hp,net,maxHp}=calcMonthly();const stats=calcStats();
+  document.getElementById('name-input').value=state.name;
+  document.getElementById('job-label').textContent='職業：'+job.name;
+  document.getElementById('job-icon').textContent=job.icon;
+  document.getElementById('hero-lv').textContent=lv;
+  document.getElementById('coin-display').textContent=state.coins.toLocaleString();
+  const combo=state.combo;const ct=document.getElementById('combo-text');
+  ct.textContent=combo+' 天連擊'+(combo>=3?' 🔥':'');ct.style.color=combo>=7?'#2a7a4f':combo>=3?'#b8860b':'#aaa';
+  const curExp=EXP_TABLE[Math.min(lv,EXP_TABLE.length-1)];const prevExp=lv>1?EXP_TABLE[lv-1]:0;
+  const pct=curExp>prevExp?Math.min(100,Math.round((state.exp-prevExp)/(curExp-prevExp)*100)):100;
+  document.getElementById('exp-bar').style.width=pct+'%';
+  document.getElementById('exp-label').textContent=state.exp+' / '+curExp+' EXP';
+  document.getElementById('next-lv-label').textContent='Lv.'+(lv+1);
+  const hpPct=maxHp>0?Math.round(hp/maxHp*100):0;
+  const hpBar=document.getElementById('hp-bar');hpBar.style.width=hpPct+'%';hpBar.style.background=hpPct>60?'#2a7a4f':hpPct>30?'#b8860b':'#c0392b';
+  document.getElementById('hp-detail').textContent='收入 $'+income.toLocaleString()+' − 支出 $'+expense.toLocaleString();
+  const hn=document.getElementById('hp-net');hn.textContent='$'+hp.toLocaleString()+' / $'+maxHp.toLocaleString();hn.style.color=net>=0?'#2a7a4f':'#c0392b';
+  document.getElementById('dying-banner').style.display=(income>0&&hp===0)?'block':'none';
+  document.getElementById('stat-grid').innerHTML=[
+    {label:'HP上限',val:stats.hp,color:'#2a7a4f',unit:''},
+    {label:'攻擊力',val:stats.atk,color:'#c0392b',unit:''},
+    {label:'防禦力',val:stats.def,color:'#5533cc',unit:''},
+    {label:'敏捷',val:stats.agi,color:'#1a6fcc',unit:'%'},
+    {label:'暴擊率',val:stats.crit,color:'#b8860b',unit:'%'},
+    {label:'記帳筆數',val:state.totalRecords,color:'#888',unit:''},
+  ].map(s=>`<div class="stat-box"><div class="stat-lbl">${s.label}</div><div class="stat-num" style="color:${s.color}">${s.val}${s.unit}</div></div>`).join('');
+  const owned=state.ownedEquips.map(id=>ALL_EQUIPS.find(e=>e.id===id)).filter(Boolean);const placed=new Set();const sl=[];
+  const ws=owned.filter(e=>e.bonuses.atk&&!placed.has(e.id)).sort((a,b)=>b.bonuses.atk-a.bonuses.atk);if(ws[0]){sl.push(ws[0]);placed.add(ws[0].id);}else sl.push(null);
+  const as=owned.filter(e=>e.bonuses.def&&!placed.has(e.id)).sort((a,b)=>b.bonuses.def-a.bonuses.def);if(as[0]){sl.push(as[0]);placed.add(as[0].id);}else sl.push(null);
+  const ac=owned.filter(e=>!placed.has(e.id)&&(e.bonuses.crit||e.bonuses.agi)).sort((a,b)=>(b.bonuses.crit||0)+(b.bonuses.agi||0)-(a.bonuses.crit||0)-(a.bonuses.agi||0));if(ac[0]){sl.push(ac[0]);placed.add(ac[0].id);}else sl.push(null);
+  const rs=owned.filter(e=>!placed.has(e.id));sl.push(rs[0]||null);
+  const slbls=['武器','防具','飾品','其他'];
+  document.getElementById('equip-slots').innerHTML=sl.map((e,i)=>e?`<div class="slot filled"><div class="slot-icon">${e.emoji}</div><div class="slot-name">${e.name}</div></div>`:`<div class="slot"><div class="slot-empty">${slbls[i]}</div></div>`).join('');
+  const tasks=[
+    {name:'今日記帳一筆',reward:'+50金幣',done:state.records.some(r=>r.date===today()),claimed:state.dailyClaimed===today(),color:'#2a7a4f'},
+    {name:'連擊達 7 天',reward:'+200金幣',done:state.combo>=7,claimed:state.claimedCombos.includes('c7'),color:'#5533cc'},
+    {name:'連擊達 30 天',reward:'+1000金幣',done:state.combo>=30,claimed:state.claimedCombos.includes('c30'),color:'#b8860b'},
+    {name:'本月收入 > 支出',reward:'財務正軌',done:income>expense,claimed:false,color:'#2a7a4f'},
+  ];
+  document.getElementById('task-list').innerHTML=tasks.map(t=>`<div class="task-item"><div class="task-dot" style="background:${t.done?t.color:'#ddd'}"></div><div style="flex:1;font-size:13px;">${t.name}</div><div style="font-size:11px;color:#aaa;">${t.reward}</div><div style="font-size:12px;font-weight:600;color:${t.done?(t.claimed?'#aaa':'#2a7a4f'):'#b8860b'}">${t.done?(t.claimed?'已領':'完成'):'進行中'}</div></div>`).join('');
+  const sc={small:'b-gold',mid:'b-silver',big:'b-purple'};
+  renderPixelChar();
+  document.getElementById('badge-wrap').innerHTML=ACH.map(a=>`<span class="badge ${state.claimedAch.includes(a.id)||a.cond(state)?sc[a.size]:'b-lock'}">${a.label}</span>`).join('');
+}
+
+// ── 渲染：屬性 ──
+function renderStats(){
+  const stats=calcStats();
+  document.getElementById('attr-list').innerHTML=[
+    {icon:'❤️',name:'HP 上限',stat:'hp',val:stats.hp,max:5000,color:'#2a7a4f',unit:''},
+    {icon:'⚔️',name:'攻擊力',stat:'atk',val:stats.atk,max:2000,color:'#c0392b',unit:''},
+    {icon:'🛡️',name:'防禦力',stat:'def',val:stats.def,max:1500,color:'#5533cc',unit:''},
+    {icon:'💨',name:'敏捷（迴避）',stat:'agi',val:stats.agi,max:99,color:'#1a6fcc',unit:'%'},
+    {icon:'✨',name:'暴擊率',stat:'crit',val:stats.crit,max:99,color:'#b8860b',unit:'%'},
+  ].map(a=>{const bonus=a.val-BASE[a.stat];const pct=Math.min(100,Math.round(a.val/a.max*100));return`<div class="attr-item"><div class="attr-icon">${a.icon}</div><div class="attr-bar-wrap"><div class="attr-name">${a.name}</div><div class="attr-bar-bg"><div class="attr-bar-fill" style="width:${pct}%;background:${a.color};"></div></div></div><div class="attr-val"><div class="attr-main" style="color:${a.color};">${a.val}${a.unit}</div><div class="attr-bonus">基礎${BASE[a.stat]} +${bonus}</div></div></div>`;}).join('');
+  const cl=document.getElementById('coin-log');
+  if(!state.coinLog.length){cl.innerHTML='<div style="font-size:13px;color:#aaa">尚無記錄</div>';return;}
+  cl.innerHTML=state.coinLog.slice(0,15).map(c=>`<div class="coin-log-item"><span>${c.date} · ${c.reason}</span><span class="${c.amount>0?'coin-plus':'coin-minus'}">${c.amount>0?'+':''}${c.amount}</span></div>`).join('');
+}
+
+// ── 渲染：熟練度 ──
+function renderMastery(){
+  const ctx=document.getElementById('pie-canvas').getContext('2d');const legend=document.getElementById('pie-legend');
+  const totals={};for(let r of state.records)if(r.type==='expense')totals[r.category]=(totals[r.category]||0)+r.amount;
+  const total=Object.values(totals).reduce((a,b)=>a+b,0);ctx.clearRect(0,0,110,110);
+  if(!total){ctx.beginPath();ctx.arc(55,55,48,0,Math.PI*2);ctx.fillStyle='#eee';ctx.fill();legend.innerHTML='<div style="font-size:12px;color:#aaa">尚無支出</div>';}
+  else{let ang=-Math.PI/2;const ents=ECATS.map(c=>({key:c.key,val:totals[c.key]||0,color:c.color})).filter(e=>e.val>0);for(let e of ents){const sl=(e.val/total)*Math.PI*2;ctx.beginPath();ctx.moveTo(55,55);ctx.arc(55,55,48,ang,ang+sl);ctx.closePath();ctx.fillStyle=e.color;ctx.fill();ang+=sl;}ctx.beginPath();ctx.arc(55,55,24,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();legend.innerHTML=ents.map(e=>`<div class="pie-row"><div class="pie-dot" style="background:${e.color}"></div><span>${e.key}</span><span style="margin-left:auto;font-weight:600;">$${e.val.toLocaleString()}</span></div>`).join('');}
+  document.getElementById('cat-grid').innerHTML=ALL_CATS.map(c=>{const isInc=c.key==='收入';const count=isInc?getCatCount(c.key,'income'):getCatCount(c.key,'expense');const lv=getCatLv(count);const pct=lv>=16?100:Math.round(count/getNextT(count)*100);const unlocked=c.skills.filter(s=>s.lv<=lv).pop();const rule=STAT_RULES.find(r=>r.cats.includes(c.key));const btag=rule?`<span style="font-size:10px;color:#2a7a4f;margin-left:3px;">+${rule.label}</span>`:'';return`<div class="cat-card ${state.selCat===c.key?'sel':''}" onclick="selCat('${c.key}')"><div class="cat-header"><span style="font-size:16px;">${c.emoji}</span><span style="font-size:13px;font-weight:600;flex:1;">${c.key}${btag}</span><span style="font-size:11px;color:#aaa;">Lv.${lv}</span></div><div class="cat-bar-bg"><div class="cat-bar-fill" style="width:${pct}%;background:${c.color};"></div></div><div class="cat-foot">${count} 筆${unlocked?' · '+unlocked.name:''}</div></div>`;}).join('');
+  if(state.selCat)renderCatDetail(state.selCat);
+}
+function selCat(key){state.selCat=key;renderMastery();}
+function renderCatDetail(key){
+  const cat=ALL_CATS.find(c=>c.key===key);if(!cat)return;
+  const isInc=key==='收入';const count=isInc?getCatCount(key,'income'):getCatCount(key,'expense');
+  const lv=getCatLv(count);const rule=STAT_RULES.find(r=>r.cats.includes(key));
+  const nodes=cat.skills.map((s,i)=>{const u=lv>=s.lv;const conn=i<cat.skills.length-1?`<div class="sconn" style="background:${u&&lv>=cat.skills[i+1].lv?'#1a1a1a':'#eee'};"></div>`:'';return`<div class="snode"><div class="sball ${u?'u':'l'}">${cat.emoji}</div><div class="sname">${s.name}</div><div class="sreq">${u?'解鎖':THRESHOLDS[i]+'筆'}</div></div>${conn}`;}).join('');
+  const remaining=lv>=16?0:getNextT(count)-count;
+  const bonusInfo=rule?`<div style="font-size:12px;color:#2a7a4f;margin-top:8px;">每升1級 → ${rule.label} +${rule.bonus}（目前 +${rule.bonus*lv}）</div>`:'';
+  document.getElementById('mastery-detail').innerHTML=`<div class="detail-card"><div class="card-title">${cat.emoji} ${key} 熟練度</div><div class="skill-nodes">${nodes}</div>${bonusInfo}<div style="margin-top:8px;font-size:12px;color:#aaa;">已記錄 <strong style="color:#1a1a1a;">${count}</strong> 筆，Lv.${lv}。${lv>=16?'最高熟練度！':'還需 <strong style="color:#1a1a1a;">'+remaining+'</strong> 筆升級。'}</div></div>`;
+}
+
+// ── 渲染：商店 ──
+function renderShop(){
+  document.getElementById('shop-coin').textContent=state.coins.toLocaleString();
+  const lbl={hp:'HP',atk:'攻擊',def:'防禦',agi:'敏捷',crit:'暴擊'};
+  document.getElementById('shop-grid').innerHTML=SHOP_EQUIPS.map(e=>{const owned=state.ownedEquips.includes(e.id);const rc=RARITY_C[e.rarity];const tags=Object.entries(e.bonuses).map(([k,v])=>`<span class="btag">${lbl[k]} +${v}${k==='agi'||k==='crit'?'%':''}</span>`).join('');return`<div class="shop-card ${owned?'owned':''}"><div class="rarity-bar" style="background:${rc};"></div><div style="font-size:22px;margin-bottom:6px;">${e.emoji}</div><div style="font-size:13px;font-weight:700;margin-bottom:2px;">${e.name}</div><div style="font-size:10px;font-weight:600;color:${rc};margin-bottom:6px;">${RARITY_L[e.rarity]}</div><div class="bonus-tags">${tags}</div><div style="font-size:12px;font-weight:700;color:#b8860b;margin-bottom:8px;">🪙 ${e.cost.toLocaleString()}</div>${owned?'<div style="font-size:12px;color:#2a7a4f;font-weight:600;">已擁有</div>':`<button class="buy-btn" onclick="buyEquip('${e.id}')" ${state.coins<e.cost?'disabled':''}>購買</button>`}</div>`;}).join('');
+}
+function buyEquip(id){const eq=SHOP_EQUIPS.find(e=>e.id===id);if(!eq||state.coins<eq.cost||state.ownedEquips.includes(id))return;state.coins-=eq.cost;state.ownedEquips.push(id);state.coinLog.unshift({amount:-eq.cost,reason:`購買「${eq.name}」`,date:today()});checkAch();renderShop();renderPlayer();}
+
+// ── 渲染：Boss ──
+function showBossArea(area){document.getElementById('boss-select-area').style.display=area==='select'?'block':'none';document.getElementById('battle-area').style.display=area==='battle'?'block':'none';document.getElementById('defeat-area').style.display=area==='defeat'?'block':'none';}
+function backToBossSelect(){battle=null;showBossArea('select');renderBossSelect();}
+function fleeBattle(){backToBossSelect();}
+function renderBossSelect(){document.getElementById('boss-grid').innerHTML=BOSSES.map(b=>{const beaten=state.beatenBosses.includes(b.id);const drop=BOSS_DROPS.find(d=>d.id===b.dropId);return`<div class="boss-card" onclick="startBattle('${b.id}')"><div class="boss-em">${b.emoji}</div><div class="boss-nm">${b.name}</div><div class="boss-diff" style="color:${b.dc};">${b.diff}</div><div class="boss-stat">HP ${b.hp.toLocaleString()} / 攻擊 ${b.atk}</div>${drop?`<div class="boss-drop">掉落：${drop.emoji}${drop.name}</div>`:''}${beaten?'<div class="beaten-label">已擊敗過 ✓</div>':''}</div>`;}).join('');}
+function startBattle(bossId){
+  const boss=BOSSES.find(b=>b.id===bossId);if(!boss)return;
+  const stats=calcStats();battle={boss,bossHp:boss.hp,bossMaxHp:boss.hp,playerHp:stats.hp,playerMaxHp:stats.hp,stats,defending:false};
+  showBossArea('battle');
+  document.getElementById('battle-title').textContent='⚔️ 挑戰 '+boss.name;
+  document.getElementById('b-avatar').textContent=boss.emoji;document.getElementById('b-name').textContent=boss.name;
+  document.getElementById('p-avatar').textContent=getJob(state.level).icon;document.getElementById('p-name').textContent=state.name;
+  document.getElementById('p-stats').textContent=`攻${stats.atk} 防${stats.def} 敏${stats.agi}% 暴${stats.crit}%`;
+  document.getElementById('atk-hint').textContent='傷害 '+stats.atk;
+  document.getElementById('def-hint').textContent='減傷 50%';
+  document.getElementById('thr-hint').textContent='固定 '+Math.floor(stats.atk*0.7)+' 無視防禦';
+  document.getElementById('battle-log').textContent=boss.name+' 出現！觀察 Boss 意圖，選擇行動！';
+  const firstAction=pickBossAction();battle.nextBossAction=firstAction;updateBossIntent(firstAction);
+  setActionBtns(true);
+  updateBattleUI();
+}
+function updateBattleUI(){if(!battle)return;const bPct=Math.max(0,Math.round(battle.bossHp/battle.bossMaxHp*100));const pPct=Math.max(0,Math.round(battle.playerHp/battle.playerMaxHp*100));document.getElementById('b-hpbar').style.width=bPct+'%';document.getElementById('b-hplabel').textContent=Math.max(0,battle.bossHp)+' / '+battle.bossMaxHp;const pb=document.getElementById('p-hpbar');pb.style.width=pPct+'%';pb.style.background=pPct>50?'#2a7a4f':pPct>25?'#b8860b':'#c0392b';document.getElementById('p-hplabel').textContent=Math.max(0,battle.playerHp)+' / '+battle.playerMaxHp;}
+function addBLog(msg){const el=document.getElementById('battle-log');el.textContent+='\n'+msg;el.scrollTop=el.scrollHeight;}
+
+// Boss 行動定義
 const BOSS_ACTIONS = [
   {
     id: 'atk',
@@ -704,120 +770,158 @@ const BOSS_ACTIONS = [
   },
 ];
 
-
-let state = {
-  name:'冒險者', level:1, exp:0, combo:0, coins:0,
-  lastDate:null, records:[], totalRecords:0, selCat:null,
-  ownedEquips:[], beatenBosses:[], claimedAch:[], claimedCombos:[],
-  dailyClaimed:null, coinLog:[]
-};
-let battle = null;
-let editingIdx = -1;
-
-// ── 工具函數 ──
-function getJob(lv){let j=JOBS[0];for(let x of JOBS)if(lv>=x.min)j=x;return j;}
-function today(){return new Date().toISOString().slice(0,10);}
-function calcMonthly(){const m=today().slice(0,7);let income=0,expense=0;for(let r of state.records)if(r.date.startsWith(m)){if(r.type==='income')income+=r.amount;else expense+=r.amount;}return{income,expense,hp:Math.max(0,income-expense),net:income-expense,maxHp:income};}
-function getCatCount(key,type='expense'){return state.records.filter(r=>r.category===key&&r.type===type).length;}
-function getCatLv(n){if(n>=300)return 16;if(n>=100)return 12;if(n>=30)return 8;if(n>=15)return 5;if(n>=5)return 3;if(n>=1)return 1;return 0;}
-function getNextT(n){for(let t of THRESHOLDS)if(n<t)return t;return 300;}
-function updateCombo(){if(!state.lastDate)return;if(Math.round((new Date(today())-new Date(state.lastDate))/86400000)>1)state.combo=0;}
-function calcStats(){
-  const s={...BASE};
-  for(let rule of STAT_RULES){for(let cat of rule.cats){const isInc=cat==='收入';const count=isInc?getCatCount(cat,'income'):getCatCount(cat,'expense');const lv=getCatLv(count);if(lv===0)continue;if(rule.stat==='all'){s.hp+=lv;s.atk+=lv;s.def+=lv;s.agi+=lv;s.crit+=lv;}else s[rule.stat]+=rule.bonus*lv;}}
-  for(let eid of state.ownedEquips){const eq=ALL_EQUIPS.find(e=>e.id===eid);if(!eq)continue;for(let[k,v] of Object.entries(eq.bonuses))s[k]=(s[k]||0)+v;}
-  return s;
+function pickBossAction() {
+  return BOSS_ACTIONS[Math.floor(Math.random() * BOSS_ACTIONS.length)];
 }
-function addCoins(amt,reason){state.coins+=amt;state.coinLog.unshift({amount:amt,reason,date:today()});if(state.coinLog.length>30)state.coinLog.pop();}
-function checkAch(){const msgs=[];for(let a of ACH){if(!state.claimedAch.includes(a.id)&&a.cond(state)){state.claimedAch.push(a.id);const c=ACH_COINS[a.size];addCoins(c,'成就「'+a.label+'」');msgs.push('🏆 '+a.label+' +'+c+'金幣');}}return msgs;}
-function checkCombo(){const msgs=[];for(let m of COMBO_MS){const key='c'+m.days;if(state.combo>=m.days&&!state.claimedCombos.includes(key)){state.claimedCombos.push(key);addCoins(m.coins,'連擊 '+m.days+' 天');msgs.push('🔥 連擊'+m.days+'天 +'+m.coins+'金幣');}}if(state.combo<7)state.claimedCombos=state.claimedCombos.filter(k=>k!=='c7');if(state.combo<30)state.claimedCombos=state.claimedCombos.filter(k=>k!=='c30');return msgs;}
-function checkDaily(){const t=today();if(state.dailyClaimed===t)return[];if(state.records.some(r=>r.date===t)){state.dailyClaimed=t;addCoins(50,'每日任務完成');return['📅 每日任務 +50金幣'];}return[];}
-function syncCats(){const type=document.getElementById('type-select').value;const cats=type==='expense'?ECATS:ICATS;document.getElementById('cat-select').innerHTML=cats.map(c=>'<option value="'+c.key+'">'+c.emoji+' '+c.key+'</option>').join('');}
-window.updateEditCats=function(){const type=document.getElementById('edit-type').value;const cats=type==='income'?ICATS:ECATS;document.getElementById('edit-cat').innerHTML=cats.map(c=>'<option value="'+c.key+'">'+c.emoji+' '+c.key+'</option>').join('');};
 
-// ── addRecord ──
-window.addRecord = async function(){
-  const type=document.getElementById('type-select').value;
-  const amount=parseInt(document.getElementById('amount-input').value);
-  const category=document.getElementById('cat-select').value;
-  const note=document.getElementById('note-input').value;
-  const fb=document.getElementById('feedback');
-  if(!amount||amount<=0){fb.textContent='請輸入有效金額';fb.style.color='#c0392b';return;}
-  const t=today();
-  const alreadyToday=state.records.some(r=>r.date===t);
-  const prevStats=calcStats();
-  const record={type,amount,category,note,date:t};
+function updateBossIntent(action) {}
 
-  // 立即加到本地 state 讓 UI 即時反應
-  state.records.push(record);
-  state.totalRecords++;
+function setActionBtns(enabled) {
+  ['btn-atk','btn-def','btn-thr'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) btn.disabled = !enabled;
+  });
+}
 
-  let expGain=type==='income'?30:20;
-  const msgs=['+'+expGain+' EXP'];
-  if(!alreadyToday){
-    if(state.lastDate){const diff=Math.round((new Date(t)-new Date(state.lastDate))/86400000);if(diff===1){state.combo++;if(state.combo>=3){expGain+=10;msgs.push('連擊+10EXP');}}else if(diff>1)state.combo=1;}
-    else state.combo=1;state.lastDate=t;
+function doAction(action) {
+  if (!battle) return;
+  setActionBtns(false);
+  const st = battle.stats;
+  const bossAct = battle.nextBossAction || pickBossAction();
+  battle.nextBossAction = null;
+
+  let playerDmg = 0;
+  let playerMsg = '';
+  let blocked = false;
+
+  // ── 玩家行動 ──
+  if (action === 'attack') {
+    if (bossAct.id === 'guard') {
+      // 攻擊 vs 防禦 → 傷害大減
+      playerDmg = Math.max(1, Math.floor(st.atk * 0.3));
+      playerMsg = `⚔️ 攻擊！但 Boss 防禦格擋，僅造成 ${playerDmg} 傷害`;
+    } else if (bossAct.id === 'heal') {
+      // 攻擊 vs 回血 → 打斷回血，全額傷害
+      const isCrit = Math.random() * 100 < st.crit;
+      playerDmg = isCrit ? st.atk * 2 : st.atk;
+      playerMsg = `⚔️ 打斷回血！造成 ${playerDmg} 傷害${isCrit ? '（暴擊！）' : ''}`;
+      blocked = true; // 阻止 Boss 回血
+    } else {
+      const isCrit = Math.random() * 100 < st.crit;
+      playerDmg = isCrit ? st.atk * 2 : st.atk;
+      playerMsg = isCrit ? `⚡ 暴擊！造成 ${playerDmg} 傷害！` : `⚔️ 攻擊！造成 ${playerDmg} 傷害`;
+    }
+  } else if (action === 'defend') {
+    playerDmg = 0;
+    if (bossAct.id === 'skill') {
+      playerMsg = '🛡️ 完美格擋技能攻擊！零傷害！';
+      blocked = true;
+    } else if (bossAct.id === 'atk') {
+      playerMsg = '🛡️ 防禦！準備減傷普通攻擊';
+    } else if (bossAct.id === 'guard') {
+      playerMsg = '🛡️ 雙方都在防禦...';
+    } else {
+      playerMsg = '🛡️ 防禦姿態，但 Boss 在回血...';
+    }
+  } else if (action === 'throw') {
+    // 投擲：固定傷害，無視防禦
+    const baseDmg = Math.floor(st.atk * 0.7);
+    if (bossAct.id === 'guard') {
+      playerDmg = baseDmg; // 無視防禦！
+      playerMsg = `🎯 投擲！無視 Boss 防禦！造成 ${playerDmg} 傷害`;
+    } else if (bossAct.id === 'atk' || bossAct.id === 'skill') {
+      playerDmg = baseDmg;
+      playerMsg = `🎯 投擲！造成 ${playerDmg} 傷害（但沒有反制效果）`;
+    } else {
+      playerDmg = baseDmg;
+      playerMsg = `🎯 投擲！造成 ${playerDmg} 傷害`;
+    }
   }
-  state.exp+=expGain;
-  while(state.level<EXP_TABLE.length-1&&state.exp>=EXP_TABLE[state.level]){state.level++;msgs.push('🎉 升等！Lv.'+state.level);}
-  const newStats=calcStats();const sm=[];
-  if(newStats.hp>prevStats.hp)sm.push('HP+'+(newStats.hp-prevStats.hp));
-  if(newStats.atk>prevStats.atk)sm.push('攻+'+(newStats.atk-prevStats.atk));
-  if(newStats.def>prevStats.def)sm.push('防+'+(newStats.def-prevStats.def));
-  if(newStats.agi>prevStats.agi)sm.push('敏+'+(newStats.agi-prevStats.agi)+'%');
-  if(newStats.crit>prevStats.crit)sm.push('暴+'+(newStats.crit-prevStats.crit)+'%');
-  if(sm.length)msgs.push('屬性↑ '+sm.join(' '));
-  [...checkDaily(),...checkAch(),...checkCombo()].forEach(m=>msgs.push(m));
 
-  document.getElementById('amount-input').value='';
-  document.getElementById('note-input').value='';
-  fb.style.color='#2a7a4f';fb.textContent=msgs.join(' · ');
-  setTimeout(()=>{fb.textContent='';},6000);
-  renderLog();renderPlayer();
+  battle.bossHp -= playerDmg;
+  addBLog(playerMsg);
 
-  // 寫入 Firebase（背景）
-  await fbAddRecord(record);
-  await saveProfile();
-};
+  // ── Boss 勝利 ──
+  if (battle.bossHp <= 0) {
+    addBLog('🎉 Boss 被擊敗！');
+    const drop = BOSS_DROPS.find(d => d.id === battle.boss.dropId);
+    if (drop && !state.ownedEquips.includes(drop.id)) {
+      state.ownedEquips.push(drop.id);
+      addBLog(`獲得：${drop.emoji} ${drop.name}！`);
+    }
+    if (!state.beatenBosses.includes(battle.boss.id)) state.beatenBosses.push(battle.boss.id);
+    addCoins(100, '擊敗 ' + battle.boss.name);
+    checkAch().forEach(m => addBLog(m));
+    updateBattleUI(); renderPlayer();
+    updateBossIntent(null);
+    setTimeout(() => backToBossSelect(), 2500);
+    return;
+  }
 
-// ── 編輯/刪除 ──
-window.editRecord = function(idx){
-  const r=state.records[idx];if(!r)return;
-  editingIdx=idx;
-  document.getElementById('edit-type').value=r.type;
-  updateEditCats();
-  document.getElementById('edit-cat').value=r.category;
-  document.getElementById('edit-amount').value=r.amount;
-  document.getElementById('edit-note').value=r.note||'';
-  document.getElementById('edit-modal').style.display='flex';
-};
-window.closeEdit = function(){document.getElementById('edit-modal').style.display='none';editingIdx=-1;};
-window.saveEdit = async function(){
-  if(editingIdx<0)return;
-  const type=document.getElementById('edit-type').value;
-  const amount=parseInt(document.getElementById('edit-amount').value);
-  const category=document.getElementById('edit-cat').value;
-  const note=document.getElementById('edit-note').value;
-  if(!amount||amount<=0)return;
-  const r=state.records[editingIdx];
-  const updated={...r,type,amount,category,note};
-  state.records[editingIdx]=updated;
-  closeEdit();
-  recalcRPG();renderLog();renderPlayer();
-  if(r.id) await fbUpdateRecord(r.id,{type,amount,category,note});
-  await saveProfile();
-};
-window.deleteRecord = async function(idx){
-  if(!confirm('確定要刪除這筆記帳嗎？'))return;
-  const r=state.records[idx];
-  state.records.splice(idx,1);
-  state.totalRecords=Math.max(0,state.totalRecords-1);
-  recalcRPG();renderLog();renderPlayer();
-  if(r&&r.id) await fbDeleteRecord(r.id);
-  await saveProfile();
-};
+  // ── Boss 行動 ──
+  setTimeout(() => {
+    if (!battle) return;
+    addBLog('--- ' + bossAct.label + ' ---');
 
-// ── renderLog ──
+    if (bossAct.id === 'atk') {
+      if (action === 'defend') {
+        const reduced = Math.max(1, Math.floor(Math.max(1, bossAct.exec(battle.boss, st).dmg) * 0.5));
+        battle.playerHp -= reduced;
+        addBLog(`${battle.boss.name} 攻擊！防禦減傷 50%，受到 ${reduced} 傷害`);
+      } else if (Math.random() * 100 < st.agi) {
+        addBLog(`💨 迴避了 ${battle.boss.name} 的攻擊！`);
+      } else {
+        const dmg = Math.max(1, battle.boss.atk - st.def);
+        battle.playerHp -= dmg;
+        addBLog(`受到 ${dmg} 傷害`);
+      }
+    } else if (bossAct.id === 'skill') {
+      if (blocked) {
+        addBLog(`🛡️ 技能被完全格擋！`);
+      } else if (Math.random() * 100 < st.agi) {
+        addBLog(`💨 迴避了技能攻擊！`);
+      } else {
+        const dmg = Math.max(1, Math.floor(battle.boss.atk * 1.5) - st.def);
+        battle.playerHp -= dmg;
+        addBLog(`受到 ${dmg} 傷害`);
+      }
+    } else if (bossAct.id === 'guard') {
+      addBLog(`🔰 Boss 防禦姿態${action === 'throw' ? '，但被投擲無視！' : '，本回合傷害大減'}`);
+    } else if (bossAct.id === 'heal') {
+      if (blocked) {
+        addBLog(`💔 回血被打斷！`);
+      } else {
+        const heal = Math.floor(battle.boss.maxHp * 0.1);
+        battle.bossHp = Math.min(battle.bossMaxHp, battle.bossHp + heal);
+        addBLog(`💚 Boss 回復了 ${heal} HP！`);
+      }
+    }
+
+    // 玩家死亡
+    if (battle.playerHp <= 0) {
+      battle.playerHp = 0;
+      updateBattleUI();
+      addBLog('💀 你被擊敗了...');
+      updateBossIntent(null);
+      setTimeout(() => {
+        document.getElementById('defeat-msg').textContent = `被 ${battle.boss.name} 擊倒了。\n裝備更好的武器再來挑戰！`;
+        showBossArea('defeat');
+      }, 1200);
+      return;
+    }
+
+    updateBattleUI();
+
+    // 下回合：隨機決定 Boss 下一個行動（預告給玩家）
+    const nextAction = pickBossAction();
+    battle.nextBossAction = nextAction;
+    updateBossIntent(nextAction);
+    setActionBtns(true);
+  }, 700);
+}
+
+
+// ── 渲染：記帳 ──
 function renderLog(){
   const el=document.getElementById('log-list');
   if(!state.records.length){el.innerHTML='<div style="font-size:13px;color:#aaa">尚無紀錄</div>';return;}
@@ -833,283 +937,220 @@ function renderLog(){
       +'</div></div>';
   }).join('');
 }
-
-// ── renderPlayer ──
-function renderPlayer(){
-  updateCombo();const lv=state.level;const job=getJob(lv);
-  const{income,expense,hp,net,maxHp}=calcMonthly();const stats=calcStats();
-  document.getElementById('name-input').value=state.name;
-  document.getElementById('job-label').textContent='職業：'+job.name;
-  document.getElementById('job-icon').textContent=job.icon;
-  document.getElementById('hero-lv').textContent=lv;
-  document.getElementById('coin-display').textContent=state.coins.toLocaleString();
-  const combo=state.combo;const ct=document.getElementById('combo-text');
-  ct.textContent=combo+' 天連擊'+(combo>=3?' 🔥':'');ct.style.color=combo>=7?'#2a7a4f':combo>=3?'#b8860b':'#aaa';
-  const maxExp=EXP_TABLE[Math.min(lv,EXP_TABLE.length-1)];const prevExp=lv>1?EXP_TABLE[lv-1]:0;
-  const pct=maxExp>prevExp?Math.min(100,Math.round((state.exp-prevExp)/(maxExp-prevExp)*100)):100;
-  document.getElementById('exp-bar').style.width=pct+'%';
-  document.getElementById('exp-label').textContent=state.exp+' / '+maxExp+' EXP';
-  document.getElementById('next-lv-label').textContent='Lv.'+(lv+1);
-  const hpPct=maxHp>0?Math.round(hp/maxHp*100):0;const hpBar=document.getElementById('hp-bar');
-  hpBar.style.width=hpPct+'%';hpBar.style.background=hpPct>60?'#2a7a4f':hpPct>30?'#b8860b':'#c0392b';
-  document.getElementById('hp-detail').textContent='收入 $'+income.toLocaleString()+' − 支出 $'+expense.toLocaleString();
-  const hn=document.getElementById('hp-net');hn.textContent='$'+hp.toLocaleString()+' / $'+maxHp.toLocaleString();hn.style.color=net>=0?'#2a7a4f':'#c0392b';
-  document.getElementById('dying-banner').style.display=(income>0&&hp===0)?'block':'none';
-  document.getElementById('stat-grid').innerHTML=[
-    {label:'HP上限',val:stats.hp,color:'#2a7a4f',unit:''},
-    {label:'攻擊力',val:stats.atk,color:'#c0392b',unit:''},
-    {label:'防禦力',val:stats.def,color:'#5533cc',unit:''},
-    {label:'敏捷',val:stats.agi,color:'#1a6fcc',unit:'%'},
-    {label:'暴擊率',val:stats.crit,color:'#b8860b',unit:'%'},
-    {label:'記帳筆數',val:state.totalRecords,color:'#888',unit:''},
-  ].map(s=>'<div class="stat-box"><div class="stat-lbl">'+s.label+'</div><div class="stat-num" style="color:'+s.color+'">'+s.val+s.unit+'</div></div>').join('');
-  const owned=state.ownedEquips.map(id=>ALL_EQUIPS.find(e=>e.id===id)).filter(Boolean);
-  const placed=new Set();const sl=[];
-  const wp=owned.filter(e=>e.bonuses.atk&&!placed.has(e.id)).sort((a,b)=>b.bonuses.atk-a.bonuses.atk);
-  if(wp[0]){sl.push(wp[0]);placed.add(wp[0].id);}else sl.push(null);
-  const ar=owned.filter(e=>e.bonuses.def&&!placed.has(e.id)).sort((a,b)=>b.bonuses.def-a.bonuses.def);
-  if(ar[0]){sl.push(ar[0]);placed.add(ar[0].id);}else sl.push(null);
-  const ac=owned.filter(e=>!placed.has(e.id)&&(e.bonuses.crit||e.bonuses.agi)).sort((a,b)=>(b.bonuses.crit||0)+(b.bonuses.agi||0)-(a.bonuses.crit||0)-(a.bonuses.agi||0));
-  if(ac[0]){sl.push(ac[0]);placed.add(ac[0].id);}else sl.push(null);
-  const rest=owned.filter(e=>!placed.has(e.id));sl.push(rest[0]||null);
-  const slabels=['武器','防具','飾品','其他'];
-  document.getElementById('equip-slots').innerHTML=sl.map((e,i)=>e?'<div class="slot filled"><div class="slot-icon">'+e.emoji+'</div><div class="slot-name">'+e.name+'</div></div>':'<div class="slot"><div class="slot-empty">'+slabels[i]+'</div></div>').join('');
-  const{income:i2,expense:e2}=calcMonthly();
-  const tasks=[
-    {name:'今日記帳一筆',reward:'+50金幣',done:state.records.some(r=>r.date===today()),claimed:state.dailyClaimed===today(),color:'#2a7a4f'},
-    {name:'連擊達 7 天',reward:'+200金幣',done:state.combo>=7,claimed:state.claimedCombos.includes('c7'),color:'#5533cc'},
-    {name:'連擊達 30 天',reward:'+1000金幣',done:state.combo>=30,claimed:state.claimedCombos.includes('c30'),color:'#b8860b'},
-    {name:'本月收入 > 支出',reward:'財務正軌',done:i2>e2,claimed:false,color:'#2a7a4f'},
-  ];
-  document.getElementById('task-list').innerHTML=tasks.map(t=>'<div class="task-item"><div class="task-dot" style="background:'+(t.done?t.color:'#ddd')+'"></div><div style="flex:1;font-size:13px;">'+t.name+'</div><div style="font-size:11px;color:#aaa;">'+t.reward+'</div><div style="font-size:12px;font-weight:600;color:'+(t.done?(t.claimed?'#aaa':'#2a7a4f'):'#b8860b')+'">'+(t.done?(t.claimed?'已領':'完成'):'進行中')+'</div></div>').join('');
-  const sc={small:'b-gold',mid:'b-silver',big:'b-purple'};
-  document.getElementById('badge-wrap').innerHTML=ACH.map(a=>'<span class="badge '+(state.claimedAch.includes(a.id)||a.cond(state)?sc[a.size]:'b-lock')+'">'+a.label+'</span>').join('');
-  renderPixelChar();
+function addRecord(){
+  const type=document.getElementById('type-select').value;const amount=parseInt(document.getElementById('amount-input').value);const category=document.getElementById('cat-select').value;const note=document.getElementById('note-input').value;const fb=document.getElementById('feedback');
+  if(!amount||amount<=0){fb.textContent='請輸入有效金額';fb.style.color='#c0392b';return;}
+  const t=today();const alreadyToday=state.records.some(r=>r.date===t);const prevStats=calcStats();
+  state.records.push({type,amount,category,note,date:t});state.totalRecords++;
+  let expGain=type==='income'?30:20;const msgs=['+'+expGain+' EXP'];
+  if(!alreadyToday){if(state.lastDate){const diff=Math.round((new Date(t)-new Date(state.lastDate))/86400000);if(diff===1){state.combo++;if(state.combo>=3){expGain+=10;msgs.push('連擊+10EXP');}}else if(diff>1)state.combo=1;}else state.combo=1;state.lastDate=t;}
+  state.exp+=expGain;
+  while(state.level<EXP_TABLE.length-1&&state.exp>=EXP_TABLE[state.level]){state.level++;msgs.push('🎉 升等！Lv.'+state.level);}
+  const newStats=calcStats();const sm=[];
+  if(newStats.hp>prevStats.hp)sm.push('HP+'+(newStats.hp-prevStats.hp));if(newStats.atk>prevStats.atk)sm.push('攻+'+(newStats.atk-prevStats.atk));if(newStats.def>prevStats.def)sm.push('防+'+(newStats.def-prevStats.def));if(newStats.agi>prevStats.agi)sm.push('敏+'+(newStats.agi-prevStats.agi)+'%');if(newStats.crit>prevStats.crit)sm.push('暴+'+(newStats.crit-prevStats.crit)+'%');
+  if(sm.length)msgs.push('屬性↑ '+sm.join(' '));
+  [...checkDaily(),...checkAch(),...checkCombo()].forEach(m=>msgs.push(m));
+  document.getElementById('amount-input').value='';document.getElementById('note-input').value='';
+  fb.style.color='#2a7a4f';fb.textContent=msgs.join(' · ');setTimeout(()=>{fb.textContent='';},6000);
+  const newIdx=state.records.length-1;renderLog();renderPlayer();writeToSheets({type,amount,category,note},newIdx);
 }
-
-// ── 像素角色 ──
-function renderPixelChar(){
-  const svg=document.getElementById('pixel-char');if(!svg)return;
-  const lv=state.level;const owned=state.ownedEquips.map(id=>ALL_EQUIPS.find(e=>e.id===id)).filter(Boolean);
-  const job=getJob(lv);
-  const hasMythic=owned.some(e=>e.rarity==='mythic');const hasLegend=owned.some(e=>e.rarity==='legend');
-  const hasEpic=owned.some(e=>e.rarity==='epic');const hasRare=owned.some(e=>e.rarity==='rare');
-  const hasSword=owned.some(e=>e.id==='fsword'||e.id==='chaos');
-  const hasGoldSwd=owned.some(e=>e.id==='legend'||e.id==='relics'||e.id==='godarmor');
-  const hasShield=owned.some(e=>e.id==='shield'||e.id==='hshield'||e.id==='holy'||e.id==='d3');
-  const hasBossWpn=owned.some(e=>e.id==='d4'||e.id==='d7');
-  let bodyC,bodyL,legC,bootC,helC;
-  if(hasMythic||lv>=100){bodyC='#EF9F27';bodyL='#FAC775';legC='#BA7517';bootC='#854F0B';helC='#BA7517';}
-  else if(hasLegend||lv>=50){bodyC='#534AB7';bodyL='#7F77DD';legC='#3C3489';bootC='#26215C';helC='#3C3489';}
-  else if(hasEpic||lv>=20){bodyC='#185FA5';bodyL='#378ADD';legC='#0C447C';bootC='#042C53';helC='#0C447C';}
-  else if(hasRare||lv>=5){bodyC='#3B6D11';bodyL='#639922';legC='#27500A';bootC='#173404';helC='#27500A';}
-  else{bodyC='#888780';bodyL='#B4B2A9';legC='#5F5E5A';bootC='#2C2C2A';helC='#5F5E5A';}
-  const skinC='#F5C4B3';const eyeC=(hasMythic||lv>=100)?'#EF9F27':'#26215C';
-  const hairC='#3C3489';const mouthC='#993C1D';
-  let wpnC1,wpnC2;
-  if(hasBossWpn){wpnC1='#E1F5EE';wpnC2='#1D9E75';}
-  else if(hasGoldSwd){wpnC1='#FAC775';wpnC2='#EF9F27';}
-  else if(hasSword){wpnC1='#EF9F27';wpnC2='#FA6027';}
-  else{wpnC1='#B4B2A9';wpnC2='#5F5E5A';}
-  function px(x,y,c){return '<rect x="'+(x*8)+'" y="'+(y*8)+'" width="8" height="8" fill="'+c+'"/>';}
-  let r='';
-  if(lv>=200){[[0,1],[1,0],[2,0],[3,0],[4,0],[5,1]].forEach(([x,y])=>r+=px(x,y,'#AFA9EC'));}
-  else if(lv>=100){[[1,0],[2,0],[3,0],[4,0]].forEach(([x,y])=>r+=px(x,y,'#FAC775'));}
-  else if(lv>=35){[[2,0],[3,0]].forEach(([x,y])=>r+=px(x,y,'#EF9F27'));}
-  const hy=(lv>=35)?1:0;
-  [[1,hy],[2,hy],[3,hy],[4,hy],[0,hy+1],[5,hy+1]].forEach(([x,y])=>r+=px(x,y,hairC));
-  [[0,hy+2],[1,hy+1],[2,hy+1],[3,hy+1],[4,hy+1],[5,hy+2],[1,hy+2],[2,hy+2],[3,hy+2],[4,hy+2]].forEach(([x,y])=>r+=px(x,y,skinC));
-  r+=px(1,hy+2,eyeC);r+=px(4,hy+2,eyeC);r+=px(2,hy+3,mouthC);r+=px(3,hy+3,mouthC);r+=px(2,hy+4,skinC);r+=px(3,hy+4,skinC);
-  const by=hy+5;
-  if(hasEpic||hasLegend||hasMythic){r+=px(1,hy,helC);r+=px(4,hy,helC);r+=px(0,hy+1,helC);r+=px(5,hy+1,helC);}
-  [[1,by],[2,by],[3,by],[4,by],[1,by+1],[2,by+1],[3,by+1],[4,by+1],[1,by+2],[2,by+2],[3,by+2],[4,by+2]].forEach(([x,y])=>r+=px(x,y,bodyC));
-  r+=px(2,by+1,bodyL);r+=px(3,by+1,bodyL);r+=px(0,by,skinC);r+=px(0,by+1,skinC);r+=px(5,by,skinC);r+=px(5,by+1,skinC);
-  r+=px(6,by-1,wpnC1);r+=px(6,by,wpnC1);r+=px(6,by+1,wpnC2);r+=px(5,by+2,bodyC);r+=px(6,by+2,wpnC2);
-  if(hasSword||hasGoldSwd||hasBossWpn)r+=px(6,by-2,wpnC1);
-  if(hasShield){r+=px(-1,by,'#185FA5');r+=px(-1,by+1,'#378ADD');r+=px(-1,by+2,'#185FA5');}
-  const ly=by+3;
-  [[1,ly],[2,ly],[3,ly],[4,ly],[1,ly+1],[2,ly+1],[3,ly+1],[4,ly+1]].forEach(([x,y])=>r+=px(x,y,legC));
-  [[1,ly+2],[2,ly+2],[3,ly+2],[4,ly+2]].forEach(([x,y])=>r+=px(x,y,bootC));
-  svg.innerHTML=r;
-  const lbl=document.getElementById('pixel-label');
-  if(lbl){const rarityName=hasMythic?'神話':hasLegend?'傳說':hasEpic?'史詩':hasRare?'稀有':'初始';lbl.textContent=job.name+' · '+rarityName+'裝備';}
-}
-
-// ── renderStats ──
-function renderStats(){
-  const stats=calcStats();
-  document.getElementById('attr-list').innerHTML=[
-    {icon:'❤️',name:'HP 上限',stat:'hp',val:stats.hp,max:5000,color:'#2a7a4f',unit:''},
-    {icon:'⚔️',name:'攻擊力',stat:'atk',val:stats.atk,max:2000,color:'#c0392b',unit:''},
-    {icon:'🛡️',name:'防禦力',stat:'def',val:stats.def,max:1500,color:'#5533cc',unit:''},
-    {icon:'💨',name:'敏捷（迴避）',stat:'agi',val:stats.agi,max:99,color:'#1a6fcc',unit:'%'},
-    {icon:'✨',name:'暴擊率',stat:'crit',val:stats.crit,max:99,color:'#b8860b',unit:'%'},
-  ].map(a=>{const bonus=a.val-BASE[a.stat];const pct=Math.min(100,Math.round(a.val/a.max*100));return'<div class="attr-item"><div class="attr-icon">'+a.icon+'</div><div class="attr-bar-wrap"><div class="attr-name">'+a.name+'</div><div class="attr-bar-bg"><div class="attr-bar-fill" style="width:'+pct+'%;background:'+a.color+';"></div></div></div><div class="attr-val"><div class="attr-main" style="color:'+a.color+';">'+a.val+a.unit+'</div><div class="attr-bonus">基礎'+BASE[a.stat]+' +'+bonus+'</div></div></div>';}).join('');
-  const cl=document.getElementById('coin-log');
-  if(!state.coinLog.length){cl.innerHTML='<div style="font-size:13px;color:#aaa">尚無紀錄</div>';return;}
-  cl.innerHTML=state.coinLog.slice(0,15).map(c=>'<div class="coin-log-item"><span>'+c.date+' · '+c.reason+'</span><span class="'+(c.amount>0?'coin-plus':'coin-minus')+'">'+(c.amount>0?'+':'')+c.amount+'</span></div>').join('');
-}
-
-// ── renderMastery ──
-function renderMastery(){
-  const ctx=document.getElementById('pie-canvas').getContext('2d');
-  const legend=document.getElementById('pie-legend');
-  const totals={};for(let r of state.records)if(r.type==='expense')totals[r.category]=(totals[r.category]||0)+r.amount;
-  const total=Object.values(totals).reduce((a,b)=>a+b,0);ctx.clearRect(0,0,110,110);
-  if(!total){ctx.beginPath();ctx.arc(55,55,48,0,Math.PI*2);ctx.fillStyle='#eee';ctx.fill();legend.innerHTML='<div style="font-size:12px;color:#aaa">尚無支出</div>';}
-  else{let ang=-Math.PI/2;const ents=ECATS.map(c=>({key:c.key,val:totals[c.key]||0,color:c.color})).filter(e=>e.val>0);for(let e of ents){const sl=(e.val/total)*Math.PI*2;ctx.beginPath();ctx.moveTo(55,55);ctx.arc(55,55,48,ang,ang+sl);ctx.closePath();ctx.fillStyle=e.color;ctx.fill();ang+=sl;}ctx.beginPath();ctx.arc(55,55,24,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();legend.innerHTML=ents.map(e=>'<div class="pie-row"><div class="pie-dot" style="background:'+e.color+'"></div><span>'+e.key+'</span><span style="margin-left:auto;font-weight:600;">$'+e.val.toLocaleString()+'</span></div>').join('');}
-  document.getElementById('cat-grid').innerHTML=ALL_CATS.map(c=>{
-    const isInc=c.key==='收入';const count=isInc?getCatCount(c.key,'income'):getCatCount(c.key,'expense');
-    const lv=getCatLv(count);const pct=lv>=16?100:Math.round(count/getNextT(count)*100);
-    const unlocked=c.skills.filter(s=>s.lv<=lv).pop();const rule=STAT_RULES.find(r=>r.cats.includes(c.key));
-    const btag=rule?'<span style="font-size:10px;color:#2a7a4f;margin-left:3px;">+'+rule.label+'</span>':'';
-    return'<div class="cat-card '+(state.selCat===c.key?'sel':'')+'" onclick="selCat(\''+c.key+'\')"><div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;"><span style="font-size:16px;">'+c.emoji+'</span><span style="font-size:13px;font-weight:600;flex:1;">'+c.key+btag+'</span><span style="font-size:11px;color:#aaa;">Lv.'+lv+'</span></div><div class="cat-bar-bg"><div class="cat-bar-fill" style="width:'+pct+'%;background:'+c.color+';"></div></div><div class="cat-foot">'+count+' 筆'+(unlocked?' · '+unlocked.name:'')+'</div></div>';
-  }).join('');
-  if(state.selCat)renderCatDetail(state.selCat);
-}
-window.selCat=function(key){state.selCat=key;renderMastery();};
-function renderCatDetail(key){
-  const cat=ALL_CATS.find(c=>c.key===key);if(!cat)return;
-  const isInc=key==='收入';const count=isInc?getCatCount(key,'income'):getCatCount(key,'expense');
-  const lv=getCatLv(count);const rule=STAT_RULES.find(r=>r.cats.includes(key));
-  const nodes=cat.skills.map((s,i)=>{const u=lv>=s.lv;const conn=i<cat.skills.length-1?'<div class="sconn" style="background:'+(u&&lv>=cat.skills[i+1].lv?'#1a1a1a':'#eee')+';"></div>':'';return'<div class="snode"><div class="sball '+(u?'u':'l')+'">'+cat.emoji+'</div><div class="sname">'+s.name+'</div><div class="sreq">'+(u?'解鎖':THRESHOLDS[i]+'筆')+'</div></div>'+conn;}).join('');
-  const remaining=lv>=16?0:getNextT(count)-count;
-  const bonusInfo=rule?'<div style="font-size:12px;color:#2a7a4f;margin-top:8px;">每升1級 → '+rule.label+' +'+rule.bonus+'（目前 +'+rule.bonus*lv+'）</div>':'';
-  document.getElementById('mastery-detail').innerHTML='<div class="detail-card"><div class="card-title">'+cat.emoji+' '+key+' 熟練度進度</div><div class="skill-nodes">'+nodes+'</div>'+bonusInfo+'<div style="margin-top:8px;font-size:12px;color:#aaa;">已記錄 <strong style="color:#1a1a1a;">'+count+'</strong> 筆，熟練 <strong style="color:#1a1a1a;">Lv.'+lv+'</strong>。'+(lv>=16?'最高熟練度！':'還需 <strong style="color:#1a1a1a;">'+remaining+'</strong> 筆升級。')+'</div></div>';
-}
-
-// ── renderShop ──
-function renderShop(){
-  document.getElementById('shop-coin').textContent=state.coins.toLocaleString();
-  const lbl={hp:'HP',atk:'攻擊',def:'防禦',agi:'敏捷',crit:'暴擊'};
-  document.getElementById('shop-grid').innerHTML=SHOP_EQUIPS.map(e=>{const owned=state.ownedEquips.includes(e.id);const rc=RARITY_C[e.rarity];const tags=Object.entries(e.bonuses).map(([k,v])=>'<span class="btag">'+lbl[k]+' +'+v+(k==='agi'||k==='crit'?'%':'')+'</span>').join('');return'<div class="shop-card '+(owned?'owned':'')+'"><div class="rarity-bar" style="background:'+rc+';"></div><div style="font-size:22px;margin-bottom:6px;">'+e.emoji+'</div><div style="font-size:13px;font-weight:700;margin-bottom:2px;">'+e.name+'</div><div style="font-size:10px;font-weight:600;color:'+rc+';margin-bottom:6px;">'+RARITY_L[e.rarity]+'</div><div class="bonus-tags">'+tags+'</div><div style="font-size:12px;font-weight:700;color:#b8860b;margin-bottom:8px;">🪙 '+e.cost.toLocaleString()+'</div>'+(owned?'<div style="font-size:12px;color:#2a7a4f;font-weight:600;">已擁有</div>':'<button class="buy-btn" onclick="buyEquip(\''+e.id+'\')" '+(state.coins<e.cost?'disabled':'')+'>購買</button>')+'</div>';}).join('');
-}
-window.buyEquip=async function(id){
-  const eq=SHOP_EQUIPS.find(e=>e.id===id);if(!eq||state.coins<eq.cost||state.ownedEquips.includes(id))return;
-  state.coins-=eq.cost;state.ownedEquips.push(id);state.coinLog.unshift({amount:-eq.cost,reason:'購買「'+eq.name+'」',date:today()});
-  checkAch();renderShop();renderPlayer();
-  await saveProfile();
-};
-
-// ── Boss 戰 ──
-function pickBossAction(){return BOSS_ACTIONS[Math.floor(Math.random()*BOSS_ACTIONS.length)];}
-function setActionBtns(enabled){['btn-atk','btn-def','btn-thr'].forEach(id=>{const btn=document.getElementById(id);if(btn)btn.disabled=!enabled;});}
-function showBossArea(area){document.getElementById('boss-select-area').style.display=area==='select'?'block':'none';document.getElementById('battle-area').style.display=area==='battle'?'block':'none';document.getElementById('defeat-area').style.display=area==='defeat'?'block':'none';}
-window.backToBossSelect=function(){battle=null;showBossArea('select');renderBossSelect();};
-window.fleeBattle=function(){backToBossSelect();};
-function renderBossSelect(){document.getElementById('boss-grid').innerHTML=BOSSES.map(b=>{const beaten=state.beatenBosses.includes(b.id);const drop=BOSS_DROPS.find(d=>d.id===b.dropId);return'<div class="boss-card" onclick="startBattle(\''+b.id+'\')"><div class="boss-em">'+b.emoji+'</div><div class="boss-nm">'+b.name+'</div><div class="boss-diff" style="color:'+b.dc+';">'+b.diff+'</div><div class="boss-stat">HP '+b.hp.toLocaleString()+' / 攻擊 '+b.atk+'</div>'+(drop?'<div class="boss-drop">掉落：'+drop.emoji+drop.name+'</div>':'')+(beaten?'<div class="beaten-label">已擊敗過 ✓</div>':'')+'</div>';}).join('');}
-window.startBattle=function(bossId){
-  const boss=BOSSES.find(b=>b.id===bossId);if(!boss)return;
-  const stats=calcStats();
-  battle={boss,bossHp:boss.hp,bossMaxHp:boss.hp,playerHp:stats.hp,playerMaxHp:stats.hp,stats,defending:false,nextBossAction:null};
-  showBossArea('battle');
-  document.getElementById('battle-title').textContent='⚔️ 挑戰 '+boss.name;
-  document.getElementById('b-avatar').textContent=boss.emoji;document.getElementById('b-name').textContent=boss.name;
-  document.getElementById('p-avatar').textContent=getJob(state.level).icon;document.getElementById('p-name').textContent=state.name;
-  document.getElementById('p-stats').textContent='攻'+stats.atk+' 防'+stats.def+' 敏'+stats.agi+'% 暴'+stats.crit+'%';
-  document.getElementById('atk-hint').textContent='傷害 '+stats.atk;
-  document.getElementById('def-hint').textContent='減傷 50%';
-  document.getElementById('thr-hint').textContent='固定 '+Math.floor(stats.atk*0.7)+' 無視防禦';
-  document.getElementById('battle-log').textContent=boss.name+' 出現！選擇行動！';
-  battle.nextBossAction=pickBossAction();
-  setActionBtns(true);updateBattleUI();
-};
-function updateBattleUI(){if(!battle)return;const bPct=Math.max(0,Math.round(battle.bossHp/battle.bossMaxHp*100));const pPct=Math.max(0,Math.round(battle.playerHp/battle.playerMaxHp*100));document.getElementById('b-hpbar').style.width=bPct+'%';document.getElementById('b-hplabel').textContent=Math.max(0,battle.bossHp).toLocaleString()+' / '+battle.bossMaxHp.toLocaleString();const pb=document.getElementById('p-hpbar');pb.style.width=pPct+'%';pb.style.background=pPct>50?'#2a7a4f':pPct>25?'#b8860b':'#c0392b';document.getElementById('p-hplabel').textContent=Math.max(0,battle.playerHp)+' / '+battle.playerMaxHp;}
-function addBLog(msg){const el=document.getElementById('battle-log');el.textContent+='\n'+msg;el.scrollTop=el.scrollHeight;}
-window.doAction=async function(action){
-  if(!battle)return;const st=battle.stats;
-  setActionBtns(false);
-  const bossAct=battle.nextBossAction||pickBossAction();
-  battle.nextBossAction=null;
-  let playerDmg=0,blocked=false,playerMsg='';
-  if(action==='attack'){
-    if(bossAct.id==='guard'){playerDmg=Math.max(1,Math.floor(st.atk*0.3));playerMsg='⚔️ 攻擊！但 Boss 防禦格擋，僅造成 '+playerDmg+' 傷害';}
-    else if(bossAct.id==='heal'){const isCrit=Math.random()*100<st.crit;playerDmg=isCrit?st.atk*2:st.atk;playerMsg='⚔️ 打斷回血！造成 '+playerDmg+' 傷害'+(isCrit?'（暴擊！）':'');blocked=true;}
-    else{const isCrit=Math.random()*100<st.crit;playerDmg=isCrit?st.atk*2:st.atk;playerMsg=isCrit?'⚡ 暴擊！造成 '+playerDmg+' 傷害！':'⚔️ 攻擊！造成 '+playerDmg+' 傷害';}
-  }else if(action==='defend'){
-    playerDmg=0;
-    if(bossAct.id==='skill'){playerMsg='🛡️ 完美格擋技能攻擊！零傷害！';blocked=true;}
-    else if(bossAct.id==='atk')playerMsg='🛡️ 防禦！準備減傷普通攻擊';
-    else playerMsg='🛡️ 防禦姿態...';
-  }else if(action==='throw'){
-    const baseDmg=Math.floor(st.atk*0.7);playerDmg=baseDmg;
-    if(bossAct.id==='guard')playerMsg='🎯 投擲！無視 Boss 防禦！造成 '+playerDmg+' 傷害';
-    else playerMsg='🎯 投擲！造成 '+playerDmg+' 傷害';
-  }
-  battle.bossHp-=playerDmg;addBLog(playerMsg);
-  if(battle.bossHp<=0){
-    addBLog('🎉 Boss 被擊敗！');
-    const drop=BOSS_DROPS.find(d=>d.id===battle.boss.dropId);
-    if(drop&&!state.ownedEquips.includes(drop.id)){state.ownedEquips.push(drop.id);addBLog('獲得：'+drop.emoji+' '+drop.name+'！');}
-    if(!state.beatenBosses.includes(battle.boss.id))state.beatenBosses.push(battle.boss.id);
-    addCoins(100,'擊敗 '+battle.boss.name);checkAch().forEach(m=>addBLog(m));
-    updateBattleUI();renderPlayer();
-    await saveProfile();
-    setTimeout(()=>backToBossSelect(),2500);return;
-  }
-  setTimeout(async()=>{
-    if(!battle)return;
-    const effDef=battle.defending?st.def*2:st.def;battle.defending=false;
-    addBLog('--- '+bossAct.label+' ---');
-    if(bossAct.id==='atk'){
-      if(action==='defend'){const r=Math.max(1,Math.floor(Math.max(1,battle.boss.atk-st.def)*0.5));battle.playerHp-=r;addBLog(battle.boss.name+' 攻擊！防禦減傷 50%，受到 '+r+' 傷害');}
-      else if(Math.random()*100<st.agi){addBLog('💨 迴避了攻擊！');}
-      else{const d=Math.max(1,battle.boss.atk-st.def);battle.playerHp-=d;addBLog('受到 '+d+' 傷害');}
-    }else if(bossAct.id==='skill'){
-      if(blocked){addBLog('🛡️ 技能被完全格擋！');}
-      else if(Math.random()*100<st.agi){addBLog('💨 迴避了技能攻擊！');}
-      else{const d=Math.max(1,Math.floor(battle.boss.atk*1.5)-st.def);battle.playerHp-=d;addBLog('受到 '+d+' 傷害');}
-    }else if(bossAct.id==='guard'){addBLog('🔰 Boss 防禦姿態'+(action==='throw'?'，但被投擲無視！':'，本回合傷害大減'));}
-    else if(bossAct.id==='heal'){
-      if(blocked){addBLog('💔 回血被打斷！');}
-      else{const heal=Math.floor(battle.boss.maxHp*0.1);battle.bossHp=Math.min(battle.bossMaxHp,battle.bossHp+heal);addBLog('💚 Boss 回復了 '+heal+' HP！');}
-    }
-    if(battle.playerHp<=0){battle.playerHp=0;updateBattleUI();addBLog('💀 你被擊敗了...');setTimeout(()=>{document.getElementById('defeat-msg').textContent='被 '+battle.boss.name+' 擊倒了。\n裝備更好的武器再來挑戰！';showBossArea('defeat');},1200);return;}
-    updateBattleUI();
-    battle.nextBossAction=pickBossAction();
-    setActionBtns(true);
-  },700);
-};
-
-// ── CSV 匯入 ──
-function stripEmoji(str){return str.replace(/[\u{1F000}-\u{1FFFF}\u{2600}-\u{27FF}\u{FE00}-\u{FEFF}]|[\uD800-\uDBFF][\uDC00-\uDFFF]/gu,'').replace(/\s+/g,' ').trim();}
-function parseDate(raw){raw=(raw||'').trim().replace('上午','AM').replace('下午','PM').replace(/\//g,'-');const d=new Date(raw);if(!isNaN(d))return d;const m=raw.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);if(m)return new Date(parseInt(m[1]),parseInt(m[2])-1,parseInt(m[3]));return new Date(NaN);}
-async function parseCSVAndImport(text,statusEl){
-  const rows=text.trim().split('\n').slice(1);const recs=[];
-  for(let row of rows){
-    const cols=[];let cur='',inQ=false;for(let ch of row){if(ch==='"')inQ=!inQ;else if(ch===','&&!inQ){cols.push(cur.trim());cur='';}else cur+=ch;}cols.push(cur.trim());
-    const amount=parseInt((cols[1]||'').replace(/[^0-9\-]/g,''));
-    const category=stripEmoji(cols[2]||'')||'其他';const note=cols[3]||'';
-    if(isNaN(amount)||amount===0)continue;
-    const dateObj=parseDate(cols[0]);if(isNaN(dateObj))continue;
-    const date=dateObj.getFullYear()+'-'+String(dateObj.getMonth()+1).padStart(2,'0')+'-'+String(dateObj.getDate()).padStart(2,'0');
-    recs.push({type:(amount<0||category.includes('收入'))?'income':'expense',amount:Math.abs(amount),category,note,date});
-  }
-  if(!recs.length){statusEl.textContent='沒有找到有效資料';return;}
-  statusEl.textContent='匯入中，共 '+recs.length+' 筆...';
-  const count=await fbBatchImport(recs);
-  statusEl.textContent='成功匯入 '+count+' 筆！資料已儲存到 Firebase。';
-}
-window.handleDrop=function(e){e.preventDefault();document.getElementById('drop-zone').style.borderColor='#e0e0e0';const file=e.dataTransfer.files[0];if(!file||!file.name.endsWith('.csv')){document.getElementById('import-status').textContent='請選擇 .csv 檔案';return;}readCSVFile(file,document.getElementById('import-status'));};
-window.handleFileInput=function(input){const file=input.files[0];if(!file)return;readCSVFile(file,document.getElementById('import-status'));};
-function readCSVFile(file,statusEl){statusEl.textContent='讀取中...';const reader=new FileReader();reader.onload=e=>{parseCSVAndImport(e.target.result,statusEl);};reader.readAsText(file,'UTF-8');}
 
 // ── Tab 切換 ──
-window.switchTab=function(name,el){
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-  el.classList.add('active');document.getElementById('tab-'+name).classList.add('active');
-  if(name==='stats')renderStats();
-  if(name==='mastery')renderMastery();
-  if(name==='shop')renderShop();
-  if(name==='boss'){renderBossSelect();showBossArea('select');}
-  if(name==='player')renderPlayer();
-};
 
-// ── 初始化（不需要等 Firebase，Auth 監聽會觸發）──
+function renderPixelChar() {
+  const svg = document.getElementById('pixel-char');
+  if (!svg) return;
+  const lv = state.level;
+  const owned = state.ownedEquips.map(id => ALL_EQUIPS.find(e => e.id === id)).filter(Boolean);
+  const job = getJob(lv);
+
+  // 判斷裝備等級
+  const hasMythic  = owned.some(e => e.rarity === 'mythic');
+  const hasLegend  = owned.some(e => e.rarity === 'legend');
+  const hasEpic    = owned.some(e => e.rarity === 'epic');
+  const hasRare    = owned.some(e => e.rarity === 'rare');
+  const hasSword   = owned.some(e => e.id === 'fsword' || e.id === 'chaos');
+  const hasGoldSwd = owned.some(e => e.id === 'legend' || e.id === 'relics' || e.id === 'godarmor');
+  const hasShield  = owned.some(e => e.id === 'shield' || e.id === 'hshield' || e.id === 'holy' || e.id === 'd3');
+  const hasBossWpn = owned.some(e => e.id === 'd4' || e.id === 'd7');
+
+  // 顏色主題
+  let bodyC, bodyL, legC, bootC, helC;
+  if (hasMythic || lv >= 100) {
+    bodyC = '#EF9F27'; bodyL = '#FAC775'; legC = '#BA7517'; bootC = '#854F0B'; helC = '#BA7517';
+  } else if (hasLegend || lv >= 50) {
+    bodyC = '#534AB7'; bodyL = '#7F77DD'; legC = '#3C3489'; bootC = '#26215C'; helC = '#3C3489';
+  } else if (hasEpic || lv >= 20) {
+    bodyC = '#185FA5'; bodyL = '#378ADD'; legC = '#0C447C'; bootC = '#042C53'; helC = '#0C447C';
+  } else if (hasRare || lv >= 5) {
+    bodyC = '#3B6D11'; bodyL = '#639922'; legC = '#27500A'; bootC = '#173404'; helC = '#27500A';
+  } else {
+    bodyC = '#888780'; bodyL = '#B4B2A9'; legC = '#5F5E5A'; bootC = '#2C2C2A'; helC = '#5F5E5A';
+  }
+
+  const skinC = '#F5C4B3';
+  const eyeC  = (hasMythic || lv >= 100) ? '#EF9F27' : '#26215C';
+  const hairC = '#3C3489';
+  const mouthC = '#993C1D';
+
+  // 武器顏色
+  let wpnC1, wpnC2;
+  if (hasBossWpn)       { wpnC1 = '#E1F5EE'; wpnC2 = '#1D9E75'; }
+  else if (hasGoldSwd)  { wpnC1 = '#FAC775'; wpnC2 = '#EF9F27'; }
+  else if (hasSword)    { wpnC1 = '#EF9F27'; wpnC2 = '#FA6027'; }
+  else                  { wpnC1 = '#B4B2A9'; wpnC2 = '#5F5E5A'; }
+
+  const shC1 = '#185FA5', shC2 = '#378ADD';
+
+  // 像素格輔助函數
+  function px(x, y, c) {
+    return `<rect x="${x*8}" y="${y*8}" width="8" height="8" fill="${c}"/>`;
+  }
+
+  let rects = '';
+
+  // ── 光環（Lv.35+）──
+  if (lv >= 200) {
+    [[0,1],[1,0],[2,0],[3,0],[4,0],[5,1]].forEach(([x,y])=> rects += px(x, y, '#AFA9EC'));
+  } else if (lv >= 100) {
+    [[1,0],[2,0],[3,0],[4,0]].forEach(([x,y])=> rects += px(x, y, '#FAC775'));
+  } else if (lv >= 35) {
+    [[2,0],[3,0]].forEach(([x,y])=> rects += px(x, y, '#EF9F27'));
+  }
+
+  // ── 頭部 ──
+  const hy = (lv >= 35) ? 1 : 0;  // 有光環時往下一格
+  // 頭髮
+  [[1,hy],[2,hy],[3,hy],[4,hy],[0,hy+1],[5,hy+1]].forEach(([x,y])=> rects += px(x, y, hairC));
+  // 臉
+  [[0,hy+2],[1,hy+1],[2,hy+1],[3,hy+1],[4,hy+1],[5,hy+2],
+   [1,hy+2],[2,hy+2],[3,hy+2],[4,hy+2]].forEach(([x,y])=> rects += px(x, y, skinC));
+  // 眼睛
+  rects += px(1, hy+2, eyeC);
+  rects += px(4, hy+2, eyeC);
+  // 嘴
+  rects += px(2, hy+3, mouthC);
+  rects += px(3, hy+3, mouthC);
+  // 頸
+  rects += px(2, hy+4, skinC);
+  rects += px(3, hy+4, skinC);
+
+  // ── 身體 ──
+  const by = hy + 5;
+  // 有頭盔（史詩+）
+  if (hasEpic || hasLegend || hasMythic) {
+    rects += px(1, hy,   helC);
+    rects += px(4, hy,   helC);
+    rects += px(0, hy+1, helC);
+    rects += px(5, hy+1, helC);
+  }
+  // 身體
+  [[1,by],[2,by],[3,by],[4,by],
+   [1,by+1],[2,by+1],[3,by+1],[4,by+1],
+   [1,by+2],[2,by+2],[3,by+2],[4,by+2]].forEach(([x,y])=> rects += px(x, y, bodyC));
+  // 身體亮部
+  rects += px(2, by+1, bodyL);
+  rects += px(3, by+1, bodyL);
+  // 手臂
+  rects += px(0, by,   skinC);
+  rects += px(0, by+1, skinC);
+  rects += px(5, by,   skinC);
+  rects += px(5, by+1, skinC);
+
+  // ── 武器（右手）──
+  rects += px(6, by-1, wpnC1);
+  rects += px(6, by,   wpnC1);
+  rects += px(6, by+1, wpnC2);
+  rects += px(5, by+2, bodyC);
+  rects += px(6, by+2, wpnC2);
+  if (hasSword || hasGoldSwd || hasBossWpn) {
+    rects += px(6, by-2, wpnC1);  // 劍尖
+  }
+
+  // ── 盾牌（左手）──
+  if (hasShield) {
+    rects += px(-1, by,   shC1);
+    rects += px(-1, by+1, shC2);
+    rects += px(-1, by+2, shC1);
+  }
+
+  // ── 腿 ──
+  const ly = by + 3;
+  [[1,ly],[2,ly],[3,ly],[4,ly],
+   [1,ly+1],[2,ly+1],[3,ly+1],[4,ly+1]].forEach(([x,y])=> rects += px(x, y, legC));
+
+  // ── 靴子 ──
+  [[1,ly+2],[2,ly+2],[3,ly+2],[4,ly+2]].forEach(([x,y])=> rects += px(x, y, bootC));
+
+  svg.innerHTML = rects;
+
+  // 標籤
+  const lbl = document.getElementById('pixel-label');
+  if (lbl) {
+    const rarityName = hasMythic ? '神話' : hasLegend ? '傳說' : hasEpic ? '史詩' : hasRare ? '稀有' : '初始';
+    lbl.textContent = job.name + ' · ' + rarityName + '裝備';
+  }
+}
+
+let editingIdx = -1;
+
+function editRecord(idx) {
+  const r = state.records[idx];
+  if (!r) return;
+  editingIdx = idx;
+  document.getElementById('edit-type').value = r.type;
+  document.getElementById('edit-type').onchange = function(){ const cs=this.value==='income'?ICATS:ECATS;document.getElementById('edit-cat').innerHTML=cs.map(c=>'<option value="'+c.key+'">'+c.emoji+' '+c.key+'</option>').join(''); };
+  const cats = r.type === 'income' ? ICATS : ECATS;
+  document.getElementById('edit-cat').innerHTML = cats.map(c => '<option value="'+c.key+'"'+(c.key===r.category?' selected':'')+'>'+c.emoji+' '+c.key+'</option>').join('');
+  document.getElementById('edit-amount').value = r.amount;
+  document.getElementById('edit-note').value = r.note || '';
+  document.getElementById('edit-modal').style.display = 'flex';
+}
+
+function closeEdit() {
+  document.getElementById('edit-modal').style.display = 'none';
+  editingIdx = -1;
+}
+
+async function saveEdit() {
+  if (editingIdx < 0) return;
+  const type = document.getElementById('edit-type').value;
+  const amount = parseInt(document.getElementById('edit-amount').value);
+  const category = document.getElementById('edit-cat').value;
+  const note = document.getElementById('edit-note').value;
+  if (!amount || amount <= 0) return;
+  const r = state.records[editingIdx];
+  state.records[editingIdx] = { ...r, type, amount, category, note };
+  closeEdit();
+  renderLog(); renderPlayer();
+  if (API_URL && r && r.rowId) {
+    try {
+      const params = new URLSearchParams({action:'update', rowId: r.rowId, amount, category, note});
+      await fetch(API_URL + '?' + params.toString());
+    } catch(e) { console.log('修改Sheets失敗:', e.message); }
+  }
+}
+
+async function deleteRecord(idx) {
+  if (!confirm('確定要刪除這筆記帳嗎？')) return;
+  const r = state.records[idx];
+  state.records.splice(idx, 1);
+  state.totalRecords = Math.max(0, state.totalRecords - 1);
+  renderLog(); renderPlayer();
+  if (API_URL && r && r.rowId) {
+    try {
+      const params = new URLSearchParams({action:'delete', rowId: r.rowId});
+      await fetch(API_URL + '?' + params.toString());
+      // 刪除後行號位移：比被刪行號大的全部 -1
+      state.records.forEach(rec => { if(rec.rowId && rec.rowId > r.rowId) rec.rowId--; });
+    } catch(e) { console.log('刪除Sheets失敗:', e.message); }
+  }
+}
+function switchTab(name,el){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));el.classList.add('active');document.getElementById('tab-'+name).classList.add('active');if(name==='stats')renderStats();if(name==='mastery')renderMastery();if(name==='shop')renderShop();if(name==='boss'){renderBossSelect();showBossArea('select');}if(name==='player')renderPlayer();}
+
+// ── 啟動 ──
 syncCats();
-document.getElementById('version-tag').textContent=APP_VERSION;
-
+checkVersion();
 </script>
 </body>
 </html>
