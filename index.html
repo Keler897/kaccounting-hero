@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="記帳勇者">
+<meta name="theme-color" content="#ffffff">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%231a1a1a'/><text y='.9em' font-size='72' x='12'>⚔️</text></svg>">
+<link rel="manifest" href="data:application/json,%7B%22name%22%3A%22%E8%A8%98%E5%B8%B3%E5%8B%87%E8%80%85%22%2C%22short_name%22%3A%22%E8%A8%98%E5%B8%B3%E5%8B%87%E8%80%85%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23ffffff%22%2C%22theme_color%22%3A%22%231a1a1a%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20100%20100'%3E%3Crect%20width%3D'100'%20height%3D'100'%20rx%3D'22'%20fill%3D'%231a1a1a'%2F%3E%3Ctext%20y%3D'.9em'%20font-size%3D'72'%20x%3D'12'%3E%E2%9A%94%EF%B8%8F%3C%2Ftext%3E%3C%2Fsvg%3E%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D">
+<title>記帳勇者</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang TC','Microsoft JhengHei',sans-serif;color:#1a1a1a;background:#f5f4f0;min-height:100vh;}
+.app{max-width:480px;margin:0 auto;background:#fff;min-height:100vh;}
+.header{background:#fff;border-bottom:1px solid #eee;padding:14px 16px 0;position:sticky;top:0;z-index:10;}
+.header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.app-title{font-size:16px;font-weight:700;}
+.coin-pill{display:inline-flex;align-items:center;gap:4px;font-size:13px;font-weight:600;background:#fff8e6;color:#b8860b;border:1px solid #f0d080;padding:3px 10px;border-radius:20px;}
+.tabs{display:flex;gap:0;overflow-x:auto;scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{flex-shrink:0;padding:8px 14px;font-size:12px;font-weight:500;color:#888;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;background:none;border-top:none;border-left:none;border-right:none;}
+.tab.active{color:#2c2c2c;border-bottom-color:#2c2c2c;font-weight:600;}
+.content{padding:16px;}
+.section{display:none;}.section.active{display:block;}
+.card{background:#fff;border:1px solid #ebebeb;border-radius:14px;padding:14px 16px;margin-bottom:12px;}
+.card-title{font-size:11px;font-weight:600;color:#999;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;}
+select,input[type=text],input[type=number]{width:100%;padding:10px 12px;border:1px solid #e0e0e0;border-radius:10px;font-size:14px;background:#fafafa;color:#1a1a1a;outline:none;font-family:inherit;}
+select:focus,input:focus{border-color:#888;background:#fff;}
+.row{display:flex;gap:8px;margin-bottom:10px;}
+.row select,.row input{flex:1;}
+.record-btn{width:100%;padding:12px;background:#1a1a1a;color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;margin-top:4px;}
+.record-btn:active{transform:scale(.98);}
+.feedback{margin-top:10px;font-size:13px;font-weight:600;color:#2a7a4f;min-height:18px;line-height:1.5;}
+.log-item{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #f0f0f0;}
+.log-item:last-child{border-bottom:none;}
+.log-meta{font-size:13px;color:#666;}
+.log-date{font-size:11px;color:#aaa;margin-top:1px;}
+.amount-pos{font-size:14px;font-weight:600;color:#2a7a4f;}
+.amount-neg{font-size:14px;font-weight:600;color:#c0392b;}
+.player-header{display:flex;align-items:center;gap:14px;margin-bottom:16px;}
+.avatar{width:56px;height:56px;border-radius:50%;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;border:2px solid #e8e8e8;}
+.player-name-input{font-size:17px;font-weight:700;border:none;background:transparent;color:#1a1a1a;width:130px;outline:none;border-bottom:1.5px dashed #ccc;padding:2px 2px;}
+.job-label{font-size:12px;color:#888;margin-top:3px;}
+.level-badge{margin-left:auto;text-align:center;}
+.level-num{font-size:36px;font-weight:800;line-height:1;}
+.level-tag{font-size:10px;color:#aaa;font-weight:500;}
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;}
+.stat-box{background:#f8f8f8;border-radius:12px;padding:10px 12px;}
+.stat-lbl{font-size:10px;color:#aaa;font-weight:500;margin-bottom:2px;}
+.stat-num{font-size:18px;font-weight:700;}
+.progress-wrap{margin-bottom:6px;}
+.progress-label{display:flex;justify-content:space-between;font-size:11px;color:#aaa;margin-bottom:4px;}
+.progress-bar{background:#f0f0f0;border-radius:99px;height:7px;overflow:hidden;}
+.progress-fill{height:100%;border-radius:99px;transition:width .5s ease;}
+.task-item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #f0f0f0;}
+.task-item:last-child{border-bottom:none;}
+.task-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.badge-wrap{display:flex;flex-wrap:wrap;gap:4px;}
+.badge{display:inline-block;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;}
+.b-gold{background:#fff8e6;color:#b8860b;border:1px solid #f0d080;}
+.b-silver{background:#f4f4f4;color:#666;border:1px solid #ddd;}
+.b-purple{background:#f0eeff;color:#5533cc;border:1px solid #d0c8ff;}
+.b-lock{background:#f8f8f8;color:#bbb;border:1px solid #eee;}
+.equip-slots{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:8px;}
+.slot{background:#f8f8f8;border:1.5px dashed #e0e0e0;border-radius:12px;padding:10px 6px;text-align:center;min-height:64px;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.slot.filled{border-style:solid;border-color:#ccc;background:#fff;}
+.slot-icon{font-size:20px;margin-bottom:3px;}
+.slot-name{font-size:9px;color:#888;line-height:1.3;}
+.slot-empty{font-size:10px;color:#ccc;}
+.attr-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f0f0f0;}
+.attr-item:last-child{border-bottom:none;}
+.attr-icon{font-size:16px;width:22px;text-align:center;flex-shrink:0;}
+.attr-bar-wrap{flex:1;}
+.attr-name{font-size:12px;color:#888;margin-bottom:3px;}
+.attr-bar-bg{background:#f0f0f0;border-radius:99px;height:5px;overflow:hidden;}
+.attr-bar-fill{height:100%;border-radius:99px;}
+.attr-val{text-align:right;min-width:70px;}
+.attr-main{font-size:15px;font-weight:700;}
+.attr-bonus{font-size:10px;color:#2a7a4f;}
+.coin-log-item{display:flex;justify-content:space-between;font-size:12px;padding:5px 0;border-bottom:1px solid #f5f5f5;color:#666;}
+.coin-log-item:last-child{border-bottom:none;}
+.coin-plus{font-weight:600;color:#b8860b;}
+.coin-minus{font-weight:600;color:#c0392b;}
+.cat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px;}
+.cat-card{background:#fff;border:1px solid #ebebeb;border-radius:12px;padding:12px;cursor:pointer;}
+.cat-card.sel{border:2px solid #1a1a1a;}
+.cat-header{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.cat-bar-bg{background:#f0f0f0;border-radius:99px;height:4px;overflow:hidden;margin-bottom:4px;}
+.cat-bar-fill{height:100%;border-radius:99px;}
+.cat-foot{font-size:10px;color:#aaa;}
+.detail-card{background:#fff;border:1px solid #ebebeb;border-radius:14px;padding:14px 16px;margin-bottom:12px;}
+.skill-nodes{display:flex;align-items:flex-start;overflow-x:auto;padding-bottom:4px;}
+.snode{display:flex;flex-direction:column;align-items:center;flex-shrink:0;width:64px;}
+.sball{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;border:2px solid;}
+.sball.u{background:#f0eeff;border-color:#5533cc;}
+.sball.l{background:#f8f8f8;border-color:#e0e0e0;opacity:.5;}
+.sconn{width:20px;height:2px;flex-shrink:0;margin-top:20px;}
+.sname{font-size:10px;text-align:center;margin-top:4px;line-height:1.3;}
+.sreq{font-size:10px;color:#aaa;text-align:center;}
+.pie-section{display:flex;align-items:center;gap:16px;}
+.pie-legend{flex:1;}
+.pie-row{display:flex;align-items:center;gap:6px;font-size:12px;margin-bottom:5px;}
+.pie-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.shop-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
+.shop-card{background:#fff;border:1px solid #ebebeb;border-radius:14px;padding:12px;}
+.shop-card.owned{border-color:#aad5b0;background:#f6fff8;}
+.rarity-bar{height:3px;border-radius:99px;margin-bottom:10px;}
+.bonus-tags{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:8px;}
+.btag{font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;background:#e8f5e9;color:#2a7a4f;}
+.buy-btn{width:100%;padding:8px;background:#1a1a1a;color:#fff;border:none;border-radius:9px;font-size:12px;font-weight:600;cursor:pointer;}
+.buy-btn:disabled{background:#e0e0e0;color:#aaa;cursor:not-allowed;}
+.boss-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px;}
+.boss-card{background:#fff;border:1px solid #ebebeb;border-radius:14px;padding:14px;cursor:pointer;text-align:center;}
+.boss-card:hover{border-color:#ccc;background:#fafafa;}
+.boss-em{font-size:32px;margin-bottom:6px;}
+.boss-nm{font-size:13px;font-weight:700;margin-bottom:3px;}
+.boss-diff{font-size:11px;font-weight:600;margin-bottom:3px;}
+.boss-stat{font-size:11px;color:#aaa;}
+.boss-drop{font-size:10px;color:#b8860b;margin-top:4px;}
+.beaten-label{font-size:10px;color:#2a7a4f;font-weight:600;margin-top:4px;}
+.battle-wrap{background:#fff;border:1px solid #ebebeb;border-radius:14px;padding:16px;margin-bottom:12px;}
+.battle-title{font-size:13px;font-weight:700;margin-bottom:12px;}
+.battle-chars{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.bchar{text-align:center;}
+.bchar-em{font-size:34px;margin-bottom:4px;}
+.bchar-nm{font-size:12px;font-weight:600;margin-bottom:4px;}
+.bchar-hp{font-size:11px;color:#aaa;margin-top:3px;}
+.bchar-stats{font-size:10px;color:#aaa;margin-top:2px;}
+.battle-log{background:#f8f8f8;border-radius:10px;padding:10px 12px;font-size:12px;color:#555;height:110px;overflow-y:auto;line-height:1.9;white-space:pre-wrap;margin-bottom:12px;}
+.battle-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
+.bbtn{padding:12px;border-radius:12px;font-size:13px;font-weight:600;cursor:pointer;text-align:center;line-height:1.4;}
+.bbtn:disabled{opacity:.35;cursor:not-allowed;}
+.bbtn-atk{background:#fff1ee;color:#c0392b;border:1.5px solid #f5c0b0;}
+.bbtn-def{background:#eef0ff;color:#3344cc;border:1.5px solid #c0c8f8;}
+.flee-btn{width:100%;padding:10px;background:#f5f5f5;color:#888;border:1px solid #e8e8e8;border-radius:10px;font-size:13px;cursor:pointer;font-weight:500;}
+.defeat-screen{text-align:center;padding:32px 16px;}
+.defeat-em{font-size:64px;margin-bottom:16px;}
+.defeat-title{font-size:22px;font-weight:800;color:#c0392b;margin-bottom:8px;}
+.defeat-sub{font-size:14px;color:#888;margin-bottom:24px;line-height:1.6;white-space:pre-wrap;}
+.defeat-btn{display:inline-block;padding:14px 32px;background:#1a1a1a;color:#fff;border:none;border-radius:14px;font-size:15px;font-weight:700;cursor:pointer;}
+.defeat-btn:active{transform:scale(.97);}
+.dying-banner{background:#fff0f0;border:1px solid #f5c0b0;border-radius:12px;padding:10px 14px;font-size:13px;color:#c0392b;margin-bottom:12px;}
+.info-box{background:#f8f8f8;border-radius:12px;padding:12px 14px;font-size:12px;color:#888;line-height:2;margin-top:10px;}
+.import-row{display:flex;gap:8px;}
+.import-row input{flex:1;}
+.import-btn{padding:10px 16px;background:#1a1a1a;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="header-top">
+      <div class="app-title">記帳勇者</div>
+      <div class="coin-pill">🪙 <span id="coin-display">0</span> 金幣</div>
+    </div>
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('record',this)">記帳</button>
+      <button class="tab" onclick="switchTab('player',this)">玩家</button>
+      <button class="tab" onclick="switchTab('stats',this)">屬性</button>
+      <button class="tab" onclick="switchTab('mastery',this)">熟練度</button>
+      <button class="tab" onclick="switchTab('shop',this)">商店</button>
+      <button class="tab" onclick="switchTab('boss',this)">Boss戰</button>
+      <button class="tab" onclick="switchTab('connect',this)">試算表</button>
+    </div>
+  </div>
+  <div class="content">
+  <div id="tab-record" class="section active">
+    <div class="card">
+      <div class="card-title">新增記帳</div>
+      <div class="row"><select id="type-select" onchange="syncCats()"><option value="expense">支出</option><option value="income">收入</option></select><input type="number" id="amount-input" placeholder="金額 (NT$)" min="1"></div>
+      <div class="row"><select id="cat-select"></select><input type="text" id="note-input" placeholder="備註（可選）"></div>
+      <button class="record-btn" onclick="addRecord()">記一筆 → EXP + 屬性成長</button>
+      <div class="feedback" id="feedback"></div>
+    </div>
+    <div class="card"><div class="card-title">最近記帳</div><div id="log-list"><div style="font-size:13px;color:#aaa">尚無紀錄</div></div></div>
+  </div>
+  <div id="tab-player" class="section">
+    <div id="dying-banner" class="dying-banner" style="display:none">⚠️ 瀕死狀態！本月支出超過收入！</div>
+    <div class="card">
+      <div class="player-header">
+        <div class="avatar" id="job-icon">⚔️</div>
+        <div style="flex:1;"><input class="player-name-input" id="name-input" value="冒險者" maxlength="12" oninput="state.name=this.value"><div class="job-label" id="job-label">職業：菜鳥記帳師</div><div style="margin-top:8px;"><span id="combo-text" style="font-size:13px;font-weight:600;color:#aaa">0 天連擊</span></div></div>
+        <div class="level-badge"><div class="level-tag">Lv.</div><div class="level-num" id="hero-lv">1</div></div>
+      </div>
+      <div class="progress-label"><span id="exp-label">0 / 100 EXP</span><span id="next-lv-label">Lv.2</span></div>
+      <div class="progress-bar" style="margin-top:4px;"><div class="progress-fill" id="exp-bar" style="width:0%;background:#1a1a1a;"></div></div>
+    </div>
+    <div class="stat-grid" id="stat-grid"></div>
+    <div class="card"><div class="card-title">裝備槽</div><div class="equip-slots" id="equip-slots"></div><div style="font-size:11px;color:#aaa;">到商店購買裝備以提升屬性</div></div>
+    <div class="card">
+      <div class="card-title">HP 狀態 — 本月收入 − 支出</div>
+      <div class="progress-label"><span id="hp-detail">收入 $0 − 支出 $0</span><span id="hp-net" style="font-weight:600;">$0 / $0</span></div>
+      <div class="progress-bar" style="margin-top:6px;"><div class="progress-fill" id="hp-bar" style="width:0%;background:#2a7a4f;"></div></div>
+    </div>
+    <div class="card"><div class="card-title">每日任務</div><div id="task-list"></div></div>
+    <div class="card"><div class="card-title">稱號 &amp; 成就</div><div class="badge-wrap" id="badge-wrap"></div></div>
+  </div>
+  <div id="tab-stats" class="section">
+    <div class="card"><div class="card-title">角色屬性</div><div id="attr-list"></div></div>
+    <div class="card"><div class="card-title">金幣記錄</div><div id="coin-log"></div></div>
+    <div class="info-box">📅 每日記帳 → +50金幣 ・ 🔥 7天連擊 → +200 ・ 30天 → +1000<br>🏆 小成就 +100 ・ 中成就 +300 ・ 大成就 +500 ・ ⚔️ 擊敗Boss → +100</div>
+  </div>
+  <div id="tab-mastery" class="section">
+    <div class="card"><div class="card-title">本月支出佔比</div><div class="pie-section"><canvas id="pie-canvas" width="110" height="110" style="flex-shrink:0;"></canvas><div class="pie-legend" id="pie-legend"></div></div></div>
+    <div class="card"><div class="card-title">分類熟練度</div><div class="cat-grid" id="cat-grid"></div></div>
+    <div id="mastery-detail"></div>
+  </div>
+  <div id="tab-shop" class="section">
+    <div class="card" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;"><div><div class="card-title" style="margin-bottom:2px;">裝備商店</div><div style="font-size:12px;color:#aaa;">購買裝備提升屬性</div></div><div class="coin-pill">🪙 <span id="shop-coin">0</span></div></div>
+    <div class="shop-grid" id="shop-grid"></div>
+  </div>
+  <div id="tab-boss" class="section">
+    <div id="boss-select-area">
+      <div class="card" style="margin-bottom:12px;"><div class="card-title">選擇 Boss 挑戰</div><div style="font-size:12px;color:#aaa;">可無限重挑！玩家攻擊力直接造成傷害，Boss攻擊 − 防禦 = 實際傷害</div></div>
+      <div class="boss-grid" id="boss-grid"></div>
+    </div>
+    <div id="battle-area" style="display:none;">
+      <div class="battle-wrap">
+        <div class="battle-title" id="battle-title">戰鬥中</div>
+        <div class="battle-chars">
+          <div class="bchar"><div class="bchar-em" id="p-avatar">⚔️</div><div class="bchar-nm" id="p-name">玩家</div><div class="progress-bar"><div class="progress-fill" id="p-hpbar" style="width:100%;background:#2a7a4f;"></div></div><div class="bchar-hp" id="p-hplabel">100/100</div><div class="bchar-stats" id="p-stats"></div></div>
+          <div class="bchar"><div class="bchar-em" id="b-avatar">👹</div><div class="bchar-nm" id="b-name">Boss</div><div class="progress-bar"><div class="progress-fill" id="b-hpbar" style="width:100%;background:#c0392b;"></div></div><div class="bchar-hp" id="b-hplabel">500/500</div></div>
+        </div>
+        <div class="battle-log" id="battle-log">準備戰鬥！</div>
+        <div class="battle-btns">
+          <button class="bbtn bbtn-atk" id="btn-atk" onclick="doAction('attack')">⚔️ 攻擊<br><span style="font-size:10px;font-weight:400;" id="atk-hint"></span></button>
+          <button class="bbtn bbtn-def" id="btn-def" onclick="doAction('defend')">🛡️ 防禦<br><span style="font-size:10px;font-weight:400;" id="def-hint"></span></button>
+        </div>
+        <button class="flee-btn" onclick="fleeBattle()">撤退（回 Boss 選擇）</button>
+      </div>
+    </div>
+    <div id="defeat-area" style="display:none;">
+      <div class="battle-wrap">
+        <div class="defeat-screen">
+          <div class="defeat-em">💀</div>
+          <div class="defeat-title">戰敗了...</div>
+          <div class="defeat-sub" id="defeat-msg">被 Boss 擊倒了。</div>
+          <button class="defeat-btn" onclick="backToBossSelect()">回到 Boss 選擇</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="tab-connect" class="section">
+    <div class="card">
+      <div class="card-title">Google Sheets 雙向同步</div>
+      <div style="font-size:13px;color:#888;margin-bottom:16px;line-height:1.7;">已連結你的 Google Sheets，可即時同步資料。</div>
+      <button id="sync-btn" onclick="syncFromSheets()" style="width:100%;padding:14px;background:#1a1a1a;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:10px;">從 Google Sheets 同步資料</button>
+      <div id="sync-status" style="font-size:13px;color:#888;text-align:center;min-height:18px;"></div>
+      <div class="info-box" style="margin-top:12px;line-height:2;">
+        ⬇️ 同步：把 Google Sheets 的歷史資料讀進來<br>
+        ⬆️ 記帳：每次記一筆都會自動寫入 Google Sheets<br>
+        🔄 建議每次開啟 App 時先點同步
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">方法一：拖入 CSV 檔案</div>
+      <div style="font-size:12px;color:#888;margin-bottom:12px;line-height:1.8;">Google Sheets → 檔案 → 下載 → <strong style="color:#1a1a1a;">逗號分隔值 (.csv)</strong>，下載後拖入下方區域。</div>
+      <div id="drop-zone" style="border:2px dashed #e0e0e0;border-radius:12px;padding:28px 16px;text-align:center;cursor:pointer;" ondragover="event.preventDefault();this.style.borderColor='#1a1a1a';" ondragleave="this.style.borderColor='#e0e0e0';" ondrop="handleDrop(event);" onclick="document.getElementById('csv-file').click()">
+        <div style="font-size:28px;margin-bottom:8px;">📂</div>
+        <div style="font-size:13px;font-weight:600;color:#555;">拖入 CSV 檔案，或點此選擇</div>
+        <div style="font-size:11px;color:#aaa;margin-top:4px;">支援 Google Sheets 匯出的 .csv 格式</div>
+      </div>
+      <input type="file" id="csv-file" accept=".csv" style="display:none;" onchange="handleFileInput(this)">
+      <div id="import-status" style="margin-top:10px;font-size:13px;color:#666;min-height:18px;"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">方法二：發布連結匯入</div>
+      <div class="info-box" style="margin-bottom:12px;line-height:2;">Google Sheets → 檔案 → 分享 → <strong style="color:#1a1a1a;">發布到網路</strong><br>左欄選工作表，右欄選「<strong style="color:#1a1a1a;">逗號分隔值 (.csv)</strong>」→ 發布 → 複製連結</div>
+      <div class="import-row"><input type="text" id="sheet-id" placeholder="貼上 https://docs.google.com/spreadsheets/d/e/... 連結"><button class="import-btn" onclick="importSheets()">匯入</button></div>
+      <div id="import-status2" style="margin-top:10px;font-size:13px;color:#666;min-height:18px;"></div>
+    </div>
+    <div class="info-box">欄位格式：A 時間戳記 | B 金額 | C 類別（可含emoji）| D 備註</div>
+  </div>
+  </div>
+</div>
+<script>
+let state={name:'冒險者',level:1,exp:0,combo:0,coins:0,lastDate:null,records:[],totalRecords:0,selCat:null,ownedEquips:[],beatenBosses:[],claimedAch:[],claimedCombos:[],dailyClaimed:null,coinLog:[]};
+let battle=null;
+const EXP_TABLE=[0,100,250,450,700,1000,1400,1900,2500,3200];
+const JOBS=[{min:1,name:'菜鳥記帳師',icon:'⚔️'},{min:3,name:'節儉見習生',icon:'🛡️'},{min:5,name:'財務冒險者',icon:'🗡️'},{min:7,name:'金幣獵人',icon:'💰'},{min:9,name:'傳說守財師',icon:'🔮'}];
+const ACH=[{id:'first',label:'新手冒險者',size:'small',cond:s=>s.totalRecords>=1},{id:'rec10',label:'記帳初學者',size:'small',cond:s=>s.totalRecords>=10},{id:'rec50',label:'記帳常客',size:'mid',cond:s=>s.totalRecords>=50},{id:'rec100',label:'記帳達人',size:'big',cond:s=>s.totalRecords>=100},{id:'combo7',label:'7天連擊',size:'mid',cond:s=>s.combo>=7},{id:'combo30',label:'30天連擊',size:'big',cond:s=>s.combo>=30},{id:'profit',label:'財務正軌',size:'small',cond:s=>calcMonthly().net>0},{id:'lv5',label:'Lv.5 冒險者',size:'mid',cond:s=>s.level>=5},{id:'lv9',label:'Lv.9 傳說',size:'big',cond:s=>s.level>=9},{id:'boss4',label:'Boss 終結者',size:'big',cond:s=>s.beatenBosses.length>=4},{id:'equip3',label:'裝備收藏家',size:'mid',cond:s=>s.ownedEquips.length>=3}];
+const ACH_COINS={small:100,mid:300,big:500};
+const COMBO_MS=[{days:7,coins:200},{days:30,coins:1000}];
+const SHOP_EQUIPS=[{id:'sword',name:'鐵製短劍',emoji:'🗡️',rarity:'common',cost:200,bonuses:{atk:10}},{id:'shield',name:'木盾',emoji:'🛡️',rarity:'common',cost:200,bonuses:{def:8}},{id:'armor',name:'皮革護甲',emoji:'🥋',rarity:'rare',cost:300,bonuses:{hp:50,def:5}},{id:'boots',name:'疾風靴',emoji:'👢',rarity:'rare',cost:350,bonuses:{agi:10}},{id:'charm',name:'幸運符',emoji:'🍀',rarity:'rare',cost:400,bonuses:{crit:10}},{id:'hshield',name:'勇者之盾',emoji:'🔰',rarity:'epic',cost:600,bonuses:{def:20,hp:30}},{id:'fsword',name:'烈焰長劍',emoji:'🔥',rarity:'epic',cost:700,bonuses:{atk:25,crit:5}},{id:'legend',name:'傳說聖甲',emoji:'✨',rarity:'legend',cost:1200,bonuses:{hp:15,atk:15,def:15,agi:15,crit:15}}];
+const RARITY_C={common:'#888',rare:'#378ADD',epic:'#5533cc',legend:'#b8860b'};
+const RARITY_L={common:'普通',rare:'稀有',epic:'史詩',legend:'傳說'};
+const BOSS_DROPS=[{id:'d1',name:'克制衝動戒指',emoji:'💍',bonuses:{crit:5},desc:'暴擊 +5%'},{id:'d2',name:'帳單剋星徽章',emoji:'🏅',bonuses:{def:10},desc:'防禦 +10'},{id:'d3',name:'房租勇者之盾',emoji:'🛡️',bonuses:{hp:80,def:15},desc:'HP +80、防禦 +15'},{id:'d4',name:'財神傳說聖劍',emoji:'⚜️',bonuses:{atk:40,crit:10},desc:'攻擊 +40、暴擊 +10%'}];
+const ALL_EQUIPS=[...SHOP_EQUIPS,...BOSS_DROPS];
+const BOSSES=[{id:'b1',name:'衝動購物怪獸',emoji:'🛍️',hp:300,atk:20,diff:'初級',dc:'#2a7a4f',dropId:'d1'},{id:'b2',name:'信用卡帳單怪',emoji:'💳',hp:500,atk:35,diff:'中級',dc:'#5533cc',dropId:'d2'},{id:'b3',name:'房租魔王',emoji:'🏠',hp:800,atk:55,diff:'高級',dc:'#b8860b',dropId:'d3'},{id:'b4',name:'超支終帥',emoji:'💀',hp:1200,atk:80,diff:'傳說',dc:'#c0392b',dropId:'d4'}];
+const STAT_RULES=[{cats:['食物','飲品'],stat:'hp',bonus:15,label:'HP上限'},{cats:['居家','醫療'],stat:'def',bonus:3,label:'防禦'},{cats:['娛樂','運動'],stat:'atk',bonus:5,label:'攻擊'},{cats:['交通','3C'],stat:'agi',bonus:3,label:'敏捷%'},{cats:['精品','結婚'],stat:'crit',bonus:3,label:'暴擊%'},{cats:['收入'],stat:'all',bonus:1,label:'全屬性'}];
+const BASE={hp:100,atk:10,def:5,agi:5,crit:5};
+const ECATS=[{key:'食物',emoji:'🍽️',color:'#D85A30',skills:[{lv:1,name:'吃貨見習'},{lv:3,name:'美食探索者'},{lv:5,name:'米其林常客'},{lv:8,name:'饕客宗師'}]},{key:'飲品',emoji:'🥤',color:'#EF9F27',skills:[{lv:1,name:'飲料新手'},{lv:3,name:'手搖達人'},{lv:5,name:'品飲師'},{lv:8,name:'飲品傳說'}]},{key:'交通',emoji:'🚘',color:'#378ADD',skills:[{lv:1,name:'通勤新手'},{lv:3,name:'老司機'},{lv:5,name:'移動要塞'},{lv:8,name:'飛天御劍'}]},{key:'娛樂',emoji:'🎮',color:'#534AB7',skills:[{lv:1,name:'休閒玩家'},{lv:3,name:'快樂達人'},{lv:5,name:'享樂大師'},{lv:8,name:'娛樂之神'}]},{key:'精品',emoji:'🎁',color:'#D4537E',skills:[{lv:1,name:'消費新鮮人'},{lv:3,name:'品味人士'},{lv:5,name:'精品鑑賞家'},{lv:8,name:'奢華傳說'}]},{key:'居家',emoji:'🏠',color:'#1D9E75',skills:[{lv:1,name:'租屋族'},{lv:3,name:'居家達人'},{lv:5,name:'生活美學家'},{lv:8,name:'豪宅之主'}]},{key:'運動',emoji:'🏃',color:'#3B6D11',skills:[{lv:1,name:'運動新手'},{lv:3,name:'健身愛好者'},{lv:5,name:'體能達人'},{lv:8,name:'運動傳說'}]},{key:'醫療',emoji:'🏥',color:'#0F6E56',skills:[{lv:1,name:'健康意識'},{lv:3,name:'養生達人'},{lv:5,name:'健康守護者'},{lv:8,name:'長生不老'}]},{key:'結婚',emoji:'💍',color:'#BA7517',skills:[{lv:1,name:'準新人'},{lv:3,name:'婚禮籌備者'},{lv:5,name:'完美婚禮官'},{lv:8,name:'幸福大使'}]},{key:'3C',emoji:'📡',color:'#185FA5',skills:[{lv:1,name:'科技新手'},{lv:3,name:'3C愛好者'},{lv:5,name:'數位達人'},{lv:8,name:'科技宗師'}]},{key:'其他',emoji:'🛠️',color:'#888780',skills:[{lv:1,name:'雜項達人'},{lv:3,name:'生活管家'},{lv:5,name:'萬能記帳師'},{lv:8,name:'帳本之主'}]}];
+const ICATS=[{key:'收入',emoji:'💵',color:'#1D9E75',skills:[{lv:1,name:'薪水族'},{lv:3,name:'穩定收入者'},{lv:5,name:'財富累積者'},{lv:8,name:'財神降臨'}]}];
+const ALL_CATS=[...ECATS,...ICATS];
+const THRESHOLDS=[1,5,15,30];
+function getJob(lv){let j=JOBS[0];for(let x of JOBS)if(lv>=x.min)j=x;return j;}
+function today(){return new Date().toISOString().slice(0,10);}
+function calcMonthly(){const m=today().slice(0,7);let income=0,expense=0;for(let r of state.records)if(r.date.startsWith(m)){if(r.type==='income')income+=r.amount;else expense+=r.amount;}return{income,expense,hp:Math.max(0,income-expense),net:income-expense,maxHp:income};}
+function getCatCount(key,type='expense'){return state.records.filter(r=>r.category===key&&r.type===type).length;}
+function getCatLv(n){if(n>=30)return 8;if(n>=15)return 5;if(n>=5)return 3;if(n>=1)return 1;return 0;}
+function getNextT(n){for(let t of THRESHOLDS)if(n<t)return t;return 30;}
+function updateCombo(){if(!state.lastDate)return;if(Math.round((new Date(today())-new Date(state.lastDate))/86400000)>1)state.combo=0;}
+function calcStats(){const s={...BASE};for(let rule of STAT_RULES){for(let cat of rule.cats){const isInc=cat==='收入';const count=isInc?getCatCount(cat,'income'):getCatCount(cat,'expense');const lv=getCatLv(count);if(lv===0)continue;if(rule.stat==='all'){s.hp+=lv;s.atk+=lv;s.def+=lv;s.agi+=lv;s.crit+=lv;}else s[rule.stat]+=rule.bonus*lv;}}for(let eid of state.ownedEquips){const eq=ALL_EQUIPS.find(e=>e.id===eid);if(!eq)continue;for(let[k,v] of Object.entries(eq.bonuses))s[k]=(s[k]||0)+v;}return s;}
+function addCoins(amt,reason){state.coins+=amt;state.coinLog.unshift({amount:amt,reason,date:today()});if(state.coinLog.length>30)state.coinLog.pop();}
+function checkAch(){const msgs=[];for(let a of ACH){if(!state.claimedAch.includes(a.id)&&a.cond(state)){state.claimedAch.push(a.id);const c=ACH_COINS[a.size];addCoins(c,`成就「${a.label}」`);msgs.push(`🏆 ${a.label} +${c}金幣`);}}return msgs;}
+function checkCombo(){const msgs=[];for(let m of COMBO_MS){const key=`c${m.days}`;if(state.combo>=m.days&&!state.claimedCombos.includes(key)){state.claimedCombos.push(key);addCoins(m.coins,`連擊 ${m.days} 天`);msgs.push(`🔥 連擊${m.days}天 +${m.coins}金幣`);}}if(state.combo<7)state.claimedCombos=state.claimedCombos.filter(k=>k!=='c7');if(state.combo<30)state.claimedCombos=state.claimedCombos.filter(k=>k!=='c30');return msgs;}
+function checkDaily(){const t=today();if(state.dailyClaimed===t)return[];if(state.records.some(r=>r.date===t)){state.dailyClaimed=t;addCoins(50,'每日任務完成');return['📅 每日任務 +50金幣'];}return[];}
+function syncCats(){const type=document.getElementById('type-select').value;const cats=type==='expense'?ECATS:ICATS;document.getElementById('cat-select').innerHTML=cats.map(c=>`<option value="${c.key}">${c.emoji} ${c.key}</option>`).join('');}
+function showBossArea(area){document.getElementById('boss-select-area').style.display=area==='select'?'block':'none';document.getElementById('battle-area').style.display=area==='battle'?'block':'none';document.getElementById('defeat-area').style.display=area==='defeat'?'block':'none';}
+function backToBossSelect(){battle=null;showBossArea('select');renderBossSelect();}
+function fleeBattle(){backToBossSelect();}
+function renderPlayer(){updateCombo();const lv=state.level;const job=getJob(lv);const{income,expense,hp,net,maxHp}=calcMonthly();const stats=calcStats();document.getElementById('name-input').value=state.name;document.getElementById('job-label').textContent='職業：'+job.name;document.getElementById('job-icon').textContent=job.icon;document.getElementById('hero-lv').textContent=lv;document.getElementById('coin-display').textContent=state.coins.toLocaleString();const combo=state.combo;const ct=document.getElementById('combo-text');ct.textContent=combo+' 天連擊'+(combo>=3?' 🔥':'');ct.style.color=combo>=7?'#2a7a4f':combo>=3?'#b8860b':'#aaa';const maxExp=EXP_TABLE[Math.min(lv,EXP_TABLE.length-1)];const prevExp=lv>1?EXP_TABLE[lv-1]:0;const pct=maxExp>prevExp?Math.min(100,Math.round((state.exp-prevExp)/(maxExp-prevExp)*100)):100;document.getElementById('exp-bar').style.width=pct+'%';document.getElementById('exp-label').textContent=state.exp+' / '+maxExp+' EXP';document.getElementById('next-lv-label').textContent='Lv.'+(lv+1);const hpPct=maxHp>0?Math.round(hp/maxHp*100):0;const hpBar=document.getElementById('hp-bar');hpBar.style.width=hpPct+'%';hpBar.style.background=hpPct>60?'#2a7a4f':hpPct>30?'#b8860b':'#c0392b';document.getElementById('hp-detail').textContent='收入 $'+income.toLocaleString()+' − 支出 $'+expense.toLocaleString();const hn=document.getElementById('hp-net');hn.textContent='$'+hp.toLocaleString()+' / $'+maxHp.toLocaleString();hn.style.color=net>=0?'#2a7a4f':'#c0392b';document.getElementById('dying-banner').style.display=(income>0&&hp===0)?'block':'none';document.getElementById('stat-grid').innerHTML=[{label:'HP上限',val:stats.hp,color:'#2a7a4f',unit:''},{label:'攻擊力',val:stats.atk,color:'#c0392b',unit:''},{label:'防禦力',val:stats.def,color:'#5533cc',unit:''},{label:'敏捷',val:stats.agi,color:'#1a6fcc',unit:'%'},{label:'暴擊率',val:stats.crit,color:'#b8860b',unit:''},{label:'記帳筆數',val:state.totalRecords,color:'#888',unit:''}].map(s=>`<div class="stat-box"><div class="stat-lbl">${s.label}</div><div class="stat-num" style="color:${s.color}">${s.val}${s.unit}</div></div>`).join('');const owned=state.ownedEquips.map(id=>ALL_EQUIPS.find(e=>e.id===id)).filter(Boolean);const placed=new Set();const sl=[];const weapons=owned.filter(e=>e.bonuses.atk&&!placed.has(e.id)).sort((a,b)=>b.bonuses.atk-a.bonuses.atk);if(weapons[0]){sl.push(weapons[0]);placed.add(weapons[0].id);}else sl.push(null);const armors=owned.filter(e=>e.bonuses.def&&!placed.has(e.id)).sort((a,b)=>b.bonuses.def-a.bonuses.def);if(armors[0]){sl.push(armors[0]);placed.add(armors[0].id);}else sl.push(null);const accys=owned.filter(e=>!placed.has(e.id)&&(e.bonuses.crit||e.bonuses.agi)).sort((a,b)=>(b.bonuses.crit||0)+(b.bonuses.agi||0)-(a.bonuses.crit||0)-(a.bonuses.agi||0));if(accys[0]){sl.push(accys[0]);placed.add(accys[0].id);}else sl.push(null);const rest=owned.filter(e=>!placed.has(e.id));sl.push(rest[0]||null);const slabels=['武器','防具','飾品','其他'];document.getElementById('equip-slots').innerHTML=sl.map((e,i)=>e?`<div class="slot filled"><div class="slot-icon">${e.emoji}</div><div class="slot-name">${e.name}</div></div>`:`<div class="slot"><div class="slot-empty">${slabels[i]}</div></div>`).join('');const tasks=[{name:'今日記帳一筆',reward:'+50金幣',done:state.records.some(r=>r.date===today()),claimed:state.dailyClaimed===today(),color:'#2a7a4f'},{name:'連擊達 7 天',reward:'+200金幣',done:state.combo>=7,claimed:state.claimedCombos.includes('c7'),color:'#5533cc'},{name:'連擊達 30 天',reward:'+1000金幣',done:state.combo>=30,claimed:state.claimedCombos.includes('c30'),color:'#b8860b'},{name:'本月收入 > 支出',reward:'財務正軌',done:income>expense,claimed:false,color:'#2a7a4f'}];document.getElementById('task-list').innerHTML=tasks.map(t=>`<div class="task-item"><div class="task-dot" style="background:${t.done?t.color:'#ddd'}"></div><div style="flex:1;font-size:13px;">${t.name}</div><div style="font-size:11px;color:#aaa;">${t.reward}</div><div style="font-size:12px;font-weight:600;color:${t.done?(t.claimed?'#aaa':'#2a7a4f'):'#b8860b'}">${t.done?(t.claimed?'已領':'完成'):'進行中'}</div></div>`).join('');const sc={small:'b-gold',mid:'b-silver',big:'b-purple'};document.getElementById('badge-wrap').innerHTML=ACH.map(a=>`<span class="badge ${state.claimedAch.includes(a.id)||a.cond(state)?sc[a.size]:'b-lock'}">${a.label}</span>`).join('');}
+function renderStats(){const stats=calcStats();document.getElementById('attr-list').innerHTML=[{icon:'❤️',name:'HP 上限',stat:'hp',val:stats.hp,max:400,color:'#2a7a4f',unit:''},{icon:'⚔️',name:'攻擊力',stat:'atk',val:stats.atk,max:200,color:'#c0392b',unit:''},{icon:'🛡️',name:'防禦力',stat:'def',val:stats.def,max:150,color:'#5533cc',unit:''},{icon:'💨',name:'敏捷（迴避）',stat:'agi',val:stats.agi,max:80,color:'#1a6fcc',unit:'%'},{icon:'✨',name:'暴擊率',stat:'crit',val:stats.crit,max:80,color:'#b8860b',unit:'%'}].map(a=>{const bonus=a.val-BASE[a.stat];const pct=Math.min(100,Math.round(a.val/a.max*100));return`<div class="attr-item"><div class="attr-icon">${a.icon}</div><div class="attr-bar-wrap"><div class="attr-name">${a.name}</div><div class="attr-bar-bg"><div class="attr-bar-fill" style="width:${pct}%;background:${a.color};"></div></div></div><div class="attr-val"><div class="attr-main" style="color:${a.color};">${a.val}${a.unit}</div><div class="attr-bonus">基礎${BASE[a.stat]} +${bonus}</div></div></div>`;}).join('');const cl=document.getElementById('coin-log');if(!state.coinLog.length){cl.innerHTML='<div style="font-size:13px;color:#aaa">尚無紀錄</div>';return;}cl.innerHTML=state.coinLog.slice(0,15).map(c=>`<div class="coin-log-item"><span>${c.date} · ${c.reason}</span><span class="${c.amount>0?'coin-plus':'coin-minus'}">${c.amount>0?'+':''}${c.amount}</span></div>`).join('');}
+function renderMastery(){const ctx=document.getElementById('pie-canvas').getContext('2d');const legend=document.getElementById('pie-legend');const totals={};for(let r of state.records)if(r.type==='expense')totals[r.category]=(totals[r.category]||0)+r.amount;const total=Object.values(totals).reduce((a,b)=>a+b,0);ctx.clearRect(0,0,110,110);if(!total){ctx.beginPath();ctx.arc(55,55,48,0,Math.PI*2);ctx.fillStyle='#eee';ctx.fill();legend.innerHTML='<div style="font-size:12px;color:#aaa">尚無支出</div>';}else{let ang=-Math.PI/2;const ents=ECATS.map(c=>({key:c.key,val:totals[c.key]||0,color:c.color})).filter(e=>e.val>0);for(let e of ents){const sl=(e.val/total)*Math.PI*2;ctx.beginPath();ctx.moveTo(55,55);ctx.arc(55,55,48,ang,ang+sl);ctx.closePath();ctx.fillStyle=e.color;ctx.fill();ang+=sl;}ctx.beginPath();ctx.arc(55,55,24,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();legend.innerHTML=ents.map(e=>`<div class="pie-row"><div class="pie-dot" style="background:${e.color}"></div><span>${e.key}</span><span style="margin-left:auto;font-weight:600;">$${e.val.toLocaleString()}</span></div>`).join('');}document.getElementById('cat-grid').innerHTML=ALL_CATS.map(c=>{const isInc=c.key==='收入';const count=isInc?getCatCount(c.key,'income'):getCatCount(c.key,'expense');const lv=getCatLv(count);const pct=lv>=8?100:Math.round(count/getNextT(count)*100);const unlocked=c.skills.filter(s=>s.lv<=lv).pop();const rule=STAT_RULES.find(r=>r.cats.includes(c.key));const btag=rule?`<span style="font-size:10px;color:#2a7a4f;margin-left:3px;">+${rule.label}</span>`:'';return`<div class="cat-card ${state.selCat===c.key?'sel':''}" onclick="selCat('${c.key}')"><div class="cat-header"><span style="font-size:16px;">${c.emoji}</span><span style="font-size:13px;font-weight:600;flex:1;">${c.key}${btag}</span><span style="font-size:11px;color:#aaa;">Lv.${lv}</span></div><div class="cat-bar-bg"><div class="cat-bar-fill" style="width:${pct}%;background:${c.color};"></div></div><div class="cat-foot">${count} 筆${unlocked?' · '+unlocked.name:''}</div></div>`;}).join('');if(state.selCat)renderCatDetail(state.selCat);}
+function selCat(key){state.selCat=key;renderMastery();}
+function renderCatDetail(key){const cat=ALL_CATS.find(c=>c.key===key);if(!cat)return;const isInc=key==='收入';const count=isInc?getCatCount(key,'income'):getCatCount(key,'expense');const lv=getCatLv(count);const rule=STAT_RULES.find(r=>r.cats.includes(key));const nodes=cat.skills.map((s,i)=>{const u=lv>=s.lv;const conn=i<cat.skills.length-1?`<div class="sconn" style="background:${u&&lv>=cat.skills[i+1].lv?'#1a1a1a':'#eee'};"></div>`:'';return`<div class="snode"><div class="sball ${u?'u':'l'}">${cat.emoji}</div><div class="sname">${s.name}</div><div class="sreq">${u?'解鎖':THRESHOLDS[i]+'筆'}</div></div>${conn}`;}).join('');const remaining=lv>=8?0:getNextT(count)-count;const bonusInfo=rule?`<div style="font-size:12px;color:#2a7a4f;margin-top:8px;">每升1級 → ${rule.label} +${rule.bonus}（目前 +${rule.bonus*lv}）</div>`:'';document.getElementById('mastery-detail').innerHTML=`<div class="detail-card"><div class="card-title">${cat.emoji} ${key} 熟練度進度</div><div class="skill-nodes">${nodes}</div>${bonusInfo}<div style="margin-top:8px;font-size:12px;color:#aaa;">已記錄 <strong style="color:#1a1a1a;">${count}</strong> 筆，熟練 <strong style="color:#1a1a1a;">Lv.${lv}</strong>。${lv>=8?'最高熟練度！':'還需 <strong style="color:#1a1a1a;">'+remaining+'</strong> 筆升級。'}</div></div>`;}
+function renderShop(){document.getElementById('shop-coin').textContent=state.coins.toLocaleString();const lbl={hp:'HP',atk:'攻擊',def:'防禦',agi:'敏捷',crit:'暴擊'};document.getElementById('shop-grid').innerHTML=SHOP_EQUIPS.map(e=>{const owned=state.ownedEquips.includes(e.id);const rc=RARITY_C[e.rarity];const tags=Object.entries(e.bonuses).map(([k,v])=>`<span class="btag">${lbl[k]} +${v}${k==='agi'||k==='crit'?'%':''}</span>`).join('');return`<div class="shop-card ${owned?'owned':''}"><div class="rarity-bar" style="background:${rc};"></div><div style="font-size:22px;margin-bottom:6px;">${e.emoji}</div><div style="font-size:13px;font-weight:700;margin-bottom:2px;">${e.name}</div><div style="font-size:10px;font-weight:600;color:${rc};margin-bottom:6px;">${RARITY_L[e.rarity]}</div><div class="bonus-tags">${tags}</div><div style="font-size:12px;font-weight:700;color:#b8860b;margin-bottom:8px;">🪙 ${e.cost.toLocaleString()}</div>${owned?'<div style="font-size:12px;color:#2a7a4f;font-weight:600;">已擁有</div>':`<button class="buy-btn" onclick="buyEquip('${e.id}')" ${state.coins<e.cost?'disabled':''}>購買</button>`}</div>`;}).join('');}
+function buyEquip(id){const eq=SHOP_EQUIPS.find(e=>e.id===id);if(!eq||state.coins<eq.cost||state.ownedEquips.includes(id))return;state.coins-=eq.cost;state.ownedEquips.push(id);state.coinLog.unshift({amount:-eq.cost,reason:`購買「${eq.name}」`,date:today()});checkAch();renderShop();renderPlayer();}
+function renderBossSelect(){document.getElementById('boss-grid').innerHTML=BOSSES.map(b=>{const beaten=state.beatenBosses.includes(b.id);const drop=BOSS_DROPS.find(d=>d.id===b.dropId);return`<div class="boss-card" onclick="startBattle('${b.id}')"><div class="boss-em">${b.emoji}</div><div class="boss-nm">${b.name}</div><div class="boss-diff" style="color:${b.dc};">${b.diff}</div><div class="boss-stat">HP ${b.hp} / 攻擊 ${b.atk}</div>${drop?`<div class="boss-drop">掉落：${drop.emoji}${drop.name}</div>`:''}${beaten?`<div class="beaten-label">已擊敗過 ✓</div>`:''}</div>`;}).join('');}
+function startBattle(bossId){const boss=BOSSES.find(b=>b.id===bossId);if(!boss)return;const stats=calcStats();battle={boss,bossHp:boss.hp,bossMaxHp:boss.hp,playerHp:stats.hp,playerMaxHp:stats.hp,stats,defending:false};showBossArea('battle');document.getElementById('battle-title').textContent='⚔️ 挑戰 '+boss.name;document.getElementById('b-avatar').textContent=boss.emoji;document.getElementById('b-name').textContent=boss.name;document.getElementById('p-avatar').textContent=getJob(state.level).icon;document.getElementById('p-name').textContent=state.name;document.getElementById('p-stats').textContent=`攻${stats.atk} 防${stats.def} 敏${stats.agi}% 暴${stats.crit}%`;document.getElementById('atk-hint').textContent=`傷害 ${stats.atk}`;document.getElementById('def-hint').textContent=`防禦力×2 (${stats.def*2})`;document.getElementById('battle-log').textContent=boss.name+' 出現！選擇行動！';document.getElementById('btn-atk').disabled=false;document.getElementById('btn-def').disabled=false;updateBattleUI();}
+function updateBattleUI(){if(!battle)return;const bPct=Math.max(0,Math.round(battle.bossHp/battle.bossMaxHp*100));const pPct=Math.max(0,Math.round(battle.playerHp/battle.playerMaxHp*100));document.getElementById('b-hpbar').style.width=bPct+'%';document.getElementById('b-hplabel').textContent=Math.max(0,battle.bossHp)+' / '+battle.bossMaxHp;const pb=document.getElementById('p-hpbar');pb.style.width=pPct+'%';pb.style.background=pPct>50?'#2a7a4f':pPct>25?'#b8860b':'#c0392b';document.getElementById('p-hplabel').textContent=Math.max(0,battle.playerHp)+' / '+battle.playerMaxHp;}
+function addBLog(msg){const el=document.getElementById('battle-log');el.textContent+='\n'+msg;el.scrollTop=el.scrollHeight;}
+function doAction(action){if(!battle)return;const st=battle.stats;document.getElementById('btn-atk').disabled=true;document.getElementById('btn-def').disabled=true;if(action==='attack'){const isCrit=Math.random()*100<st.crit;const dmg=isCrit?st.atk*2:st.atk;battle.bossHp-=dmg;addBLog(isCrit?`⚡ 暴擊！造成 ${dmg} 傷害！`:`⚔️ 攻擊！造成 ${dmg} 傷害`);}else{battle.defending=true;addBLog('🛡️ 防禦姿態！防禦力暫時翻倍');}if(battle.bossHp<=0){addBLog('🎉 Boss 被擊敗！');const drop=BOSS_DROPS.find(d=>d.id===battle.boss.dropId);if(drop&&!state.ownedEquips.includes(drop.id)){state.ownedEquips.push(drop.id);addBLog(`獲得：${drop.emoji} ${drop.name}！`);}if(!state.beatenBosses.includes(battle.boss.id))state.beatenBosses.push(battle.boss.id);addCoins(100,'擊敗 '+battle.boss.name);checkAch().forEach(m=>addBLog(m));updateBattleUI();renderPlayer();setTimeout(()=>backToBossSelect(),2500);return;}setTimeout(()=>{if(!battle)return;const effDef=battle.defending?st.def*2:st.def;battle.defending=false;if(Math.random()*100<st.agi){addBLog(`💨 迴避了 ${battle.boss.name} 的攻擊！`);}else{const dmgTaken=Math.max(1,battle.boss.atk-effDef);battle.playerHp-=dmgTaken;addBLog(`${battle.boss.name} 攻擊 ${battle.boss.atk} − 防禦 ${effDef} = 受到 ${dmgTaken} 傷害`);}if(battle.playerHp<=0){battle.playerHp=0;updateBattleUI();addBLog('💀 你被擊敗了...');setTimeout(()=>{document.getElementById('defeat-msg').textContent=`被 ${battle.boss.name} 擊倒了。\n裝備更好的武器再回來挑戰！`;showBossArea('defeat');},1200);return;}updateBattleUI();document.getElementById('btn-atk').disabled=false;document.getElementById('btn-def').disabled=false;},600);}
+function renderLog(){const el=document.getElementById('log-list');if(!state.records.length){el.innerHTML='<div style="font-size:13px;color:#aaa">尚無紀錄</div>';return;}el.innerHTML=state.records.slice(-8).reverse().map(r=>{const cat=ALL_CATS.find(c=>c.key===r.category);return`<div class="log-item"><div><div class="log-meta">${cat?cat.emoji:''} ${r.category}${r.note?' · '+r.note:''}</div><div class="log-date">${r.date}</div></div><div class="${r.type==='income'?'amount-pos':'amount-neg'}">${r.type==='income'?'+':'-'}$${r.amount.toLocaleString()}</div></div>`;}).join('');}
+function addRecord(){const type=document.getElementById('type-select').value;const amount=parseInt(document.getElementById('amount-input').value);const category=document.getElementById('cat-select').value;const note=document.getElementById('note-input').value;const fb=document.getElementById('feedback');if(!amount||amount<=0){fb.textContent='請輸入有效金額';fb.style.color='#c0392b';return;}const t=today();const alreadyToday=state.records.some(r=>r.date===t);const prevStats=calcStats();state.records.push({type,amount,category,note,date:t});state.totalRecords++;let expGain=type==='income'?30:20;const msgs=['+'+expGain+' EXP'];if(!alreadyToday){if(state.lastDate){const diff=Math.round((new Date(t)-new Date(state.lastDate))/86400000);if(diff===1){state.combo++;if(state.combo>=3){expGain+=10;msgs.push('連擊+10EXP');}}else if(diff>1)state.combo=1;}else state.combo=1;state.lastDate=t;}state.exp+=expGain;while(state.level<EXP_TABLE.length-1&&state.exp>=EXP_TABLE[state.level]){state.level++;msgs.push('🎉 升等！Lv.'+state.level);}const newStats=calcStats();const sm=[];if(newStats.hp>prevStats.hp)sm.push('HP+'+(newStats.hp-prevStats.hp));if(newStats.atk>prevStats.atk)sm.push('攻+'+(newStats.atk-prevStats.atk));if(newStats.def>prevStats.def)sm.push('防+'+(newStats.def-prevStats.def));if(newStats.agi>prevStats.agi)sm.push('敏+'+(newStats.agi-prevStats.agi)+'%');if(newStats.crit>prevStats.crit)sm.push('暴+'+(newStats.crit-prevStats.crit)+'%');if(sm.length)msgs.push('屬性↑ '+sm.join(' '));[...checkDaily(),...checkAch(),...checkCombo()].forEach(m=>msgs.push(m));document.getElementById('amount-input').value='';document.getElementById('note-input').value='';fb.style.color='#2a7a4f';fb.textContent=msgs.join(' · ');setTimeout(()=>{fb.textContent='';},6000);renderLog();renderPlayer();writeToSheets({type,amount,category,note});}
+function stripEmoji(str){return str.replace(/[\u{1F000}-\u{1FFFF}\u{2600}-\u{27FF}\u{FE00}-\u{FEFF}]|[\uD800-\uDBFF][\uDC00-\uDFFF]/gu,'').replace(/\s+/g,' ').trim();}
+function parseDate(raw){raw=(raw||'').trim();raw=raw.replace('上午','AM').replace('下午','PM');raw=raw.replace(/\//g,'-');const d=new Date(raw);if(!isNaN(d))return d;const m=raw.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);if(m)return new Date(parseInt(m[1]),parseInt(m[2])-1,parseInt(m[3]));return new Date(NaN);}
+function parseCSVText(text,statusEl){const rows=text.trim().split('\n').slice(1);let count=0;const dateSet=new Set();for(let row of rows){const cols=[];let cur='',inQ=false;for(let ch of row){if(ch==='"')inQ=!inQ;else if(ch===','&&!inQ){cols.push(cur.trim());cur='';}else cur+=ch;}cols.push(cur.trim());const rawAmt=cols[1]||'';const amount=parseInt(rawAmt.replace(/[^0-9\-]/g,''));const rawCat=cols[2]||'';const category=stripEmoji(rawCat)||'其他';const note=cols[3]||'';if(isNaN(amount)||amount===0)continue;const dateObj=parseDate(cols[0]);if(isNaN(dateObj))continue;const date=dateObj.getFullYear()+'-'+String(dateObj.getMonth()+1).padStart(2,'0')+'-'+String(dateObj.getDate()).padStart(2,'0');const type=amount<0?'income':'expense';state.records.push({type,amount:Math.abs(amount),category,note,date});state.totalRecords++;state.exp+=15;dateSet.add(date);count++;}while(state.level<EXP_TABLE.length-1&&state.exp>=EXP_TABLE[state.level])state.level++;if(state.records.length){const sorted=[...state.records].sort((a,b)=>a.date.localeCompare(b.date));state.lastDate=sorted[sorted.length-1].date;const dates=[...dateSet].sort();let maxCombo=1,cur=1;for(let i=1;i<dates.length;i++){const diff=Math.round((new Date(dates[i])-new Date(dates[i-1]))/86400000);cur=diff===1?cur+1:1;if(cur>maxCombo)maxCombo=cur;}state.combo=maxCombo;}checkAch();checkCombo();statusEl.textContent='成功匯入 '+count+' 筆！';renderLog();renderPlayer();}
+function handleDrop(e){e.preventDefault();document.getElementById('drop-zone').style.borderColor='#e0e0e0';const file=e.dataTransfer.files[0];if(!file)return;if(!file.name.endsWith('.csv')){document.getElementById('import-status').textContent='請選擇 .csv 檔案';return;}readCSVFile(file,document.getElementById('import-status'));}
+function handleFileInput(input){const file=input.files[0];if(!file)return;readCSVFile(file,document.getElementById('import-status'));}
+function readCSVFile(file,statusEl){statusEl.textContent='讀取中...';const reader=new FileReader();reader.onload=e=>{try{parseCSVText(e.target.result,statusEl);}catch(err){statusEl.textContent='解析失敗：'+err.message;}};reader.readAsText(file,'UTF-8');}
+async function importSheets(){const raw=document.getElementById('sheet-id').value.trim();const status=document.getElementById('import-status2');if(!raw){status.textContent='請貼上 CSV 連結';return;}if(!raw.startsWith('http')){status.textContent='請貼上完整的 https:// 連結';return;}status.textContent='匯入中...';try{const res=await fetch(raw);if(!res.ok)throw new Error('無法存取，請確認已公開分享且使用發布連結');const text=await res.text();parseCSVText(text,status);}catch(e){status.textContent='匯入失敗：'+e.message+'\n（建議改用方法一拖入CSV）';}}
+function switchTab(name,el){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));el.classList.add('active');document.getElementById('tab-'+name).classList.add('active');if(name==='stats')renderStats();if(name==='mastery')renderMastery();if(name==='shop')renderShop();if(name==='boss'){renderBossSelect();showBossArea('select');}if(name==='player')renderPlayer();}
+
+// ── Google Sheets API 設定 ──
+const API_URL = 'https://script.google.com/macros/s/AKfycbwoeeGwe7UW7FMk6pvENTN8iqsYuTfAwylrWZOXAkSGDQlZ8D0R5qJxOJafAo_s4miaiA/exec';
+
+// 從 Google Sheets 讀取所有資料
+async function syncFromSheets() {
+  const btn = document.getElementById('sync-btn');
+  const status = document.getElementById('sync-status');
+  btn.disabled = true;
+  status.textContent = '同步中...';
+  status.style.color = '#888';
+  try {
+    const res = await fetch(API_URL + '?action=read');
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    // 清空舊資料再匯入
+    state.records = [];
+    state.totalRecords = 0;
+    state.exp = 0;
+    state.level = 1;
+    state.combo = 0;
+    state.lastDate = null;
+    state.claimedAch = [];
+    state.claimedCombos = [];
+    state.dailyClaimed = null;
+
+    const dateSet = new Set();
+    for (let r of data.records) {
+      state.records.push(r);
+      state.totalRecords++;
+      state.exp += 15;
+      dateSet.add(r.date);
+    }
+    while (state.level < EXP_TABLE.length - 1 && state.exp >= EXP_TABLE[state.level]) state.level++;
+    if (state.records.length) {
+      const sorted = [...state.records].sort((a,b) => a.date.localeCompare(b.date));
+      state.lastDate = sorted[sorted.length-1].date;
+      const dates = [...dateSet].sort();
+      let maxCombo = 1, cur = 1;
+      for (let i = 1; i < dates.length; i++) {
+        const diff = Math.round((new Date(dates[i]) - new Date(dates[i-1])) / 86400000);
+        cur = diff === 1 ? cur + 1 : 1;
+        if (cur > maxCombo) maxCombo = cur;
+      }
+      state.combo = maxCombo;
+    }
+    checkAch(); checkCombo();
+    status.textContent = '同步完成！共 ' + data.records.length + ' 筆';
+    status.style.color = '#2a7a4f';
+    renderLog(); renderPlayer();
+  } catch(e) {
+    status.textContent = '同步失敗：' + e.message;
+    status.style.color = '#c0392b';
+  }
+  btn.disabled = false;
+}
+
+// 寫入一筆記帳到 Google Sheets
+async function writeToSheets(record) {
+  try {
+    await fetch(API_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'write', ...record })
+    });
+  } catch(e) {
+    console.log('寫入 Sheets 失敗：', e.message);
+  }
+}
+syncCats();renderLog();renderPlayer();
+</script>
+</body>
+</html>
