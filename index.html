@@ -390,13 +390,20 @@ async function syncFromSheets() {
   btn.disabled = false;
 }
 
-// 寫入一筆記帳到 Google Sheets
+// 寫入一筆記帳到 Google Sheets（用 GET 繞過 CORS）
 async function writeToSheets(record) {
   try {
-    await fetch(API_URL, {
-      method: 'POST',
-      body: JSON.stringify({ action: 'write', ...record })
+    const params = new URLSearchParams({
+      action:   'write',
+      type:     record.type,
+      amount:   record.amount,
+      category: record.category,
+      note:     record.note || ''
     });
+    const res = await fetch(API_URL + '?' + params.toString());
+    const data = await res.json();
+    if (data.error) console.log('寫入失敗：', data.error);
+    else console.log('寫入成功：', data.timestamp);
   } catch(e) {
     console.log('寫入 Sheets 失敗：', e.message);
   }
