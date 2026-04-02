@@ -494,18 +494,7 @@ function showChangelog() {
   document.getElementById('changelog-overlay').style.display = 'flex';
 }
 
-function closeChangelog() {
-  document.getElementById('changelog-overlay').style.display = 'none';
-  localStorage.setItem('last_seen_version', APP_VERSION);
-}
 
-function checkVersion() {
-  document.getElementById('version-tag').textContent = APP_VERSION;
-  const lastSeen = localStorage.getItem('last_seen_version');
-  if (lastSeen !== APP_VERSION) {
-    showChangelog();
-  }
-}
 
 // 從 Google Sheets 讀取所有資料
 async function syncFromSheets() {
@@ -598,7 +587,6 @@ function resetApiUrl() {
 }
 
 function startApp() {
-  checkVersion();
   syncCats();renderLog();renderPlayer();
   // 自動同步
   (async function autoSync() {
@@ -665,27 +653,24 @@ function showChangelog() {
 function closeChangelog() {
   document.getElementById('changelog-overlay').style.display = 'none';
   localStorage.setItem('rpg_seen_version', APP_VERSION);
-  // 改版說明關掉後才啟動 App 或顯示設定畫面
-  if (!API_URL) {
-    document.getElementById('setup-overlay').style.display = 'flex';
-  } else {
-    startApp();
-  }
+  launchApp();
 }
 
 function checkVersion() {
   document.getElementById('version-tag').textContent = APP_VERSION;
   const seenVersion = localStorage.getItem('rpg_seen_version');
   if (seenVersion !== APP_VERSION) {
-    // 新版本，顯示改版說明
     showChangelog();
   } else {
-    // 已看過，直接啟動
-    if (!API_URL) {
-      document.getElementById('setup-overlay').style.display = 'flex';
-    } else {
-      startApp();
-    }
+    launchApp();
+  }
+}
+
+function launchApp() {
+  if (!API_URL) {
+    document.getElementById('setup-overlay').style.display = 'flex';
+  } else {
+    startApp();
   }
 }
 
