@@ -133,6 +133,10 @@ select:focus,input:focus{border-color:#888;background:#fff;}
 .bbtn:disabled{opacity:.35;cursor:not-allowed;}
 .bbtn-atk{background:#fff1ee;color:#c0392b;border:1.5px solid #f5c0b0;}
 .bbtn-def{background:#eef0ff;color:#3344cc;border:1.5px solid #c0c8f8;}
+.bbtn-thr{background:#eefff2;color:#1D9E75;border:1.5px solid #9FE1CB;}
+.boss-intent{background:#fff8e6;border:1px solid #f0d080;border-radius:10px;padding:8px 12px;font-size:12px;color:#b8860b;font-weight:600;margin-bottom:10px;text-align:center;min-height:34px;}
+.bbtn-thr{background:#eefff2;color:#1D9E75;border:1.5px solid #9FE1CB;}
+.boss-intent{background:#fff8e6;border:1px solid #f0d080;border-radius:10px;padding:8px 12px;font-size:12px;color:#b8860b;font-weight:600;margin-bottom:10px;text-align:center;min-height:34px;}
 .flee-btn{width:100%;padding:10px;background:#f5f5f5;color:#888;border:1px solid #e8e8e8;border-radius:10px;font-size:13px;cursor:pointer;font-weight:500;}
 .defeat-screen{text-align:center;padding:32px 16px;}
 .defeat-em{font-size:64px;margin-bottom:16px;}
@@ -302,9 +306,11 @@ select:focus,input:focus{border-color:#888;background:#fff;}
           <div class="bchar"><div class="bchar-em" id="b-avatar">👹</div><div class="bchar-nm" id="b-name">Boss</div><div class="progress-bar"><div class="progress-fill" id="b-hpbar" style="width:100%;background:#c0392b;"></div></div><div class="bchar-hp" id="b-hplabel"></div></div>
         </div>
         <div class="battle-log" id="battle-log"></div>
-        <div class="battle-btns">
+        <div class="boss-intent" id="boss-intent">⚡ 準備戰鬥！</div>
+        <div class="battle-btns" style="grid-template-columns:1fr 1fr 1fr;">
           <button class="bbtn bbtn-atk" id="btn-atk" onclick="doAction('attack')">⚔️ 攻擊<br><span style="font-size:10px;font-weight:400;" id="atk-hint"></span></button>
           <button class="bbtn bbtn-def" id="btn-def" onclick="doAction('defend')">🛡️ 防禦<br><span style="font-size:10px;font-weight:400;" id="def-hint"></span></button>
+          <button class="bbtn bbtn-thr" id="btn-thr" onclick="doAction('throw')">🎯 投擲<br><span style="font-size:10px;font-weight:400;" id="thr-hint"></span></button>
         </div>
         <button class="flee-btn" onclick="fleeBattle()">撤退（回 Boss 選擇）</button>
       </div>
@@ -410,28 +416,28 @@ const SHOP_EQUIPS=[
   {id:'sword',name:'鐵製短劍',emoji:'🗡️',rarity:'common',cost:200,bonuses:{atk:10}},
   {id:'shield',name:'木盾',emoji:'🛡️',rarity:'common',cost:200,bonuses:{def:8}},
   {id:'armor',name:'皮革護甲',emoji:'🥋',rarity:'rare',cost:300,bonuses:{hp:50,def:5}},
-  {id:'boots',name:'疾風靴',emoji:'👢',rarity:'rare',cost:350,bonuses:{agi:10}},
-  {id:'charm',name:'幸運符',emoji:'🍀',rarity:'rare',cost:400,bonuses:{crit:10}},
+  {id:'boots',name:'疾風靴',emoji:'👢',rarity:'rare',cost:350,bonuses:{agi:5}},
+  {id:'charm',name:'幸運符',emoji:'🍀',rarity:'rare',cost:400,bonuses:{crit:3}},
   {id:'hshield',name:'勇者之盾',emoji:'🔰',rarity:'epic',cost:600,bonuses:{def:20,hp:30}},
-  {id:'fsword',name:'烈焰長劍',emoji:'🔥',rarity:'epic',cost:700,bonuses:{atk:25,crit:5}},
-  {id:'legend',name:'傳說聖甲',emoji:'✨',rarity:'legend',cost:1200,bonuses:{hp:15,atk:15,def:15,agi:15,crit:15}},
-  {id:'dcrystal',name:'龍晶護符',emoji:'🐉',rarity:'legend',cost:2000,bonuses:{hp:50,atk:25,def:25,agi:10,crit:10}},
-  {id:'chaos',name:'混沌戰刃',emoji:'⚡',rarity:'legend',cost:3500,bonuses:{atk:80,crit:15}},
+  {id:'fsword',name:'烈焰長劍',emoji:'🔥',rarity:'epic',cost:700,bonuses:{atk:25,crit:3}},
+  {id:'legend',name:'傳說聖甲',emoji:'✨',rarity:'legend',cost:1200,bonuses:{hp:15,atk:15,def:15,agi:8,crit:5}},
+  {id:'dcrystal',name:'龍晶護符',emoji:'🐉',rarity:'legend',cost:2000,bonuses:{hp:50,atk:25,def:25,agi:5,crit:5}},
+  {id:'chaos',name:'混沌戰刃',emoji:'⚡',rarity:'legend',cost:3500,bonuses:{atk:80,crit:8}},
   {id:'holy',name:'神聖聖盾',emoji:'🌟',rarity:'legend',cost:3500,bonuses:{def:60,hp:150}},
-  {id:'timeboots',name:'時空靴',emoji:'🌀',rarity:'legend',cost:4000,bonuses:{agi:30,crit:10}},
-  {id:'relics',name:'傳說聖物',emoji:'🏛️',rarity:'mythic',cost:6000,bonuses:{hp:50,atk:50,def:50,agi:50,crit:50}},
-  {id:'godarmor',name:'神話絕世聖甲',emoji:'💠',rarity:'mythic',cost:12000,bonuses:{hp:100,atk:100,def:100,agi:100,crit:100}},
+  {id:'timeboots',name:'時空靴',emoji:'🌀',rarity:'legend',cost:4000,bonuses:{agi:12,crit:5}},
+  {id:'relics',name:'傳說聖物',emoji:'🏛️',rarity:'mythic',cost:6000,bonuses:{hp:50,atk:50,def:50,agi:20,crit:15}},
+  {id:'godarmor',name:'神話絕世聖甲',emoji:'💠',rarity:'mythic',cost:12000,bonuses:{hp:100,atk:100,def:100,agi:35,crit:25}},
 ];
 const RARITY_C={common:'#888',rare:'#378ADD',epic:'#5533cc',legend:'#b8860b',mythic:'#c0392b'};
 const RARITY_L={common:'普通',rare:'稀有',epic:'史詩',legend:'傳說',mythic:'神話'};
 const BOSS_DROPS=[
-  {id:'d1',name:'克制衝動戒指',emoji:'💍',bonuses:{crit:5}},
+  {id:'d1',name:'克制衝動戒指',emoji:'💍',bonuses:{crit:3}},
   {id:'d2',name:'帳單剋星徽章',emoji:'🏅',bonuses:{def:10}},
   {id:'d3',name:'房租勇者之盾',emoji:'🛡️',bonuses:{hp:80,def:15}},
-  {id:'d4',name:'財神傳說聖劍',emoji:'⚜️',bonuses:{atk:40,crit:10}},
+  {id:'d4',name:'財神傳說聖劍',emoji:'⚜️',bonuses:{atk:40,crit:5}},
   {id:'d5',name:'膨脹剋星神甲',emoji:'🔴',bonuses:{hp:300,def:50,atk:30}},
-  {id:'d6',name:'年終惡魔之核',emoji:'💜',bonuses:{atk:100,crit:20,agi:15}},
-  {id:'d7',name:'虛空帳本聖器',emoji:'🌌',bonuses:{hp:500,atk:150,def:80,agi:20,crit:25}},
+  {id:'d6',name:'年終惡魔之核',emoji:'💜',bonuses:{atk:100,crit:10,agi:8}},
+  {id:'d7',name:'虛空帳本聖器',emoji:'🌌',bonuses:{hp:500,atk:150,def:80,agi:10,crit:12}},
 ];
 const ALL_EQUIPS=[...SHOP_EQUIPS,...BOSS_DROPS];
 const BOSSES=[
@@ -447,8 +453,8 @@ const STAT_RULES=[
   {cats:['食物','飲品'],stat:'hp',bonus:15,label:'HP上限'},
   {cats:['居家','醫療'],stat:'def',bonus:3,label:'防禦'},
   {cats:['娛樂','運動'],stat:'atk',bonus:5,label:'攻擊'},
-  {cats:['交通','3C'],stat:'agi',bonus:3,label:'敏捷%'},
-  {cats:['精品','結婚'],stat:'crit',bonus:3,label:'暴擊%'},
+  {cats:['交通','3C'],stat:'agi',bonus:1,label:'敏捷%'},
+  {cats:['精品','結婚'],stat:'crit',bonus:1,label:'暴擊%'},
   {cats:['收入'],stat:'all',bonus:1,label:'全屬性'},
 ];
 const BASE={hp:100,atk:10,def:5,agi:5,crit:5};
@@ -699,34 +705,206 @@ function startBattle(bossId){
   document.getElementById('b-avatar').textContent=boss.emoji;document.getElementById('b-name').textContent=boss.name;
   document.getElementById('p-avatar').textContent=getJob(state.level).icon;document.getElementById('p-name').textContent=state.name;
   document.getElementById('p-stats').textContent=`攻${stats.atk} 防${stats.def} 敏${stats.agi}% 暴${stats.crit}%`;
-  document.getElementById('atk-hint').textContent=`傷害 ${stats.atk}`;document.getElementById('def-hint').textContent=`防禦×2 (${stats.def*2})`;
-  document.getElementById('battle-log').textContent=boss.name+' 出現！選擇行動！';
-  document.getElementById('btn-atk').disabled=false;document.getElementById('btn-def').disabled=false;
+  document.getElementById('atk-hint').textContent='傷害 '+stats.atk;
+  document.getElementById('def-hint').textContent='減傷 50%';
+  document.getElementById('thr-hint').textContent='固定 '+Math.floor(stats.atk*0.7)+' 無視防禦';
+  document.getElementById('battle-log').textContent=boss.name+' 出現！觀察 Boss 意圖，選擇行動！';
+  const firstAction=pickBossAction();battle.nextBossAction=firstAction;updateBossIntent(firstAction);
+  setActionBtns(true);
   updateBattleUI();
 }
 function updateBattleUI(){if(!battle)return;const bPct=Math.max(0,Math.round(battle.bossHp/battle.bossMaxHp*100));const pPct=Math.max(0,Math.round(battle.playerHp/battle.playerMaxHp*100));document.getElementById('b-hpbar').style.width=bPct+'%';document.getElementById('b-hplabel').textContent=Math.max(0,battle.bossHp)+' / '+battle.bossMaxHp;const pb=document.getElementById('p-hpbar');pb.style.width=pPct+'%';pb.style.background=pPct>50?'#2a7a4f':pPct>25?'#b8860b':'#c0392b';document.getElementById('p-hplabel').textContent=Math.max(0,battle.playerHp)+' / '+battle.playerMaxHp;}
 function addBLog(msg){const el=document.getElementById('battle-log');el.textContent+='\n'+msg;el.scrollTop=el.scrollHeight;}
-function doAction(action){
-  if(!battle)return;const st=battle.stats;
-  document.getElementById('btn-atk').disabled=true;document.getElementById('btn-def').disabled=true;
-  if(action==='attack'){const isCrit=Math.random()*100<st.crit;const dmg=isCrit?st.atk*2:st.atk;battle.bossHp-=dmg;addBLog(isCrit?`⚡ 暴擊！造成 ${dmg} 傷害！`:`⚔️ 攻擊！造成 ${dmg} 傷害`);}
-  else{battle.defending=true;addBLog('🛡️ 防禦姿態！防禦力暫時翻倍');}
-  if(battle.bossHp<=0){
-    addBLog('🎉 Boss 被擊敗！');
-    const drop=BOSS_DROPS.find(d=>d.id===battle.boss.dropId);
-    if(drop&&!state.ownedEquips.includes(drop.id)){state.ownedEquips.push(drop.id);addBLog(`獲得：${drop.emoji} ${drop.name}！`);}
-    if(!state.beatenBosses.includes(battle.boss.id))state.beatenBosses.push(battle.boss.id);
-    addCoins(100,'擊敗 '+battle.boss.name);checkAch().forEach(m=>addBLog(m));updateBattleUI();renderPlayer();
-    setTimeout(()=>backToBossSelect(),2500);return;
-  }
-  setTimeout(()=>{
-    if(!battle)return;const effDef=battle.defending?st.def*2:st.def;battle.defending=false;
-    if(Math.random()*100<st.agi){addBLog(`💨 迴避了 ${battle.boss.name} 的攻擊！`);}
-    else{const dmgTaken=Math.max(1,battle.boss.atk-effDef);battle.playerHp-=dmgTaken;addBLog(`${battle.boss.name} 攻擊 ${battle.boss.atk} − 防禦 ${effDef} = 受到 ${dmgTaken} 傷害`);}
-    if(battle.playerHp<=0){battle.playerHp=0;updateBattleUI();addBLog('💀 你被擊敗了...');setTimeout(()=>{document.getElementById('defeat-msg').textContent=`被 ${battle.boss.name} 擊倒了。\n裝備更好的武器再回來挑戰！`;showBossArea('defeat');},1200);return;}
-    updateBattleUI();document.getElementById('btn-atk').disabled=false;document.getElementById('btn-def').disabled=false;
-  },600);
+
+// Boss 行動定義
+const BOSS_ACTIONS = [
+  {
+    id: 'atk',
+    label: '💢 普通攻擊',
+    hint: 'Boss 正在蓄力普通攻擊...',
+    color: '#c0392b',
+    exec: (boss, st) => ({ dmg: Math.max(1, boss.atk - st.def), msg: `💢 普通攻擊！造成 ${Math.max(1, boss.atk - st.def)} 傷害` }),
+  },
+  {
+    id: 'skill',
+    label: '💥 技能攻擊',
+    hint: 'Boss 正在蓄力強力技能...',
+    color: '#8B0000',
+    exec: (boss, st) => ({ dmg: Math.max(1, Math.floor(boss.atk * 1.5) - st.def), msg: `💥 技能攻擊！造成 ${Math.max(1, Math.floor(boss.atk * 1.5) - st.def)} 傷害` }),
+  },
+  {
+    id: 'guard',
+    label: '🔰 防禦姿態',
+    hint: 'Boss 似乎在準備防禦...',
+    color: '#185FA5',
+    exec: () => ({ dmg: 0, msg: '🔰 Boss 進入防禦姿態！傷害大幅降低' }),
+  },
+  {
+    id: 'heal',
+    label: '💚 恢復',
+    hint: 'Boss 正在凝聚能量...',
+    color: '#1D9E75',
+    exec: (boss) => ({ dmg: 0, heal: Math.floor(boss.maxHp * 0.1), msg: `💚 Boss 回復了 ${Math.floor(boss.maxHp * 0.1)} HP！` }),
+  },
+];
+
+function pickBossAction() {
+  return BOSS_ACTIONS[Math.floor(Math.random() * BOSS_ACTIONS.length)];
 }
+
+function updateBossIntent(action) {
+  const el = document.getElementById('boss-intent');
+  if (!el) return;
+  el.textContent = action ? action.hint : '⚡ 選擇行動！';
+  el.style.color = action ? action.color : '#b8860b';
+  el.style.background = action ? '#fff8f8' : '#fff8e6';
+  el.style.borderColor = action ? action.color : '#f0d080';
+}
+
+function setActionBtns(enabled) {
+  ['btn-atk','btn-def','btn-thr'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) btn.disabled = !enabled;
+  });
+}
+
+function doAction(action) {
+  if (!battle) return;
+  setActionBtns(false);
+  const st = battle.stats;
+  const bossAct = battle.nextBossAction || pickBossAction();
+  battle.nextBossAction = null;
+
+  let playerDmg = 0;
+  let playerMsg = '';
+  let blocked = false;
+
+  // ── 玩家行動 ──
+  if (action === 'attack') {
+    if (bossAct.id === 'guard') {
+      // 攻擊 vs 防禦 → 傷害大減
+      playerDmg = Math.max(1, Math.floor(st.atk * 0.3));
+      playerMsg = `⚔️ 攻擊！但 Boss 防禦格擋，僅造成 ${playerDmg} 傷害`;
+    } else if (bossAct.id === 'heal') {
+      // 攻擊 vs 回血 → 打斷回血，全額傷害
+      const isCrit = Math.random() * 100 < st.crit;
+      playerDmg = isCrit ? st.atk * 2 : st.atk;
+      playerMsg = `⚔️ 打斷回血！造成 ${playerDmg} 傷害${isCrit ? '（暴擊！）' : ''}`;
+      blocked = true; // 阻止 Boss 回血
+    } else {
+      const isCrit = Math.random() * 100 < st.crit;
+      playerDmg = isCrit ? st.atk * 2 : st.atk;
+      playerMsg = isCrit ? `⚡ 暴擊！造成 ${playerDmg} 傷害！` : `⚔️ 攻擊！造成 ${playerDmg} 傷害`;
+    }
+  } else if (action === 'defend') {
+    playerDmg = 0;
+    if (bossAct.id === 'skill') {
+      playerMsg = '🛡️ 完美格擋技能攻擊！零傷害！';
+      blocked = true;
+    } else if (bossAct.id === 'atk') {
+      playerMsg = '🛡️ 防禦！準備減傷普通攻擊';
+    } else if (bossAct.id === 'guard') {
+      playerMsg = '🛡️ 雙方都在防禦...';
+    } else {
+      playerMsg = '🛡️ 防禦姿態，但 Boss 在回血...';
+    }
+  } else if (action === 'throw') {
+    // 投擲：固定傷害，無視防禦
+    const baseDmg = Math.floor(st.atk * 0.7);
+    if (bossAct.id === 'guard') {
+      playerDmg = baseDmg; // 無視防禦！
+      playerMsg = `🎯 投擲！無視 Boss 防禦！造成 ${playerDmg} 傷害`;
+    } else if (bossAct.id === 'atk' || bossAct.id === 'skill') {
+      playerDmg = baseDmg;
+      playerMsg = `🎯 投擲！造成 ${playerDmg} 傷害（但沒有反制效果）`;
+    } else {
+      playerDmg = baseDmg;
+      playerMsg = `🎯 投擲！造成 ${playerDmg} 傷害`;
+    }
+  }
+
+  battle.bossHp -= playerDmg;
+  addBLog(playerMsg);
+
+  // ── Boss 勝利 ──
+  if (battle.bossHp <= 0) {
+    addBLog('🎉 Boss 被擊敗！');
+    const drop = BOSS_DROPS.find(d => d.id === battle.boss.dropId);
+    if (drop && !state.ownedEquips.includes(drop.id)) {
+      state.ownedEquips.push(drop.id);
+      addBLog(`獲得：${drop.emoji} ${drop.name}！`);
+    }
+    if (!state.beatenBosses.includes(battle.boss.id)) state.beatenBosses.push(battle.boss.id);
+    addCoins(100, '擊敗 ' + battle.boss.name);
+    checkAch().forEach(m => addBLog(m));
+    updateBattleUI(); renderPlayer();
+    updateBossIntent(null);
+    setTimeout(() => backToBossSelect(), 2500);
+    return;
+  }
+
+  // ── Boss 行動 ──
+  setTimeout(() => {
+    if (!battle) return;
+    addBLog('--- ' + bossAct.label + ' ---');
+
+    if (bossAct.id === 'atk') {
+      if (action === 'defend') {
+        const reduced = Math.max(1, Math.floor(Math.max(1, bossAct.exec(battle.boss, st).dmg) * 0.5));
+        battle.playerHp -= reduced;
+        addBLog(`${battle.boss.name} 攻擊！防禦減傷 50%，受到 ${reduced} 傷害`);
+      } else if (Math.random() * 100 < st.agi) {
+        addBLog(`💨 迴避了 ${battle.boss.name} 的攻擊！`);
+      } else {
+        const dmg = Math.max(1, battle.boss.atk - st.def);
+        battle.playerHp -= dmg;
+        addBLog(`受到 ${dmg} 傷害`);
+      }
+    } else if (bossAct.id === 'skill') {
+      if (blocked) {
+        addBLog(`🛡️ 技能被完全格擋！`);
+      } else if (Math.random() * 100 < st.agi) {
+        addBLog(`💨 迴避了技能攻擊！`);
+      } else {
+        const dmg = Math.max(1, Math.floor(battle.boss.atk * 1.5) - st.def);
+        battle.playerHp -= dmg;
+        addBLog(`受到 ${dmg} 傷害`);
+      }
+    } else if (bossAct.id === 'guard') {
+      addBLog(`🔰 Boss 防禦姿態${action === 'throw' ? '，但被投擲無視！' : '，本回合傷害大減'}`);
+    } else if (bossAct.id === 'heal') {
+      if (blocked) {
+        addBLog(`💔 回血被打斷！`);
+      } else {
+        const heal = Math.floor(battle.boss.maxHp * 0.1);
+        battle.bossHp = Math.min(battle.bossMaxHp, battle.bossHp + heal);
+        addBLog(`💚 Boss 回復了 ${heal} HP！`);
+      }
+    }
+
+    // 玩家死亡
+    if (battle.playerHp <= 0) {
+      battle.playerHp = 0;
+      updateBattleUI();
+      addBLog('💀 你被擊敗了...');
+      updateBossIntent(null);
+      setTimeout(() => {
+        document.getElementById('defeat-msg').textContent = `被 ${battle.boss.name} 擊倒了。\n裝備更好的武器再來挑戰！`;
+        showBossArea('defeat');
+      }, 1200);
+      return;
+    }
+
+    updateBattleUI();
+
+    // 下回合：隨機決定 Boss 下一個行動（預告給玩家）
+    const nextAction = pickBossAction();
+    battle.nextBossAction = nextAction;
+    updateBossIntent(nextAction);
+    setActionBtns(true);
+  }, 700);
+}
+
 
 // ── 渲染：記帳 ──
 function renderLog(){const el=document.getElementById('log-list');if(!state.records.length){el.innerHTML='<div style="font-size:13px;color:#aaa">尚無紀錄</div>';return;}el.innerHTML=state.records.slice(-8).reverse().map(r=>{const cat=ALL_CATS.find(c=>c.key===r.category);return`<div class="log-item"><div><div class="log-meta">${cat?cat.emoji:''} ${r.category}${r.note?' · '+r.note:''}</div><div class="log-date">${r.date}</div></div><div class="${r.type==='income'?'amount-pos':'amount-neg'}">${r.type==='income'?'+':'-'}$${r.amount.toLocaleString()}</div></div>`;}).join('');}
