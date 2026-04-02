@@ -134,9 +134,7 @@ select:focus,input:focus{border-color:#888;background:#fff;}
 .bbtn-atk{background:#fff1ee;color:#c0392b;border:1.5px solid #f5c0b0;}
 .bbtn-def{background:#eef0ff;color:#3344cc;border:1.5px solid #c0c8f8;}
 .bbtn-thr{background:#eefff2;color:#1D9E75;border:1.5px solid #9FE1CB;}
-.boss-intent{background:#fff8e6;border:1px solid #f0d080;border-radius:10px;padding:8px 12px;font-size:12px;color:#b8860b;font-weight:600;margin-bottom:10px;text-align:center;min-height:34px;}
 .bbtn-thr{background:#eefff2;color:#1D9E75;border:1.5px solid #9FE1CB;}
-.boss-intent{background:#fff8e6;border:1px solid #f0d080;border-radius:10px;padding:8px 12px;font-size:12px;color:#b8860b;font-weight:600;margin-bottom:10px;text-align:center;min-height:34px;}
 .flee-btn{width:100%;padding:10px;background:#f5f5f5;color:#888;border:1px solid #e8e8e8;border-radius:10px;font-size:13px;cursor:pointer;font-weight:500;}
 .defeat-screen{text-align:center;padding:32px 16px;}
 .defeat-em{font-size:64px;margin-bottom:16px;}
@@ -173,6 +171,15 @@ select:focus,input:focus{border-color:#888;background:#fff;}
 .changelog-dot{width:8px;height:8px;border-radius:50%;background:#1a1a1a;flex-shrink:0;margin-top:5px;}
 .changelog-text{font-size:13px;color:#444;line-height:1.6;}
 .changelog-close{width:100%;padding:13px;background:#1a1a1a;color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;margin-top:16px;}
+
+.edit-modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:300;display:flex;align-items:center;justify-content:center;padding:24px;}
+.edit-card{background:#fff;border-radius:16px;padding:20px;width:100%;max-width:400px;}
+.edit-title{font-size:15px;font-weight:700;margin-bottom:16px;}
+.edit-label{font-size:12px;color:#888;margin-bottom:4px;font-weight:500;}
+.edit-row{margin-bottom:12px;}
+.edit-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px;}
+.edit-save{padding:11px;background:#1a1a1a;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;}
+.edit-cancel{padding:11px;background:#f5f5f5;color:#666;border:1px solid #e0e0e0;border-radius:10px;font-size:13px;cursor:pointer;}
 </style>
 </head>
 <body>
@@ -306,13 +313,25 @@ select:focus,input:focus{border-color:#888;background:#fff;}
           <div class="bchar"><div class="bchar-em" id="b-avatar">👹</div><div class="bchar-nm" id="b-name">Boss</div><div class="progress-bar"><div class="progress-fill" id="b-hpbar" style="width:100%;background:#c0392b;"></div></div><div class="bchar-hp" id="b-hplabel"></div></div>
         </div>
         <div class="battle-log" id="battle-log"></div>
-        <div class="boss-intent" id="boss-intent">⚡ 準備戰鬥！</div>
         <div class="battle-btns" style="grid-template-columns:1fr 1fr 1fr;">
           <button class="bbtn bbtn-atk" id="btn-atk" onclick="doAction('attack')">⚔️ 攻擊<br><span style="font-size:10px;font-weight:400;" id="atk-hint"></span></button>
           <button class="bbtn bbtn-def" id="btn-def" onclick="doAction('defend')">🛡️ 防禦<br><span style="font-size:10px;font-weight:400;" id="def-hint"></span></button>
           <button class="bbtn bbtn-thr" id="btn-thr" onclick="doAction('throw')">🎯 投擲<br><span style="font-size:10px;font-weight:400;" id="thr-hint"></span></button>
         </div>
         <button class="flee-btn" onclick="fleeBattle()">撤退（回 Boss 選擇）</button>
+        <div style="margin-top:12px;background:#f8f8f8;border-radius:10px;padding:10px 12px;font-size:11px;color:#888;line-height:2;">
+          <strong style="color:#555;font-size:12px;">玩家行動</strong><br>
+          ⚔️ 攻擊：正常傷害，可打斷 Boss 回血<br>
+          🛡️ 防禦：普攻減傷 50%，完全格擋技能攻擊<br>
+          🎯 投擲：固定傷害，無視 Boss 防禦姿態<br>
+          <div style="margin-top:6px;border-top:1px solid #e8e8e8;padding-top:6px;">
+          <strong style="color:#555;">Boss 行動</strong><br>
+          💢 普通攻擊：正常傷害（防禦可減半）<br>
+          💥 技能攻擊：1.5倍傷害（防禦可完全格擋）<br>
+          🔰 防禦姿態：承傷大減（投擲可無視）<br>
+          💚 恢復：回復 10% HP（攻擊可打斷）
+          </div>
+        </div>
       </div>
     </div>
     <div id="defeat-area" style="display:none;">
@@ -543,7 +562,7 @@ function loadRecords(records){
   state.records=[];state.totalRecords=0;state.exp=0;state.level=1;
   state.combo=0;state.lastDate=null;state.claimedAch=[];state.claimedCombos=[];state.dailyClaimed=null;
   const dateSet=new Set();
-  for(let r of records){state.records.push(r);state.totalRecords++;state.exp+=15;dateSet.add(r.date);}
+  for(let r of records){state.records.push({...r});state.totalRecords++;state.exp+=15;dateSet.add(r.date);}
   while(state.level<EXP_TABLE.length-1&&state.exp>=EXP_TABLE[state.level])state.level++;
   if(state.records.length){
     const sorted=[...state.records].sort((a,b)=>a.date.localeCompare(b.date));
@@ -567,12 +586,15 @@ async function syncFromSheets(){
   }catch(e){st.textContent='同步失敗：'+e.message;st.style.color='#c0392b';}
   btn.disabled=false;
 }
-async function writeToSheets(record){
+async function writeToSheets(record, idx){
   try{
     const params=new URLSearchParams({action:'write',type:record.type,amount:record.amount,category:record.category,note:record.note||''});
     const res=await fetch(API_URL+'?'+params.toString());
     const data=await res.json();
-    if(data.error)console.log('寫入失敗：',data.error);
+    if(data.error){console.log('寫入失敗：',data.error);}
+    else if(data.rowId && idx >= 0 && idx < state.records.length){
+      state.records[idx].rowId = data.rowId;
+    }
   }catch(e){console.log('寫入失敗：',e.message);}
 }
 
@@ -752,14 +774,7 @@ function pickBossAction() {
   return BOSS_ACTIONS[Math.floor(Math.random() * BOSS_ACTIONS.length)];
 }
 
-function updateBossIntent(action) {
-  const el = document.getElementById('boss-intent');
-  if (!el) return;
-  el.textContent = action ? action.hint : '⚡ 選擇行動！';
-  el.style.color = action ? action.color : '#b8860b';
-  el.style.background = action ? '#fff8f8' : '#fff8e6';
-  el.style.borderColor = action ? action.color : '#f0d080';
-}
+function updateBossIntent(action) {}
 
 function setActionBtns(enabled) {
   ['btn-atk','btn-def','btn-thr'].forEach(id => {
@@ -907,7 +922,21 @@ function doAction(action) {
 
 
 // ── 渲染：記帳 ──
-function renderLog(){const el=document.getElementById('log-list');if(!state.records.length){el.innerHTML='<div style="font-size:13px;color:#aaa">尚無紀錄</div>';return;}el.innerHTML=state.records.slice(-8).reverse().map(r=>{const cat=ALL_CATS.find(c=>c.key===r.category);return`<div class="log-item"><div><div class="log-meta">${cat?cat.emoji:''} ${r.category}${r.note?' · '+r.note:''}</div><div class="log-date">${r.date}</div></div><div class="${r.type==='income'?'amount-pos':'amount-neg'}">${r.type==='income'?'+':'-'}$${r.amount.toLocaleString()}</div></div>`;}).join('');}
+function renderLog(){
+  const el=document.getElementById('log-list');
+  if(!state.records.length){el.innerHTML='<div style="font-size:13px;color:#aaa">尚無紀錄</div>';return;}
+  const total=state.records.length;
+  el.innerHTML=state.records.slice(-8).reverse().map((r,i)=>{
+    const realIdx=total-1-i;
+    const cat=ALL_CATS.find(c=>c.key===r.category);
+    return '<div class="log-item"><div style="flex:1;"><div class="log-meta">'+(cat?cat.emoji:'')+' '+r.category+(r.note?' · '+r.note:'')+'</div><div class="log-date">'+r.date+'</div></div>'
+      +'<div class="'+(r.type==='income'?'amount-pos':'amount-neg')+'" style="margin-right:8px;">'+(r.type==='income'?'+':'-')+'$'+r.amount.toLocaleString()+'</div>'
+      +'<div style="display:flex;gap:4px;">'
+      +'<button onclick="editRecord('+realIdx+')" style="padding:3px 8px;font-size:11px;border:1px solid #e0e0e0;border-radius:6px;background:#f8f8f8;color:#555;cursor:pointer;">✏️</button>'
+      +'<button onclick="deleteRecord('+realIdx+')" style="padding:3px 8px;font-size:11px;border:1px solid #f5c0b0;border-radius:6px;background:#fff0f0;color:#c0392b;cursor:pointer;">🗑️</button>'
+      +'</div></div>';
+  }).join('');
+}
 function addRecord(){
   const type=document.getElementById('type-select').value;const amount=parseInt(document.getElementById('amount-input').value);const category=document.getElementById('cat-select').value;const note=document.getElementById('note-input').value;const fb=document.getElementById('feedback');
   if(!amount||amount<=0){fb.textContent='請輸入有效金額';fb.style.color='#c0392b';return;}
@@ -923,7 +952,7 @@ function addRecord(){
   [...checkDaily(),...checkAch(),...checkCombo()].forEach(m=>msgs.push(m));
   document.getElementById('amount-input').value='';document.getElementById('note-input').value='';
   fb.style.color='#2a7a4f';fb.textContent=msgs.join(' · ');setTimeout(()=>{fb.textContent='';},6000);
-  renderLog();renderPlayer();writeToSheets({type,amount,category,note});
+  const newIdx=state.records.length-1;renderLog();renderPlayer();writeToSheets({type,amount,category,note},newIdx);
 }
 
 // ── Tab 切換 ──
@@ -1060,6 +1089,61 @@ function renderPixelChar() {
   if (lbl) {
     const rarityName = hasMythic ? '神話' : hasLegend ? '傳說' : hasEpic ? '史詩' : hasRare ? '稀有' : '初始';
     lbl.textContent = job.name + ' · ' + rarityName + '裝備';
+  }
+}
+
+let editingIdx = -1;
+
+function editRecord(idx) {
+  const r = state.records[idx];
+  if (!r) return;
+  editingIdx = idx;
+  document.getElementById('edit-type').value = r.type;
+  document.getElementById('edit-type').onchange = function(){ const cs=this.value==='income'?ICATS:ECATS;document.getElementById('edit-cat').innerHTML=cs.map(c=>'<option value="'+c.key+'">'+c.emoji+' '+c.key+'</option>').join(''); };
+  const cats = r.type === 'income' ? ICATS : ECATS;
+  document.getElementById('edit-cat').innerHTML = cats.map(c => '<option value="'+c.key+'"'+(c.key===r.category?' selected':'')+'>'+c.emoji+' '+c.key+'</option>').join('');
+  document.getElementById('edit-amount').value = r.amount;
+  document.getElementById('edit-note').value = r.note || '';
+  document.getElementById('edit-modal').style.display = 'flex';
+}
+
+function closeEdit() {
+  document.getElementById('edit-modal').style.display = 'none';
+  editingIdx = -1;
+}
+
+async function saveEdit() {
+  if (editingIdx < 0) return;
+  const type = document.getElementById('edit-type').value;
+  const amount = parseInt(document.getElementById('edit-amount').value);
+  const category = document.getElementById('edit-cat').value;
+  const note = document.getElementById('edit-note').value;
+  if (!amount || amount <= 0) return;
+  const r = state.records[editingIdx];
+  state.records[editingIdx] = { ...r, type, amount, category, note };
+  closeEdit();
+  renderLog(); renderPlayer();
+  if (API_URL && r && r.rowId) {
+    try {
+      const params = new URLSearchParams({action:'update', rowId: r.rowId, amount, category, note});
+      await fetch(API_URL + '?' + params.toString());
+    } catch(e) { console.log('修改Sheets失敗:', e.message); }
+  }
+}
+
+async function deleteRecord(idx) {
+  if (!confirm('確定要刪除這筆記帳嗎？')) return;
+  const r = state.records[idx];
+  state.records.splice(idx, 1);
+  state.totalRecords = Math.max(0, state.totalRecords - 1);
+  renderLog(); renderPlayer();
+  if (API_URL && r && r.rowId) {
+    try {
+      const params = new URLSearchParams({action:'delete', rowId: r.rowId});
+      await fetch(API_URL + '?' + params.toString());
+      // 刪除後行號位移：比被刪行號大的全部 -1
+      state.records.forEach(rec => { if(rec.rowId && rec.rowId > r.rowId) rec.rowId--; });
+    } catch(e) { console.log('刪除Sheets失敗:', e.message); }
   }
 }
 function switchTab(name,el){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));el.classList.add('active');document.getElementById('tab-'+name).classList.add('active');if(name==='stats')renderStats();if(name==='mastery')renderMastery();if(name==='shop')renderShop();if(name==='boss'){renderBossSelect();showBossArea('select');}if(name==='player')renderPlayer();}
