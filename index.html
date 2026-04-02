@@ -160,13 +160,40 @@ select:focus,input:focus{border-color:#888;background:#fff;}
 .setup-steps{font-size:12px;color:#aaa;line-height:2.2;margin-top:16px;}
 .setup-steps strong{color:#555;}
 .setup-err{font-size:12px;color:#c0392b;margin-top:8px;min-height:16px;}
+
+.version-tag{font-size:10px;color:#aaa;font-weight:400;margin-left:6px;letter-spacing:.03em;}
+.changelog-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1000;display:flex;align-items:center;justify-content:center;padding:24px;}
+.changelog-card{background:#fff;border-radius:20px;padding:24px;width:100%;max-width:400px;max-height:80vh;overflow-y:auto;}
+.changelog-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.changelog-title{font-size:18px;font-weight:800;}
+.changelog-ver{font-size:12px;font-weight:600;background:#1a1a1a;color:#fff;padding:3px 10px;border-radius:20px;}
+.changelog-item{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid #f0f0f0;}
+.changelog-item:last-child{border-bottom:none;}
+.changelog-dot{width:8px;height:8px;border-radius:50%;background:#1a1a1a;flex-shrink:0;margin-top:5px;}
+.changelog-text{font-size:13px;color:#444;line-height:1.6;}
+.changelog-close{width:100%;padding:13px;background:#1a1a1a;color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;margin-top:16px;}
+.changelog-close:active{transform:scale(.98);}
+
+.changelog-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1000;display:flex;align-items:center;justify-content:center;padding:24px;}
+.changelog-box{background:#fff;border-radius:20px;padding:24px;width:100%;max-width:380px;max-height:80vh;overflow-y:auto;}
+.changelog-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.changelog-title{font-size:18px;font-weight:800;}
+.changelog-ver{font-size:12px;font-weight:600;color:#fff;background:#1a1a1a;padding:3px 10px;border-radius:20px;}
+.changelog-item{display:flex;gap:10px;margin-bottom:12px;align-items:flex-start;}
+.changelog-dot{width:8px;height:8px;border-radius:50%;background:#1a1a1a;flex-shrink:0;margin-top:5px;}
+.changelog-text{font-size:13px;color:#555;line-height:1.6;}
+.changelog-btn{width:100%;padding:14px;background:#1a1a1a;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;margin-top:16px;}
+.changelog-btn:active{transform:scale(.98);}
 </style>
 </head>
 <body>
 <div class="app">
   <div class="header">
     <div class="header-top">
-      <div class="app-title">記帳勇者傳說</div>
+      <div style="display:flex;align-items:baseline;gap:0;">
+        <div class="app-title">記帳勇者傳說</div>
+        <span class="version-tag" id="version-tag">v1.0</span>
+      </div>
       <div class="coin-pill">🪙 <span id="coin-display">0</span> 金幣</div>
     </div>
     <div class="tabs">
@@ -289,6 +316,28 @@ select:focus,input:focus{border-color:#888;background:#fff;}
     <div class="info-box">欄位格式：A 時間戳記 | B 金額 | C 類別（可含emoji）| D 備註</div>
   </div>
   
+
+<div id="changelog-overlay" style="display:none;" class="changelog-overlay">
+  <div class="changelog-card">
+    <div class="changelog-header">
+      <div class="changelog-title">更新內容</div>
+      <div class="changelog-ver" id="changelog-ver">v1.0</div>
+    </div>
+    <div id="changelog-list"></div>
+    <button class="changelog-close" onclick="closeChangelog()">知道了，開始冒險！</button>
+  </div>
+</div>
+
+<div id="changelog-overlay" class="changelog-overlay" style="display:none;">
+  <div class="changelog-box">
+    <div class="changelog-header">
+      <div class="changelog-title">更新說明 🎉</div>
+      <div class="changelog-ver" id="changelog-ver-badge">v1.0</div>
+    </div>
+    <div id="changelog-content"></div>
+    <button class="changelog-btn" onclick="closeChangelog()">知道了，開始冒險！</button>
+  </div>
+</div>
 <div id="setup-overlay" class="setup-overlay" style="display:none;">
   <div class="setup-logo">⚔️</div>
   <div class="setup-title">記帳勇者傳說</div>
@@ -421,6 +470,43 @@ function switchTab(name,el){document.querySelectorAll('.tab').forEach(t=>t.class
 // ── Google Sheets API 設定 ──
 let API_URL = localStorage.getItem('rpg_api_url') || '';
 
+// ── 版本與改版說明 ──
+const APP_VERSION = 'v1.0';
+const CHANGELOGS = {
+  'v1.0': [
+    '🎮 記帳勇者傳說正式上線！',
+    '⚔️ 完整 RPG 系統：角色升等、屬性成長、Boss 戰',
+    '🏪 商店系統：購買裝備提升戰鬥屬性',
+    '🌟 熟練度系統：每個消費分類都有獨立技能樹',
+    '🔗 雙向同步 Google Sheets：記帳資料自動雲端備份',
+    '📱 PWA 支援：可安裝到手機主畫面',
+  ],
+};
+
+function showChangelog() {
+  const ver = APP_VERSION;
+  const logs = CHANGELOGS[ver] || ['本次版本更新'];
+  document.getElementById('changelog-ver-badge').textContent = ver;
+  document.getElementById('version-tag').textContent = ver;
+  document.getElementById('changelog-content').innerHTML = logs.map(l =>
+    '<div class="changelog-item"><div class="changelog-dot"></div><div class="changelog-text">'+l+'</div></div>'
+  ).join('');
+  document.getElementById('changelog-overlay').style.display = 'flex';
+}
+
+function closeChangelog() {
+  document.getElementById('changelog-overlay').style.display = 'none';
+  localStorage.setItem('last_seen_version', APP_VERSION);
+}
+
+function checkVersion() {
+  document.getElementById('version-tag').textContent = APP_VERSION;
+  const lastSeen = localStorage.getItem('last_seen_version');
+  if (lastSeen !== APP_VERSION) {
+    showChangelog();
+  }
+}
+
 // 從 Google Sheets 讀取所有資料
 async function syncFromSheets() {
   const btn = document.getElementById('sync-btn');
@@ -512,6 +598,7 @@ function resetApiUrl() {
 }
 
 function startApp() {
+  checkVersion();
   syncCats();renderLog();renderPlayer();
   // 自動同步
   (async function autoSync() {
@@ -550,13 +637,61 @@ function startApp() {
   })();
 }
 
-// 啟動：判斷是否已設定 API
-if (!API_URL) {
-  document.getElementById('setup-overlay').style.display = 'flex';
-} else {
-  startApp();
+
+// ── 版本管理 ──
+const APP_VERSION = 'v1.0';
+const CHANGELOG = {
+  'v1.0': [
+    '🎮 記帳勇者傳說正式上線！',
+    '⚔️ RPG 記帳系統：記帳升等、屬性成長、Boss 戰',
+    '🛍️ 裝備商店：購買裝備提升屬性',
+    '🏆 成就系統：解鎖稱號與金幣獎勵',
+    '🔗 雙向連動 Google Sheets',
+    '📱 支援安裝到手機主畫面',
+  ],
+};
+
+function showChangelog() {
+  const ver = APP_VERSION;
+  const items = CHANGELOG[ver] || ['本次版本更新'];
+  document.getElementById('changelog-ver').textContent = ver;
+  document.getElementById('version-tag').textContent = ver;
+  document.getElementById('changelog-list').innerHTML = items.map(item =>
+    `<div class="changelog-item"><div class="changelog-dot"></div><div class="changelog-text">${item}</div></div>`
+  ).join('');
+  document.getElementById('changelog-overlay').style.display = 'flex';
 }
+
+function closeChangelog() {
+  document.getElementById('changelog-overlay').style.display = 'none';
+  localStorage.setItem('rpg_seen_version', APP_VERSION);
+  // 改版說明關掉後才啟動 App 或顯示設定畫面
+  if (!API_URL) {
+    document.getElementById('setup-overlay').style.display = 'flex';
+  } else {
+    startApp();
+  }
+}
+
+function checkVersion() {
+  document.getElementById('version-tag').textContent = APP_VERSION;
+  const seenVersion = localStorage.getItem('rpg_seen_version');
+  if (seenVersion !== APP_VERSION) {
+    // 新版本，顯示改版說明
+    showChangelog();
+  } else {
+    // 已看過，直接啟動
+    if (!API_URL) {
+      document.getElementById('setup-overlay').style.display = 'flex';
+    } else {
+      startApp();
+    }
+  }
+}
+
+// 啟動
 syncCats();
+checkVersion();
 </script>
 </body>
 </html>
