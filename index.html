@@ -409,6 +409,54 @@ async function writeToSheets(record) {
   }
 }
 syncCats();renderLog();renderPlayer();
+
+// 開啟 App 時自動從 Google Sheets 同步
+(async function autoSync() {
+  const status = document.getElementById('sync-status');
+  if (status) { status.textContent = '正在自動同步...'; status.style.color = '#888'; }
+  try {
+    const res = await fetch(API_URL + '?action=read');
+    const data = await res.json();
+    if (data.error || !data.records) throw new Error(data.error || '無資料');
+
+    state.records = [];
+    state.totalRecords = 0;
+    state.exp = 0;
+    state.level = 1;
+    state.combo = 0;
+    state.lastDate = null;
+    state.claimedAch = [];
+    state.claimedCombos = [];
+    state.dailyClaimed = null;
+
+    const dateSet = new Set();
+    for (let r of data.records) {
+      state.records.push(r);
+      state.totalRecords++;
+      state.exp += 15;
+      dateSet.add(r.date);
+    }
+    while (state.level < EXP_TABLE.length - 1 && state.exp >= EXP_TABLE[state.level]) state.level++;
+    if (state.records.length) {
+      const sorted = [...state.records].sort((a,b) => a.date.localeCompare(b.date));
+      state.lastDate = sorted[sorted.length - 1].date;
+      const dates = [...dateSet].sort();
+      let maxCombo = 1, cur = 1;
+      for (let i = 1; i < dates.length; i++) {
+        const diff = Math.round((new Date(dates[i]) - new Date(dates[i-1])) / 86400000);
+        cur = diff === 1 ? cur + 1 : 1;
+        if (cur > maxCombo) maxCombo = cur;
+      }
+      state.combo = maxCombo;
+    }
+    checkAch(); checkCombo();
+    renderLog(); renderPlayer();
+    if (status) { status.textContent = '自動同步完成！共 ' + data.records.length + ' 筆'; status.style.color = '#2a7a4f'; }
+  } catch(e) {
+    if (status) { status.textContent = '自動同步失敗，請手動同步'; status.style.color = '#c0392b'; }
+    console.log('auto sync error:', e.message);
+  }
+})();
 </script>
 </body>
 </html>
