@@ -578,7 +578,7 @@ function parseCSV(text,statusEl){
     if(isNaN(amount)||amount===0)continue;
     const dateObj=parseDate(cols[0]);if(isNaN(dateObj))continue;
     const date=dateObj.getFullYear()+'-'+String(dateObj.getMonth()+1).padStart(2,'0')+'-'+String(dateObj.getDate()).padStart(2,'0');
-    const type=amount<0?'income':'expense';
+    const type=(amount<0||category==='收入')?'income':'expense';
     state.records.push({type,amount:Math.abs(amount),category,note,date});state.totalRecords++;state.exp+=15;dateSet.add(date);count++;
   }
   while(state.level<EXP_TABLE.length-1&&state.exp>=EXP_TABLE[state.level])state.level++;
