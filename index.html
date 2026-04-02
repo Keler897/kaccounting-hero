@@ -253,6 +253,11 @@ select:focus,input:focus{border-color:#888;background:#fff;}
       <div class="progress-bar" style="margin-top:4px;"><div class="progress-fill" id="exp-bar" style="width:0%;background:#1a1a1a;"></div></div>
     </div>
     <div class="stat-grid" id="stat-grid"></div>
+    <div class="card" style="text-align:center;">
+      <div class="card-title">角色</div>
+      <svg id="pixel-char" width="96" height="112" viewBox="0 0 64 80" style="image-rendering:pixelated;display:block;margin:0 auto 4px;"></svg>
+      <div id="pixel-label" style="font-size:11px;color:#aaa;margin-bottom:2px;"></div>
+    </div>
     <div class="card"><div class="card-title">裝備槽</div><div class="equip-slots" id="equip-slots"></div><div style="font-size:11px;color:#aaa;">到商店購買裝備以提升屬性</div></div>
     <div class="card">
       <div class="card-title">HP 狀態 — 本月收入 − 支出</div>
@@ -578,7 +583,7 @@ function parseCSV(text,statusEl){
     if(isNaN(amount)||amount===0)continue;
     const dateObj=parseDate(cols[0]);if(isNaN(dateObj))continue;
     const date=dateObj.getFullYear()+'-'+String(dateObj.getMonth()+1).padStart(2,'0')+'-'+String(dateObj.getDate()).padStart(2,'0');
-    const type=(amount<0||category==='收入')?'income':'expense';
+    const type=(amount<0||category.includes('收入'))?'income':'expense';
     state.records.push({type,amount:Math.abs(amount),category,note,date});state.totalRecords++;state.exp+=15;dateSet.add(date);count++;
   }
   while(state.level<EXP_TABLE.length-1&&state.exp>=EXP_TABLE[state.level])state.level++;
@@ -633,6 +638,7 @@ function renderPlayer(){
   ];
   document.getElementById('task-list').innerHTML=tasks.map(t=>`<div class="task-item"><div class="task-dot" style="background:${t.done?t.color:'#ddd'}"></div><div style="flex:1;font-size:13px;">${t.name}</div><div style="font-size:11px;color:#aaa;">${t.reward}</div><div style="font-size:12px;font-weight:600;color:${t.done?(t.claimed?'#aaa':'#2a7a4f'):'#b8860b'}">${t.done?(t.claimed?'已領':'完成'):'進行中'}</div></div>`).join('');
   const sc={small:'b-gold',mid:'b-silver',big:'b-purple'};
+  renderPixelChar();
   document.getElementById('badge-wrap').innerHTML=ACH.map(a=>`<span class="badge ${state.claimedAch.includes(a.id)||a.cond(state)?sc[a.size]:'b-lock'}">${a.label}</span>`).join('');
 }
 
@@ -743,6 +749,141 @@ function addRecord(){
 }
 
 // ── Tab 切換 ──
+
+function renderPixelChar() {
+  const svg = document.getElementById('pixel-char');
+  if (!svg) return;
+  const lv = state.level;
+  const owned = state.ownedEquips.map(id => ALL_EQUIPS.find(e => e.id === id)).filter(Boolean);
+  const job = getJob(lv);
+
+  // 判斷裝備等級
+  const hasMythic  = owned.some(e => e.rarity === 'mythic');
+  const hasLegend  = owned.some(e => e.rarity === 'legend');
+  const hasEpic    = owned.some(e => e.rarity === 'epic');
+  const hasRare    = owned.some(e => e.rarity === 'rare');
+  const hasSword   = owned.some(e => e.id === 'fsword' || e.id === 'chaos');
+  const hasGoldSwd = owned.some(e => e.id === 'legend' || e.id === 'relics' || e.id === 'godarmor');
+  const hasShield  = owned.some(e => e.id === 'shield' || e.id === 'hshield' || e.id === 'holy' || e.id === 'd3');
+  const hasBossWpn = owned.some(e => e.id === 'd4' || e.id === 'd7');
+
+  // 顏色主題
+  let bodyC, bodyL, legC, bootC, helC;
+  if (hasMythic || lv >= 100) {
+    bodyC = '#EF9F27'; bodyL = '#FAC775'; legC = '#BA7517'; bootC = '#854F0B'; helC = '#BA7517';
+  } else if (hasLegend || lv >= 50) {
+    bodyC = '#534AB7'; bodyL = '#7F77DD'; legC = '#3C3489'; bootC = '#26215C'; helC = '#3C3489';
+  } else if (hasEpic || lv >= 20) {
+    bodyC = '#185FA5'; bodyL = '#378ADD'; legC = '#0C447C'; bootC = '#042C53'; helC = '#0C447C';
+  } else if (hasRare || lv >= 5) {
+    bodyC = '#3B6D11'; bodyL = '#639922'; legC = '#27500A'; bootC = '#173404'; helC = '#27500A';
+  } else {
+    bodyC = '#888780'; bodyL = '#B4B2A9'; legC = '#5F5E5A'; bootC = '#2C2C2A'; helC = '#5F5E5A';
+  }
+
+  const skinC = '#F5C4B3';
+  const eyeC  = (hasMythic || lv >= 100) ? '#EF9F27' : '#26215C';
+  const hairC = '#3C3489';
+  const mouthC = '#993C1D';
+
+  // 武器顏色
+  let wpnC1, wpnC2;
+  if (hasBossWpn)       { wpnC1 = '#E1F5EE'; wpnC2 = '#1D9E75'; }
+  else if (hasGoldSwd)  { wpnC1 = '#FAC775'; wpnC2 = '#EF9F27'; }
+  else if (hasSword)    { wpnC1 = '#EF9F27'; wpnC2 = '#FA6027'; }
+  else                  { wpnC1 = '#B4B2A9'; wpnC2 = '#5F5E5A'; }
+
+  const shC1 = '#185FA5', shC2 = '#378ADD';
+
+  // 像素格輔助函數
+  function px(x, y, c) {
+    return `<rect x="${x*8}" y="${y*8}" width="8" height="8" fill="${c}"/>`;
+  }
+
+  let rects = '';
+
+  // ── 光環（Lv.35+）──
+  if (lv >= 200) {
+    [[0,1],[1,0],[2,0],[3,0],[4,0],[5,1]].forEach(([x,y])=> rects += px(x, y, '#AFA9EC'));
+  } else if (lv >= 100) {
+    [[1,0],[2,0],[3,0],[4,0]].forEach(([x,y])=> rects += px(x, y, '#FAC775'));
+  } else if (lv >= 35) {
+    [[2,0],[3,0]].forEach(([x,y])=> rects += px(x, y, '#EF9F27'));
+  }
+
+  // ── 頭部 ──
+  const hy = (lv >= 35) ? 1 : 0;  // 有光環時往下一格
+  // 頭髮
+  [[1,hy],[2,hy],[3,hy],[4,hy],[0,hy+1],[5,hy+1]].forEach(([x,y])=> rects += px(x, y, hairC));
+  // 臉
+  [[0,hy+2],[1,hy+1],[2,hy+1],[3,hy+1],[4,hy+1],[5,hy+2],
+   [1,hy+2],[2,hy+2],[3,hy+2],[4,hy+2]].forEach(([x,y])=> rects += px(x, y, skinC));
+  // 眼睛
+  rects += px(1, hy+2, eyeC);
+  rects += px(4, hy+2, eyeC);
+  // 嘴
+  rects += px(2, hy+3, mouthC);
+  rects += px(3, hy+3, mouthC);
+  // 頸
+  rects += px(2, hy+4, skinC);
+  rects += px(3, hy+4, skinC);
+
+  // ── 身體 ──
+  const by = hy + 5;
+  // 有頭盔（史詩+）
+  if (hasEpic || hasLegend || hasMythic) {
+    rects += px(1, hy,   helC);
+    rects += px(4, hy,   helC);
+    rects += px(0, hy+1, helC);
+    rects += px(5, hy+1, helC);
+  }
+  // 身體
+  [[1,by],[2,by],[3,by],[4,by],
+   [1,by+1],[2,by+1],[3,by+1],[4,by+1],
+   [1,by+2],[2,by+2],[3,by+2],[4,by+2]].forEach(([x,y])=> rects += px(x, y, bodyC));
+  // 身體亮部
+  rects += px(2, by+1, bodyL);
+  rects += px(3, by+1, bodyL);
+  // 手臂
+  rects += px(0, by,   skinC);
+  rects += px(0, by+1, skinC);
+  rects += px(5, by,   skinC);
+  rects += px(5, by+1, skinC);
+
+  // ── 武器（右手）──
+  rects += px(6, by-1, wpnC1);
+  rects += px(6, by,   wpnC1);
+  rects += px(6, by+1, wpnC2);
+  rects += px(5, by+2, bodyC);
+  rects += px(6, by+2, wpnC2);
+  if (hasSword || hasGoldSwd || hasBossWpn) {
+    rects += px(6, by-2, wpnC1);  // 劍尖
+  }
+
+  // ── 盾牌（左手）──
+  if (hasShield) {
+    rects += px(-1, by,   shC1);
+    rects += px(-1, by+1, shC2);
+    rects += px(-1, by+2, shC1);
+  }
+
+  // ── 腿 ──
+  const ly = by + 3;
+  [[1,ly],[2,ly],[3,ly],[4,ly],
+   [1,ly+1],[2,ly+1],[3,ly+1],[4,ly+1]].forEach(([x,y])=> rects += px(x, y, legC));
+
+  // ── 靴子 ──
+  [[1,ly+2],[2,ly+2],[3,ly+2],[4,ly+2]].forEach(([x,y])=> rects += px(x, y, bootC));
+
+  svg.innerHTML = rects;
+
+  // 標籤
+  const lbl = document.getElementById('pixel-label');
+  if (lbl) {
+    const rarityName = hasMythic ? '神話' : hasLegend ? '傳說' : hasEpic ? '史詩' : hasRare ? '稀有' : '初始';
+    lbl.textContent = job.name + ' · ' + rarityName + '裝備';
+  }
+}
 function switchTab(name,el){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));el.classList.add('active');document.getElementById('tab-'+name).classList.add('active');if(name==='stats')renderStats();if(name==='mastery')renderMastery();if(name==='shop')renderShop();if(name==='boss'){renderBossSelect();showBossArea('select');}if(name==='player')renderPlayer();}
 
 // ── 啟動 ──
