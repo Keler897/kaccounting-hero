@@ -1,37 +1,5 @@
-<!
-// ── Load user data from Firestore ──
-async function loadUserData() {
-  if (!currentUser) return;
-  try {
-    const profileSnap = await getDoc(doc(db, 'users', currentUser.uid, 'profile', 'main'));
-    if (profileSnap.exists()) {
-      const p = profileSnap.data();
-      state.name = p.name || '冒險者';
-      state.level = p.level || 1;
-      state.exp = p.exp || 0;
-      state.combo = p.combo || 0;
-      state.coins = p.coins || 0;
-      state.lastDate = p.lastDate || null;
-      state.ownedEquips = p.ownedEquips || [];
-      state.beatenBosses = p.beatenBosses || [];
-      state.claimedAch = p.claimedAch || [];
-      state.claimedCombos = p.claimedCombos || [];
-      state.dailyClaimed = p.dailyClaimed || null;
-      state.coinLog = p.coinLog || [];
-    }
-    const q = query(collection(db, 'users', currentUser.uid, 'records'), orderBy('date', 'asc'));
-    const snap = await getDocs(q);
-    state.records = [];
-    state.totalRecords = 0;
-    snap.forEach(d => {
-      state.records.push({ ...d.data(), docId: d.id });
-      state.totalRecords++;
-    });
-    updateCombo();
-    syncCats(); renderLog(); renderPlayer();
-  } catch(e) { console.error('loadUserData:', e); }
-}
-DOCTYPE html>
+<!DOCTYPE html>
+
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
@@ -430,6 +398,39 @@ window.signOut = async function() {
 };
 
 // ── Auth 狀態監聽 ──
+// ── Load user data from Firestore ──
+async function loadUserData() {
+  if (!currentUser) return;
+  try {
+    const profileSnap = await getDoc(doc(db, 'users', currentUser.uid, 'profile', 'main'));
+    if (profileSnap.exists()) {
+      const p = profileSnap.data();
+      state.name = p.name || '冒險者';
+      state.level = p.level || 1;
+      state.exp = p.exp || 0;
+      state.combo = p.combo || 0;
+      state.coins = p.coins || 0;
+      state.lastDate = p.lastDate || null;
+      state.ownedEquips = p.ownedEquips || [];
+      state.beatenBosses = p.beatenBosses || [];
+      state.claimedAch = p.claimedAch || [];
+      state.claimedCombos = p.claimedCombos || [];
+      state.dailyClaimed = p.dailyClaimed || null;
+      state.coinLog = p.coinLog || [];
+    }
+    const q = query(collection(db, 'users', currentUser.uid, 'records'), orderBy('date', 'asc'));
+    const snap = await getDocs(q);
+    state.records = [];
+    state.totalRecords = 0;
+    snap.forEach(d => {
+      state.records.push({ ...d.data(), docId: d.id });
+      state.totalRecords++;
+    });
+    updateCombo();
+    syncCats(); renderLog(); renderPlayer();
+  } catch(e) { console.error('loadUserData:', e); }
+}
+
 onAuthStateChanged(auth, async (user) => {
   if (user) {
     currentUser = user;
@@ -622,7 +623,6 @@ function recalcRPG() {
 // ══════════════════════════════════════════
 const EXP_BASE=[0,100,250,450,700,1000,1400,1900,2500,3200,4200,5500,7000,9000,11500,14500,18000,22500,28000,35000];
 function getExpRequired(lv){if(lv<EXP_BASE.length)return EXP_BASE[lv];return Math.floor(EXP_BASE[EXP_BASE.length-1]*Math.pow(1.15,lv-EXP_BASE.length+1));}
-const EXP_TABLE=Array.from({length:1000},(_,i)=>getExpRequired(i));
 const EXP_TABLE=Array.from({length:1000},(_,i)=>getExpRequired(i));
 
 const JOBS=[
