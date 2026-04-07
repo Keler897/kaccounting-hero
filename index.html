@@ -1130,7 +1130,10 @@ async function parseCSVAndImport(text,statusEl){
   if(!recs.length){statusEl.textContent='沒有找到有效資料';return;}
   statusEl.textContent='匯入中，共 '+recs.length+' 筆...';
   const count=await fbBatchImport(recs);
-  statusEl.textContent='成功匯入 '+count+' 筆！資料已儲存到 Firebase。';
+  statusEl.textContent='成功匯入 '+count+' 筆！重新載入中...';
+  // 匯入完成後重新從 Firebase 讀取，讓畫面同步
+  await loadUserData();
+  statusEl.textContent='成功匯入 '+count+' 筆！資料已同步。';
 }
 window.handleDrop=function(e){e.preventDefault();document.getElementById('drop-zone').style.borderColor='#e0e0e0';const file=e.dataTransfer.files[0];if(!file||!file.name.endsWith('.csv')){document.getElementById('import-status').textContent='請選擇 .csv 檔案';return;}readCSVFile(file,document.getElementById('import-status'));};
 window.handleFileInput=function(input){const file=input.files[0];if(!file)return;readCSVFile(file,document.getElementById('import-status'));};
