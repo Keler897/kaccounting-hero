@@ -442,8 +442,6 @@ onAuthStateChanged(auth, async (user) => {
     document.getElementById('user-avatar').src = user.photoURL || '';
     const pa=document.getElementById('user-avatar-profile');if(pa){pa.src=user.photoURL||'';pa.style.display=user.photoURL?'block':'none';}
     document.getElementById('user-name').textContent = (user.displayName || user.email || '').slice(0,8);
-    document.getElementById('user-info-card').innerHTML =
-      '<strong style="color:#1a1a1a;">'+(user.displayName||'')+'</strong><br>'+(user.email||'');
     await loadUserData();
     checkVersion();
   } else {
