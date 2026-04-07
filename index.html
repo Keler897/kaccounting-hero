@@ -402,22 +402,20 @@ window.signOut = async function() {
 async function loadUserData() {
   if (!currentUser) return;
   try {
-    const profileSnap = await getDoc(doc(db, 'users', currentUser.uid, 'profile', 'main'));
+    // 讀取 profile（裝備、金幣、成就等）
+    const profileSnap = await getDoc(doc(db, 'users', currentUser.uid, 'profile', 'data'));
     if (profileSnap.exists()) {
       const p = profileSnap.data();
-      state.name = p.name || '冒險者';
-      state.level = p.level || 1;
-      state.exp = p.exp || 0;
-      state.combo = p.combo || 0;
-      state.coins = p.coins || 0;
-      state.lastDate = p.lastDate || null;
-      state.ownedEquips = p.ownedEquips || [];
+      state.name         = p.name         || '冒險者';
+      state.coins        = p.coins        || 0;
+      state.ownedEquips  = p.ownedEquips  || [];
       state.beatenBosses = p.beatenBosses || [];
-      state.claimedAch = p.claimedAch || [];
-      state.claimedCombos = p.claimedCombos || [];
+      state.claimedAch   = p.claimedAch   || [];
+      state.claimedCombos= p.claimedCombos|| [];
       state.dailyClaimed = p.dailyClaimed || null;
-      state.coinLog = p.coinLog || [];
+      state.coinLog      = p.coinLog      || [];
     }
+    // 讀取所有記帳記錄
     const q = query(collection(db, 'users', currentUser.uid, 'records'), orderBy('date', 'asc'));
     const snap = await getDocs(q);
     state.records = [];
@@ -426,7 +424,8 @@ async function loadUserData() {
       state.records.push({ ...d.data(), docId: d.id });
       state.totalRecords++;
     });
-    updateCombo();
+    // 根據 records 重新計算等級、連擊等 RPG 數值
+    recalcRPG();
     syncCats(); renderLog(); renderPlayer();
   } catch(e) { console.error('loadUserData:', e); }
 }
@@ -650,6 +649,7 @@ const ACH=[
   {id:'equip3',label:'裝備收藏家',size:'mid',cond:s=>s.ownedEquips.length>=3},
   {id:'equip8',label:'神話收藏家',size:'big',cond:s=>s.ownedEquips.length>=8},
 ];
+const ACH_COINS={small:100,mid:300,big:500};
 const COMBO_MS=[{days:7,coins:200},{days:30,coins:1000}];
 const SHOP_EQUIPS=[
   {id:'sword',name:'鐵製短劍',emoji:'🗡️',rarity:'common',cost:200,bonuses:{atk:10}},
