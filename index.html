@@ -401,8 +401,8 @@ window.signOut = async function() {
 // ── Load user data from Firestore ──
 async function loadUserData() {
   if (!currentUser) return;
+  // Step 1: 讀取 profile（失敗不影響 records）
   try {
-    // 讀取 profile（裝備、金幣、成就等）
     const profileSnap = await getDoc(doc(db, 'users', currentUser.uid, 'profile', 'data'));
     if (profileSnap.exists()) {
       const p = profileSnap.data();
@@ -415,19 +415,23 @@ async function loadUserData() {
       state.dailyClaimed = p.dailyClaimed || null;
       state.coinLog      = p.coinLog      || [];
     }
-    // 讀取所有記帳記錄
-    const q = query(collection(db, 'users', currentUser.uid, 'records'), orderBy('date', 'asc'));
-    const snap = await getDocs(q);
+  } catch(e) { console.warn('profile 讀取失敗（可忽略）:', e.message); }
+
+  // Step 2: 讀取 records（不用 orderBy 避免需要 index）
+  try {
+    const col = collection(db, 'users', currentUser.uid, 'records');
+    const snap = await getDocs(col);
     state.records = [];
     state.totalRecords = 0;
     snap.forEach(d => {
       state.records.push({ ...d.data(), docId: d.id });
       state.totalRecords++;
     });
-    // 根據 records 重新計算等級、連擊等 RPG 數值
+    // JS 端排序，不依賴 Firestore index
+    state.records.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
     recalcRPG();
     syncCats(); renderLog(); renderPlayer();
-  } catch(e) { console.error('loadUserData:', e); }
+  } catch(e) { console.error('records 讀取失敗:', e); }
 }
 
 onAuthStateChanged(auth, async (user) => {
