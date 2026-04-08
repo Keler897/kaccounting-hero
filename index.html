@@ -1113,7 +1113,7 @@ window.doAction=async function(action){
     }else if(bossAct.id==='guard'){addBLog('🔰 Boss 防禦姿態'+(action==='throw'?'，但被投擲無視！':'，本回合傷害大減'));}
     else if(bossAct.id==='heal'){
       if(blocked){addBLog('💔 回血被打斷！');}
-      else{const heal=Math.floor(battle.boss.maxHp*0.1);battle.bossHp=Math.min(battle.bossMaxHp,battle.bossHp+heal);addBLog('💚 Boss 回復了 '+heal+' HP！');}
+      else{const heal=Math.floor(battle.bossMaxHp*0.1);battle.bossHp=Math.min(battle.bossMaxHp,battle.bossHp+heal);addBLog('💚 Boss 回復了 '+heal+' HP！');}
     }
     if(battle.playerHp<=0){battle.playerHp=0;updateBattleUI();addBLog('💀 你被擊敗了...');setTimeout(()=>{document.getElementById('defeat-msg').textContent='被 '+battle.boss.name+' 擊倒了。\n裝備更好的武器再來挑戰！';showBossArea('defeat');},1200);return;}
     updateBattleUI();
