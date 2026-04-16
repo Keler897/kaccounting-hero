@@ -255,8 +255,8 @@ select:focus,input:focus{border-color:#888;background:#fff;}
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
         <div class="card-title" style="margin-bottom:0;">記帳記錄</div>
         <div style="display:flex;gap:6px;align-items:center;">
-          <input type="date" id="log-date-filter" style="font-size:12px;padding:4px 8px;border:1px solid #e0e0e0;border-radius:8px;background:#fafafa;" oninput="renderLog()" onchange="renderLog()">
-          <button onclick="renderLog()" style="padding:4px 12px;font-size:12px;background:#1a1a1a;color:#fff;border:none;border-radius:8px;cursor:pointer;">查</button>
+          <input type="date" id="log-date-filter" style="font-size:12px;padding:4px 8px;border:1px solid #e0e0e0;border-radius:8px;background:#fafafa;" oninput="window.renderLog()" onchange="window.renderLog()">
+          <button onclick="window.renderLog()" style="padding:4px 12px;font-size:12px;background:#1a1a1a;color:#fff;border:none;border-radius:8px;cursor:pointer;">查</button>
         </div>
       </div>
       <div style="display:flex;gap:6px;margin-bottom:10px;">
@@ -923,7 +923,7 @@ window.deleteRecord = async function(idx){
 };
 
 // ── renderLog ──
-function renderLog(){
+window.renderLog = function renderLog(){
   const el=document.getElementById('log-list');
   if(!state.records.length){el.innerHTML='<div style="font-size:13px;color:#aaa">尚無紀錄</div>';return;}
   const filterInput=document.getElementById('log-date-filter');
