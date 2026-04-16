@@ -232,12 +232,12 @@ select:focus,input:focus{border-color:#888;background:#fff;}
     </div>
     <div class="tabs">
       <button class="tab active" onclick="switchTab('record',this)">記帳</button>
+      <button class="tab" onclick="switchTab('search',this)">查詢</button>
       <button class="tab" onclick="switchTab('player',this)">玩家</button>
       <button class="tab" onclick="switchTab('stats',this)">屬性</button>
       <button class="tab" onclick="switchTab('mastery',this)">熟練度</button>
       <button class="tab" onclick="switchTab('shop',this)">商店</button>
       <button class="tab" onclick="switchTab('boss',this)">Boss戰</button>
-      <button class="tab" onclick="switchTab('search',this)">查詢</button>
       <button class="tab" onclick="switchTab('connect',this)">設定</button>
     </div>
   </div>
@@ -254,7 +254,7 @@ select:focus,input:focus{border-color:#888;background:#fff;}
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
         <div class="card-title" style="margin-bottom:0;">記帳記錄</div>
-        <input type="date" id="log-date-filter" style="font-size:12px;padding:4px 8px;border:1px solid #e0e0e0;border-radius:8px;background:#fafafa;width:auto;" onchange="renderLog()">
+        <input type="date" id="log-date-filter" style="font-size:12px;padding:4px 8px;border:1px solid #e0e0e0;border-radius:8px;background:#fafafa;width:auto;" oninput="renderLog()" onchange="renderLog()">
       </div>
       <div style="display:flex;gap:6px;margin-bottom:10px;">
         <button onclick="clearLogFilter()" style="padding:4px 10px;font-size:11px;border:1px solid #e0e0e0;border-radius:16px;background:#f8f8f8;cursor:pointer;color:#888;">全部</button>
@@ -923,15 +923,15 @@ window.deleteRecord = async function(idx){
 function renderLog(){
   const el=document.getElementById('log-list');
   if(!state.records.length){el.innerHTML='<div style="font-size:13px;color:#aaa">尚無紀錄</div>';return;}
-  const dateFilter=document.getElementById('log-date-filter');
-  const filterDate=dateFilter?dateFilter.value:'';
+  const filterInput=document.getElementById('log-date-filter');
+  const filterDate=(filterInput&&filterInput.value)||'';
   let recs;
   if(filterDate){
-    recs=state.records.filter(r=>r.date===filterDate).slice().reverse();
+    recs=state.records.filter(r=>(r.date||'')===filterDate).slice().reverse();
   } else {
     recs=state.records.slice(-20).reverse();
   }
-  if(!recs.length){el.innerHTML='<div style="font-size:13px;color:#aaa">'+(filterDate?'這天沒有記帳記錄':'尚無紀錄')+'</div>';return;}
+  if(!recs.length){el.innerHTML='<div style="font-size:13px;color:#aaa;padding:8px 0;">'+(filterDate?filterDate+' 這天沒有記帳記錄':'尚無紀錄')+'</div>';return;}
   el.innerHTML=recs.map(r=>{
     const realIdx=state.records.indexOf(r);
     const cat=ALL_CATS.find(c=>c.key===r.category);
