@@ -237,6 +237,7 @@ select:focus,input:focus{border-color:#888;background:#fff;}
       <button class="tab" onclick="switchTab('mastery',this)">熟練度</button>
       <button class="tab" onclick="switchTab('shop',this)">商店</button>
       <button class="tab" onclick="switchTab('boss',this)">Boss戰</button>
+      <button class="tab" onclick="switchTab('search',this)">查詢</button>
       <button class="tab" onclick="switchTab('connect',this)">設定</button>
     </div>
   </div>
@@ -250,7 +251,17 @@ select:focus,input:focus{border-color:#888;background:#fff;}
       <button class="record-btn" onclick="addRecord()">記一筆 → EXP + 屬性成長</button>
       <div class="feedback" id="feedback"></div>
     </div>
-    <div class="card"><div class="card-title">最近記帳</div><div id="log-list"><div style="font-size:13px;color:#aaa">尚無紀錄</div></div></div>
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div class="card-title" style="margin-bottom:0;">記帳記錄</div>
+        <input type="date" id="log-date-filter" style="font-size:12px;padding:4px 8px;border:1px solid #e0e0e0;border-radius:8px;background:#fafafa;width:auto;" onchange="renderLog()">
+      </div>
+      <div style="display:flex;gap:6px;margin-bottom:10px;">
+        <button onclick="clearLogFilter()" style="padding:4px 10px;font-size:11px;border:1px solid #e0e0e0;border-radius:16px;background:#f8f8f8;cursor:pointer;color:#888;">全部</button>
+        <button onclick="setLogToday()" style="padding:4px 10px;font-size:11px;border:1px solid #e0e0e0;border-radius:16px;background:#f8f8f8;cursor:pointer;color:#888;">今天</button>
+      </div>
+      <div id="log-list"><div style="font-size:13px;color:#aaa">尚無紀錄</div></div>
+    </div>
   </div>
 
   <div id="tab-player" class="section">
@@ -326,6 +337,46 @@ select:focus,input:focus{border-color:#888;background:#fff;}
     <div id="defeat-area" style="display:none;">
       <div class="battle-wrap"><div class="defeat-screen"><div class="defeat-em">💀</div><div class="defeat-title">戰敗了...</div><div class="defeat-sub" id="defeat-msg">被 Boss 擊倒了。</div><button class="defeat-btn" onclick="backToBossSelect()">回到 Boss 選擇</button></div></div>
     </div>
+  </div>
+
+  <div id="tab-search" class="section">
+    <!-- 日期區間選擇 -->
+    <div class="card">
+      <div class="card-title">區間篩選</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
+        <button onclick="setSearchRange('week')" id="sr-week" style="padding:5px 12px;font-size:12px;border:1px solid #e0e0e0;border-radius:20px;background:#f8f8f8;cursor:pointer;">本週</button>
+        <button onclick="setSearchRange('month')" id="sr-month" style="padding:5px 12px;font-size:12px;border:1px solid #1a1a1a;border-radius:20px;background:#1a1a1a;color:#fff;cursor:pointer;">本月</button>
+        <button onclick="setSearchRange('lastmonth')" id="sr-lastmonth" style="padding:5px 12px;font-size:12px;border:1px solid #e0e0e0;border-radius:20px;background:#f8f8f8;cursor:pointer;">上個月</button>
+        <button onclick="setSearchRange('year')" id="sr-year" style="padding:5px 12px;font-size:12px;border:1px solid #e0e0e0;border-radius:20px;background:#f8f8f8;cursor:pointer;">今年</button>
+        <button onclick="setSearchRange('all')" id="sr-all" style="padding:5px 12px;font-size:12px;border:1px solid #e0e0e0;border-radius:20px;background:#f8f8f8;cursor:pointer;">全部</button>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input type="date" id="sr-start" style="flex:1;font-size:13px;" onchange="renderSearch()">
+        <span style="color:#aaa;font-size:13px;">～</span>
+        <input type="date" id="sr-end" style="flex:1;font-size:13px;" onchange="renderSearch()">
+      </div>
+    </div>
+
+    <!-- 支出圓餅圖 -->
+    <div class="card">
+      <div class="card-title">支出分佈</div>
+      <div class="pie-section">
+        <canvas id="sr-pie" width="110" height="110" style="flex-shrink:0;"></canvas>
+        <div class="pie-legend" id="sr-legend"></div>
+      </div>
+    </div>
+
+    <!-- 類別列表 -->
+    <div id="sr-cats"></div>
+
+    <!-- 收入區塊 -->
+    <div id="sr-income-wrap" style="display:none;">
+      <div class="card" style="margin-top:4px;">
+        <div class="card-title" style="color:#2a7a4f;">收入明細</div>
+        <div id="sr-income-list"></div>
+      </div>
+    </div>
+    <button onclick="toggleSearchIncome()" id="sr-income-btn" style="width:100%;padding:10px;background:#f5f5f5;color:#888;border:1px solid #e0e0e0;border-radius:10px;font-size:13px;cursor:pointer;margin-bottom:12px;">顯示收入記錄 ▼</button>
   </div>
 
   <div id="tab-connect" class="section">
@@ -872,9 +923,17 @@ window.deleteRecord = async function(idx){
 function renderLog(){
   const el=document.getElementById('log-list');
   if(!state.records.length){el.innerHTML='<div style="font-size:13px;color:#aaa">尚無紀錄</div>';return;}
-  const total=state.records.length;
-  el.innerHTML=state.records.slice(-8).reverse().map((r,i)=>{
-    const realIdx=total-1-i;
+  const dateFilter=document.getElementById('log-date-filter');
+  const filterDate=dateFilter?dateFilter.value:'';
+  let recs;
+  if(filterDate){
+    recs=state.records.filter(r=>r.date===filterDate).slice().reverse();
+  } else {
+    recs=state.records.slice(-20).reverse();
+  }
+  if(!recs.length){el.innerHTML='<div style="font-size:13px;color:#aaa">'+(filterDate?'這天沒有記帳記錄':'尚無紀錄')+'</div>';return;}
+  el.innerHTML=recs.map(r=>{
+    const realIdx=state.records.indexOf(r);
     const cat=ALL_CATS.find(c=>c.key===r.category);
     return '<div class="log-item"><div style="flex:1;"><div class="log-meta">'+(cat?cat.emoji:'')+' '+r.category+(r.note?' · '+r.note:'')+'</div><div class="log-date">'+r.date+'</div></div>'
       +'<div class="'+(r.type==='income'?'amount-pos':'amount-neg')+'" style="margin-right:8px;">'+(r.type==='income'?'+':'-')+'$'+r.amount.toLocaleString()+'</div>'
@@ -1194,6 +1253,253 @@ window.exportCSV = function() {
   statusEl.textContent = '已匯出 ' + state.records.length + ' 筆資料！';
   statusEl.style.color = '#2a7a4f';
 };
+
+// ── 查詢功能 ──
+window.setQuickRange = function(range) {
+  const now = new Date();
+  let start, end;
+  const fmt = d => d.toISOString().slice(0,10);
+
+  if (range === 'today') {
+    start = end = fmt(now);
+  } else if (range === 'week') {
+    const day = now.getDay() || 7;
+    const mon = new Date(now); mon.setDate(now.getDate() - day + 1);
+    start = fmt(mon); end = fmt(now);
+  } else if (range === 'month') {
+    start = fmt(new Date(now.getFullYear(), now.getMonth(), 1));
+    end = fmt(now);
+  } else if (range === 'lastmonth') {
+    const first = new Date(now.getFullYear(), now.getMonth()-1, 1);
+    const last  = new Date(now.getFullYear(), now.getMonth(), 0);
+    start = fmt(first); end = fmt(last);
+  }
+
+  document.getElementById('q-start').value = start;
+  document.getElementById('q-end').value   = end;
+  runQuery();
+};
+
+window.runQuery = function() {
+  const start  = document.getElementById('q-start').value;
+  const end    = document.getElementById('q-end').value;
+  const type   = document.getElementById('q-type').value;
+  const cat    = document.getElementById('q-cat').value;
+  const el     = document.getElementById('q-results');
+
+  if (!start || !end) { el.innerHTML = '<div style="color:#aaa;text-align:center;padding:8px;">請選擇日期區間</div>'; return; }
+  if (start > end)    { el.innerHTML = '<div style="color:#c0392b;text-align:center;padding:8px;">開始日期不能晚於結束日期</div>'; return; }
+
+  const filtered = state.records.filter(r => {
+    if (r.date < start || r.date > end) return false;
+    if (type !== 'all' && r.type !== type) return false;
+    if (cat  !== 'all' && r.category !== cat) return false;
+    return true;
+  }).slice().reverse(); // 新的在上面
+
+  if (!filtered.length) {
+    el.innerHTML = '<div style="color:#aaa;text-align:center;padding:12px;">此區間沒有符合的記帳</div>';
+    return;
+  }
+
+  el.innerHTML = filtered.map((r, i) => {
+    const realIdx = state.records.indexOf(r);
+    const c = ALL_CATS.find(x => x.key === r.category);
+    return '<div class="log-item">'
+      + '<div style="flex:1;"><div class="log-meta">' + (c ? c.emoji : '') + ' ' + r.category + (r.note ? ' · ' + r.note : '') + '</div>'
+      + '<div class="log-date">' + r.date + '</div></div>'
+      + '<div class="' + (r.type==='income'?'amount-pos':'amount-neg') + '" style="margin-right:8px;">'
+      + (r.type==='income'?'+':'-') + '$' + r.amount.toLocaleString() + '</div>'
+      + '<div style="display:flex;gap:4px;">'
+      + '<button onclick="editRecord(' + realIdx + ');runQuery()" style="padding:3px 8px;font-size:11px;border:1px solid #e0e0e0;border-radius:6px;background:#f8f8f8;color:#555;cursor:pointer;">✏️</button>'
+      + '<button onclick="deleteRecord(' + realIdx + ').then(()=>runQuery())" style="padding:3px 8px;font-size:11px;border:1px solid #f5c0b0;border-radius:6px;background:#fff0f0;color:#c0392b;cursor:pointer;">🗑️</button>'
+      + '</div></div>';
+  }).join('');
+};
+
+// 初始化查詢類別下拉選單
+function initQueryCats() {
+  const sel = document.getElementById('q-cat');
+  if (!sel) return;
+  sel.innerHTML = '<option value="all">全部類別</option>'
+    + ALL_CATS.map(c => '<option value="' + c.key + '">' + c.emoji + ' ' + c.key + '</option>').join('');
+}
+
+// ══════════════════════════════════
+// 記帳頁面：單日篩選
+// ══════════════════════════════════
+window.setLogToday = function() {
+  document.getElementById('log-date-filter').value = today();
+  renderLog();
+};
+window.clearLogFilter = function() {
+  document.getElementById('log-date-filter').value = '';
+  renderLog();
+};
+
+// ══════════════════════════════════
+// 查詢分頁
+// ══════════════════════════════════
+let srIncomeOpen = false;
+
+window.setSearchRange = function(range) {
+  const now = new Date();
+  const fmt = d => d.toISOString().slice(0,10);
+  let start, end;
+  const btns = ['week','month','lastmonth','year','all'];
+  btns.forEach(b => {
+    const el = document.getElementById('sr-'+b);
+    if (el) { el.style.background='#f8f8f8'; el.style.color='#555'; el.style.border='1px solid #e0e0e0'; }
+  });
+  const active = document.getElementById('sr-'+range);
+  if (active) { active.style.background='#1a1a1a'; active.style.color='#fff'; active.style.border='1px solid #1a1a1a'; }
+
+  if (range === 'week') {
+    const day = now.getDay() || 7;
+    const mon = new Date(now); mon.setDate(now.getDate() - day + 1);
+    start = fmt(mon); end = fmt(now);
+  } else if (range === 'month') {
+    start = fmt(new Date(now.getFullYear(), now.getMonth(), 1));
+    end = fmt(now);
+  } else if (range === 'lastmonth') {
+    start = fmt(new Date(now.getFullYear(), now.getMonth()-1, 1));
+    end = fmt(new Date(now.getFullYear(), now.getMonth(), 0));
+  } else if (range === 'year') {
+    start = now.getFullYear() + '-01-01'; end = fmt(now);
+  } else {
+    start = ''; end = '';
+  }
+  document.getElementById('sr-start').value = start;
+  document.getElementById('sr-end').value = end;
+  renderSearch();
+};
+
+window.renderSearch = function() {
+  const start = document.getElementById('sr-start').value;
+  const end   = document.getElementById('sr-end').value;
+
+  // 篩選 records
+  const recs = state.records.filter(r => {
+    if (start && r.date < start) return false;
+    if (end   && r.date > end)   return false;
+    return true;
+  });
+
+  const expense = recs.filter(r => r.type === 'expense');
+  const income  = recs.filter(r => r.type === 'income');
+
+  // ── 圓餅圖 ──
+  const ctx = document.getElementById('sr-pie').getContext('2d');
+  const legend = document.getElementById('sr-legend');
+  const totals = {};
+  expense.forEach(r => totals[r.category] = (totals[r.category]||0) + r.amount);
+  const total = Object.values(totals).reduce((a,b)=>a+b,0);
+  ctx.clearRect(0,0,110,110);
+  if (!total) {
+    ctx.beginPath(); ctx.arc(55,55,48,0,Math.PI*2); ctx.fillStyle='#eee'; ctx.fill();
+    legend.innerHTML = '<div style="font-size:12px;color:#aaa">此區間無支出</div>';
+  } else {
+    let ang = -Math.PI/2;
+    const ents = ECATS.map(c=>({key:c.key,val:totals[c.key]||0,color:c.color})).filter(e=>e.val>0);
+    for (const e of ents) {
+      const sl = (e.val/total)*Math.PI*2;
+      ctx.beginPath(); ctx.moveTo(55,55); ctx.arc(55,55,48,ang,ang+sl); ctx.closePath();
+      ctx.fillStyle=e.color; ctx.fill(); ang+=sl;
+    }
+    ctx.beginPath(); ctx.arc(55,55,24,0,Math.PI*2); ctx.fillStyle='#fff'; ctx.fill();
+    legend.innerHTML = ents.map(e =>
+      '<div class="pie-row"><div class="pie-dot" style="background:'+e.color+'"></div>'
+      +'<span>'+e.key+'</span>'
+      +'<span style="margin-left:auto;font-weight:600;">$'+e.val.toLocaleString()+'</span></div>'
+    ).join('');
+  }
+
+  // ── 各類別卡片 ──
+  const catEl = document.getElementById('sr-cats');
+  if (!expense.length) {
+    catEl.innerHTML = '<div class="card" style="text-align:center;color:#aaa;font-size:13px;">此區間無支出記錄</div>';
+  } else {
+    const cats = {};
+    expense.forEach(r => {
+      if (!cats[r.category]) cats[r.category] = { total:0, records:[] };
+      cats[r.category].total += r.amount;
+      cats[r.category].records.push(r);
+    });
+    const sorted = Object.entries(cats).sort((a,b)=>b[1].total-a[1].total);
+    catEl.innerHTML = sorted.map(([cat, data]) => {
+      const c = ALL_CATS.find(x=>x.key===cat);
+      const emoji = c ? c.emoji : '🏷️';
+      const color = c ? c.color : '#888';
+      const recHtml = data.records.slice().reverse().map(r => {
+        const idx = state.records.indexOf(r);
+        return '<div class="log-item">'
+          + '<div style="flex:1;"><div class="log-meta">' + r.date + (r.note?' · '+r.note:'') + '</div></div>'
+          + '<div class="amount-neg" style="margin-right:8px;">-$'+r.amount.toLocaleString()+'</div>'
+          + '<div style="display:flex;gap:4px;">'
+          + '<button onclick="editRecord('+idx+');renderSearch()" style="padding:3px 8px;font-size:11px;border:1px solid #e0e0e0;border-radius:6px;background:#f8f8f8;color:#555;cursor:pointer;">✏️</button>'
+          + '<button onclick="deleteRecord('+idx+').then(()=>renderSearch())" style="padding:3px 8px;font-size:11px;border:1px solid #f5c0b0;border-radius:6px;background:#fff0f0;color:#c0392b;cursor:pointer;">🗑️</button>'
+          + '</div></div>';
+      }).join('');
+      return '<div class="card" style="margin-bottom:8px;">'
+        + '<div onclick="toggleCat(this)" style="display:flex;align-items:center;gap:8px;cursor:pointer;">'
+        + '<span style="font-size:18px;">'+emoji+'</span>'
+        + '<span style="font-size:14px;font-weight:600;flex:1;">'+cat+'</span>'
+        + '<span style="font-size:14px;font-weight:700;color:'+color+';">$'+data.total.toLocaleString()+'</span>'
+        + '<span style="font-size:12px;color:#aaa;margin-left:6px;">'+data.records.length+'筆 ▼</span>'
+        + '</div>'
+        + '<div class="cat-detail" style="display:none;margin-top:8px;border-top:1px solid #f0f0f0;padding-top:8px;">'
+        + recHtml
+        + '</div></div>';
+    }).join('');
+  }
+
+  // ── 收入區塊 ──
+  if (srIncomeOpen && income.length) {
+    const incEl = document.getElementById('sr-income-list');
+    const inCats = {};
+    income.forEach(r => {
+      if (!inCats[r.category]) inCats[r.category] = {total:0, records:[]};
+      inCats[r.category].total += r.amount;
+      inCats[r.category].records.push(r);
+    });
+    incEl.innerHTML = Object.entries(inCats).map(([cat, data]) => {
+      const recHtml = data.records.slice().reverse().map(r => {
+        const idx = state.records.indexOf(r);
+        return '<div class="log-item">'
+          + '<div style="flex:1;"><div class="log-meta">'+r.date+(r.note?' · '+r.note:'')+'</div></div>'
+          + '<div class="amount-pos" style="margin-right:8px;">+$'+r.amount.toLocaleString()+'</div>'
+          + '<div style="display:flex;gap:4px;">'
+          + '<button onclick="editRecord('+idx+');renderSearch()" style="padding:3px 8px;font-size:11px;border:1px solid #e0e0e0;border-radius:6px;background:#f8f8f8;color:#555;cursor:pointer;">✏️</button>'
+          + '<button onclick="deleteRecord('+idx+').then(()=>renderSearch())" style="padding:3px 8px;font-size:11px;border:1px solid #f5c0b0;border-radius:6px;background:#fff0f0;color:#c0392b;cursor:pointer;">🗑️</button>'
+          + '</div></div>';
+      }).join('');
+      return '<div style="margin-bottom:12px;">'
+        + '<div style="font-size:13px;font-weight:600;color:#2a7a4f;margin-bottom:6px;">💵 '+cat+' · $'+data.total.toLocaleString()+'</div>'
+        + recHtml + '</div>';
+    }).join('');
+    document.getElementById('sr-income-wrap').style.display = 'block';
+  } else {
+    document.getElementById('sr-income-wrap').style.display = 'none';
+  }
+  const btn = document.getElementById('sr-income-btn');
+  if (btn) btn.textContent = srIncomeOpen ? '收起收入記錄 ▲' : '顯示收入記錄 ▼';
+};
+
+window.toggleCat = function(el) {
+  const detail = el.parentElement.querySelector('.cat-detail');
+  if (!detail) return;
+  const isOpen = detail.style.display !== 'none';
+  detail.style.display = isOpen ? 'none' : 'block';
+  const arrow = el.querySelector('span:last-child');
+  if (arrow) arrow.textContent = arrow.textContent.replace(isOpen?'▲':'▼', isOpen?'▼':'▲');
+};
+
+window.toggleSearchIncome = function() {
+  srIncomeOpen = !srIncomeOpen;
+  renderSearch();
+};
+
+// switchTab 時初始化查詢頁
 window.switchTab=function(name,el){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
@@ -1202,11 +1508,12 @@ window.switchTab=function(name,el){
   if(name==='mastery')renderMastery();
   if(name==='shop')renderShop();
   if(name==='boss'){renderBossSelect();showBossArea('select');}
+  if(name==='search'){setSearchRange('month');}
   if(name==='player')renderPlayer();
 };
 
 // ── 初始化（不需要等 Firebase，Auth 監聽會觸發）──
-syncCats();
+syncCats();initQueryCats();
 document.getElementById('version-tag').textContent=APP_VERSION;
 
 </script>
