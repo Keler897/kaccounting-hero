@@ -362,7 +362,10 @@ select:focus,input:focus{border-color:#888;background:#fff;}
 
     <!-- 支出圓餅圖 -->
     <div class="card">
-      <div class="card-title">支出分佈</div>
+      <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px;">
+        <div class="card-title" style="margin-bottom:0;">支出分佈</div>
+        <div id="sr-total" style="font-size:18px;font-weight:800;color:#c0392b;"></div>
+      </div>
       <div class="pie-section">
         <canvas id="sr-pie" width="110" height="110" style="flex-shrink:0;"></canvas>
         <div class="pie-legend" id="sr-legend"></div>
@@ -1397,6 +1400,8 @@ window.renderSearch = function() {
   const totals = {};
   expense.forEach(r => totals[r.category] = (totals[r.category]||0) + r.amount);
   const total = Object.values(totals).reduce((a,b)=>a+b,0);
+  const totalEl = document.getElementById('sr-total');
+  if (totalEl) totalEl.textContent = total > 0 ? '$' + total.toLocaleString() : '';
   ctx.clearRect(0,0,110,110);
   if (!total) {
     ctx.beginPath(); ctx.arc(55,55,48,0,Math.PI*2); ctx.fillStyle='#eee'; ctx.fill();
