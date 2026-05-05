@@ -248,7 +248,12 @@ select:focus,input:focus{border-color:#888;background:#fff;}
       <div class="card-title">新增記帳</div>
       <div class="row"><select id="type-select" onchange="syncCats()"><option value="expense">支出</option><option value="income">收入</option></select><input type="number" id="amount-input" placeholder="金額 (NT$)" min="1"></div>
       <div class="row"><select id="cat-select"></select><input type="text" id="note-input" placeholder="備註（可選）"></div>
-      <button class="record-btn" onclick="addRecord()">記一筆 → EXP + 屬性成長</button>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <span style="font-size:12px;color:#888;white-space:nowrap;">消費日期</span>
+        <input type="date" id="record-date" style="flex:1;font-size:13px;padding:8px 10px;border:1px solid #e0e0e0;border-radius:10px;background:#fafafa;">
+        <button onclick="document.getElementById('record-date').value=today()" style="padding:6px 10px;font-size:11px;border:1px solid #e0e0e0;border-radius:8px;background:#f8f8f8;color:#888;cursor:pointer;white-space:nowrap;">今天</button>
+      </div>
+      <button class="record-btn" onclick="window.addRecord()">記一筆 → EXP + 屬性成長</button>
       <div class="feedback" id="feedback"></div>
     </div>
     <div class="card">
@@ -851,8 +856,9 @@ window.addRecord = async function(){
   const note=document.getElementById('note-input').value;
   const fb=document.getElementById('feedback');
   if(!amount||amount<=0){fb.textContent='請輸入有效金額';fb.style.color='#c0392b';return;}
-  const t=today();
-  const alreadyToday=state.records.some(r=>r.date===t);
+  const _di=document.getElementById('record-date');
+  const t=(_di&&_di.value)?_di.value:today();
+  const alreadyToday=state.records.some(r=>r.date===today());
   const prevStats=calcStats();
   const record={type,amount,category,note,date:t};
 
@@ -1522,6 +1528,8 @@ window.switchTab=function(name,el){
 
 // ── 初始化（不需要等 Firebase，Auth 監聽會觸發）──
 syncCats();initQueryCats();
+const _rd=document.getElementById('record-date');
+if(_rd)_rd.value=today();
 document.getElementById('version-tag').textContent=APP_VERSION;
 
 </script>
