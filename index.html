@@ -885,6 +885,7 @@ window.addRecord = async function(){
 
   document.getElementById('amount-input').value='';
   document.getElementById('note-input').value='';
+  syncCats();
   fb.style.color='#2a7a4f';fb.textContent=msgs.join(' · ');
   setTimeout(()=>{fb.textContent='';},6000);
   renderLog();renderPlayer();
