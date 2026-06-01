@@ -638,7 +638,7 @@ const CHANGELOG = {
   ],
 };
 
-function showChangelog() {
+window.showChangelog = function showChangelog() {
   const items = CHANGELOG[APP_VERSION] || ['本次版本更新'];
   document.getElementById('cl-ver').textContent = APP_VERSION;
   document.getElementById('version-tag').textContent = APP_VERSION;
@@ -845,7 +845,7 @@ function addCoins(amt,reason){state.coins+=amt;state.coinLog.unshift({amount:amt
 function checkAch(){const msgs=[];for(let a of ACH){if(!state.claimedAch.includes(a.id)&&a.cond(state)){state.claimedAch.push(a.id);const c=ACH_COINS[a.size];addCoins(c,'成就「'+a.label+'」');msgs.push('🏆 '+a.label+' +'+c+'金幣');}}return msgs;}
 function checkCombo(){const msgs=[];for(let m of COMBO_MS){const key='c'+m.days;if(state.combo>=m.days&&!state.claimedCombos.includes(key)){state.claimedCombos.push(key);addCoins(m.coins,'連擊 '+m.days+' 天');msgs.push('🔥 連擊'+m.days+'天 +'+m.coins+'金幣');}}if(state.combo<7)state.claimedCombos=state.claimedCombos.filter(k=>k!=='c7');if(state.combo<30)state.claimedCombos=state.claimedCombos.filter(k=>k!=='c30');return msgs;}
 function checkDaily(){const t=today();if(state.dailyClaimed===t)return[];if(state.records.some(r=>r.date===t)){state.dailyClaimed=t;addCoins(50,'每日任務完成');return['📅 每日任務 +50金幣'];}return[];}
-function syncCats(){const type=document.getElementById('type-select').value;const cats=type==='expense'?ECATS:ICATS;document.getElementById('cat-select').innerHTML=cats.map(c=>'<option value="'+c.key+'">'+c.emoji+' '+c.key+'</option>').join('');}
+window.syncCats = function syncCats(){const type=document.getElementById('type-select').value;const cats=type==='expense'?ECATS:ICATS;document.getElementById('cat-select').innerHTML=cats.map(c=>'<option value="'+c.key+'">'+c.emoji+' '+c.key+'</option>').join('');}
 window.updateEditCats=function(){const type=document.getElementById('edit-type').value;const cats=type==='income'?ICATS:ECATS;document.getElementById('edit-cat').innerHTML=cats.map(c=>'<option value="'+c.key+'">'+c.emoji+' '+c.key+'</option>').join('');};
 
 // ── addRecord ──
@@ -958,7 +958,7 @@ window.renderLog = function renderLog(){
 }
 
 // ── renderPlayer ──
-function renderPlayer(){
+window.renderPlayer = function renderPlayer(){
   updateCombo();const lv=state.level;const job=getJob(lv);
   const{income,expense,hp,net,maxHp}=calcMonthly();const stats=calcStats();
   document.getElementById('name-input').value=state.name;
@@ -1059,7 +1059,7 @@ function renderPixelChar(){
 }
 
 // ── renderStats ──
-function renderStats(){
+window.renderStats = function renderStats(){
   const stats=calcStats();
   document.getElementById('attr-list').innerHTML=[
     {icon:'❤️',name:'HP 上限',stat:'hp',val:stats.hp,max:5000,color:'#2a7a4f',unit:''},
@@ -1074,7 +1074,7 @@ function renderStats(){
 }
 
 // ── renderMastery ──
-function renderMastery(){
+window.renderMastery = function renderMastery(){
   const ctx=document.getElementById('pie-canvas').getContext('2d');
   const legend=document.getElementById('pie-legend');
   const totals={};for(let r of state.records)if(r.type==='expense')totals[r.category]=(totals[r.category]||0)+r.amount;
@@ -1091,7 +1091,7 @@ function renderMastery(){
   if(state.selCat)renderCatDetail(state.selCat);
 }
 window.selCat=function(key){state.selCat=key;renderMastery();};
-function renderCatDetail(key){
+window.renderCatDetail = function renderCatDetail(key){
   const cat=ALL_CATS.find(c=>c.key===key);if(!cat)return;
   const isInc=key==='收入';const count=isInc?getCatCount(key,'income'):getCatCount(key,'expense');
   const lv=getCatLv(count);const rule=STAT_RULES.find(r=>r.cats.includes(key));
@@ -1102,7 +1102,7 @@ function renderCatDetail(key){
 }
 
 // ── renderShop ──
-function renderShop(){
+window.renderShop = function renderShop(){
   document.getElementById('shop-coin').textContent=state.coins.toLocaleString();
   const lbl={hp:'HP',atk:'攻擊',def:'防禦',agi:'敏捷',crit:'暴擊'};
   document.getElementById('shop-grid').innerHTML=SHOP_EQUIPS.map(e=>{const owned=state.ownedEquips.includes(e.id);const rc=RARITY_C[e.rarity];const tags=Object.entries(e.bonuses).map(([k,v])=>'<span class="btag">'+lbl[k]+' +'+v+(k==='agi'||k==='crit'?'%':'')+'</span>').join('');return'<div class="shop-card '+(owned?'owned':'')+'"><div class="rarity-bar" style="background:'+rc+';"></div><div style="font-size:22px;margin-bottom:6px;">'+e.emoji+'</div><div style="font-size:13px;font-weight:700;margin-bottom:2px;">'+e.name+'</div><div style="font-size:10px;font-weight:600;color:'+rc+';margin-bottom:6px;">'+RARITY_L[e.rarity]+'</div><div class="bonus-tags">'+tags+'</div><div style="font-size:12px;font-weight:700;color:#b8860b;margin-bottom:8px;">🪙 '+e.cost.toLocaleString()+'</div>'+(owned?'<div style="font-size:12px;color:#2a7a4f;font-weight:600;">已擁有</div>':'<button class="buy-btn" onclick="buyEquip(\''+e.id+'\')" '+(state.coins<e.cost?'disabled':'')+'>購買</button>')+'</div>';}).join('');
@@ -1120,7 +1120,7 @@ function setActionBtns(enabled){['btn-atk','btn-def','btn-thr'].forEach(id=>{con
 function showBossArea(area){document.getElementById('boss-select-area').style.display=area==='select'?'block':'none';document.getElementById('battle-area').style.display=area==='battle'?'block':'none';document.getElementById('defeat-area').style.display=area==='defeat'?'block':'none';}
 window.backToBossSelect=function(){battle=null;showBossArea('select');renderBossSelect();};
 window.fleeBattle=function(){backToBossSelect();};
-function renderBossSelect(){document.getElementById('boss-grid').innerHTML=BOSSES.map(b=>{const beaten=state.beatenBosses.includes(b.id);const drop=BOSS_DROPS.find(d=>d.id===b.dropId);return'<div class="boss-card" onclick="startBattle(\''+b.id+'\')"><div class="boss-em">'+b.emoji+'</div><div class="boss-nm">'+b.name+'</div><div class="boss-diff" style="color:'+b.dc+';">'+b.diff+'</div><div class="boss-stat">HP '+b.hp.toLocaleString()+' / 攻擊 '+b.atk+'</div>'+(drop?'<div class="boss-drop">掉落：'+drop.emoji+drop.name+'</div>':'')+(beaten?'<div class="beaten-label">已擊敗過 ✓</div>':'')+'</div>';}).join('');}
+window.renderBossSelect = function renderBossSelect(){document.getElementById('boss-grid').innerHTML=BOSSES.map(b=>{const beaten=state.beatenBosses.includes(b.id);const drop=BOSS_DROPS.find(d=>d.id===b.dropId);return'<div class="boss-card" onclick="startBattle(\''+b.id+'\')"><div class="boss-em">'+b.emoji+'</div><div class="boss-nm">'+b.name+'</div><div class="boss-diff" style="color:'+b.dc+';">'+b.diff+'</div><div class="boss-stat">HP '+b.hp.toLocaleString()+' / 攻擊 '+b.atk+'</div>'+(drop?'<div class="boss-drop">掉落：'+drop.emoji+drop.name+'</div>':'')+(beaten?'<div class="beaten-label">已擊敗過 ✓</div>':'')+'</div>';}).join('');}
 window.startBattle=function(bossId){
   const boss=BOSSES.find(b=>b.id===bossId);if(!boss)return;
   const stats=calcStats();
@@ -1137,7 +1137,7 @@ window.startBattle=function(bossId){
   battle.nextBossAction=pickBossAction();
   setActionBtns(true);updateBattleUI();
 };
-function updateBattleUI(){if(!battle)return;const bPct=Math.max(0,Math.round(battle.bossHp/battle.bossMaxHp*100));const pPct=Math.max(0,Math.round(battle.playerHp/battle.playerMaxHp*100));document.getElementById('b-hpbar').style.width=bPct+'%';document.getElementById('b-hplabel').textContent=Math.max(0,battle.bossHp).toLocaleString()+' / '+battle.bossMaxHp.toLocaleString();const pb=document.getElementById('p-hpbar');pb.style.width=pPct+'%';pb.style.background=pPct>50?'#2a7a4f':pPct>25?'#b8860b':'#c0392b';document.getElementById('p-hplabel').textContent=Math.max(0,battle.playerHp)+' / '+battle.playerMaxHp;}
+window.updateBattleUI = function updateBattleUI(){if(!battle)return;const bPct=Math.max(0,Math.round(battle.bossHp/battle.bossMaxHp*100));const pPct=Math.max(0,Math.round(battle.playerHp/battle.playerMaxHp*100));document.getElementById('b-hpbar').style.width=bPct+'%';document.getElementById('b-hplabel').textContent=Math.max(0,battle.bossHp).toLocaleString()+' / '+battle.bossMaxHp.toLocaleString();const pb=document.getElementById('p-hpbar');pb.style.width=pPct+'%';pb.style.background=pPct>50?'#2a7a4f':pPct>25?'#b8860b':'#c0392b';document.getElementById('p-hplabel').textContent=Math.max(0,battle.playerHp)+' / '+battle.playerMaxHp;}
 function addBLog(msg){const el=document.getElementById('battle-log');el.textContent+='\n'+msg;el.scrollTop=el.scrollHeight;}
 window.doAction=async function(action){
   if(!battle)return;const st=battle.stats;
@@ -1331,7 +1331,7 @@ window.runQuery = function() {
 };
 
 // 初始化查詢類別下拉選單
-function initQueryCats() {
+window.initQueryCats = function initQueryCats() {
   const sel = document.getElementById('q-cat');
   if (!sel) return;
   sel.innerHTML = '<option value="all">全部類別</option>'
