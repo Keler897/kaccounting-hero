@@ -174,6 +174,11 @@ select:focus,input:focus{border-color:#888;background:#fff;}
 /* Sync indicator */
 .sync-dot{width:7px;height:7px;border-radius:50%;background:#2a7a4f;display:inline-block;margin-left:6px;}
 .sync-dot.syncing{background:#b8860b;animation:pulse 1s infinite;}
+.search-box{position:relative;display:flex;gap:8px;}
+.search-box input{padding-right:38px;}
+.search-clear{position:absolute;right:9px;top:50%;transform:translateY(-50%);width:28px;height:28px;border:none;border-radius:50%;background:transparent;color:#aaa;font-size:18px;cursor:pointer;display:none;}
+.search-clear:hover{background:#eee;color:#555;}
+.keyword-summary{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;font-size:12px;color:#888;}
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
 </style>
 </head>
@@ -348,8 +353,19 @@ select:focus,input:focus{border-color:#888;background:#fff;}
   </div>
 
   <div id="tab-search" class="section">
-    <!-- 日期區間選擇 -->
+    <!-- 關鍵字查詢（跨全部日期） -->
     <div class="card">
+      <div class="card-title">關鍵字查詢</div>
+      <div class="search-box">
+        <input type="text" id="sr-keyword" placeholder="搜尋備註、類別、日期或金額" oninput="renderSearch()" autocomplete="off">
+        <button type="button" class="search-clear" id="sr-keyword-clear" onclick="clearSearchKeyword()" aria-label="清除關鍵字">×</button>
+      </div>
+      <div style="font-size:11px;color:#aaa;margin-top:7px;line-height:1.5;">輸入後會搜尋全部日期的記帳紀錄</div>
+    </div>
+    <div id="sr-keyword-results" style="display:none;"></div>
+
+    <!-- 日期區間選擇 -->
+    <div class="card" id="sr-range-card">
       <div class="card-title">區間篩選</div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
         <button onclick="setSearchRange('week')" id="sr-week" style="padding:5px 12px;font-size:12px;border:1px solid #e0e0e0;border-radius:20px;background:#f8f8f8;cursor:pointer;">本週</button>
@@ -366,7 +382,7 @@ select:focus,input:focus{border-color:#888;background:#fff;}
     </div>
 
     <!-- 支出圓餅圖 -->
-    <div class="card">
+    <div class="card" id="sr-chart-card">
       <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px;">
         <div class="card-title" style="margin-bottom:0;">支出分佈</div>
         <div id="sr-total" style="font-size:18px;font-weight:800;color:#c0392b;"></div>
@@ -919,6 +935,7 @@ window.saveEdit = async function(){
   state.records[editingIdx]=updated;
   closeEdit();
   recalcRPG();renderLog();renderPlayer();
+  if(document.getElementById('tab-search').classList.contains('active'))renderSearch();
   if(r.id) await fbUpdateRecord(r.id,{type,amount,category,note});
   await saveProfile();
 };
@@ -1390,6 +1407,72 @@ window.setSearchRange = function(range) {
 window.renderSearch = function() {
   const start = document.getElementById('sr-start').value;
   const end   = document.getElementById('sr-end').value;
+  const keywordInput = document.getElementById('sr-keyword');
+  const keyword = keywordInput ? keywordInput.value.trim().toLocaleLowerCase('zh-TW') : '';
+  const clearBtn = document.getElementById('sr-keyword-clear');
+  const keywordResults = document.getElementById('sr-keyword-results');
+  const rangeCard = document.getElementById('sr-range-card');
+  const chartCard = document.getElementById('sr-chart-card');
+  const catEl = document.getElementById('sr-cats');
+  const incomeWrap = document.getElementById('sr-income-wrap');
+  const incomeBtn = document.getElementById('sr-income-btn');
+
+  if (clearBtn) clearBtn.style.display = keyword ? 'block' : 'none';
+
+  // 有關鍵字時跨全部日期搜尋，不受下方日期區間限制。
+  if (keyword) {
+    if (rangeCard) rangeCard.style.display = 'none';
+    if (chartCard) chartCard.style.display = 'none';
+    if (catEl) catEl.style.display = 'none';
+    if (incomeWrap) incomeWrap.style.display = 'none';
+    if (incomeBtn) incomeBtn.style.display = 'none';
+
+    const typeLabel = r => r.type === 'income' ? '收入' : '支出';
+    const matches = state.records.filter(r => {
+      const fields = [r.note, r.category, typeLabel(r), r.date, r.amount];
+      return fields.some(value => String(value ?? '').toLocaleLowerCase('zh-TW').includes(keyword));
+    }).slice().sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+
+    const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, ch => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    })[ch]);
+    const expenseTotal = matches.filter(r => r.type === 'expense').reduce((sum, r) => sum + Number(r.amount || 0), 0);
+    const incomeTotal = matches.filter(r => r.type === 'income').reduce((sum, r) => sum + Number(r.amount || 0), 0);
+
+    keywordResults.style.display = 'block';
+    if (!matches.length) {
+      keywordResults.innerHTML = '<div class="card" style="text-align:center;color:#aaa;font-size:13px;line-height:1.7;">' +
+        '找不到包含「' + escapeHtml(keywordInput.value.trim()) + '」的記帳紀錄</div>';
+      return;
+    }
+
+    const rows = matches.map(r => {
+      const idx = state.records.indexOf(r);
+      const c = ALL_CATS.find(x => x.key === r.category);
+      return '<div class="log-item">'
+        + '<div style="flex:1;min-width:0;"><div class="log-meta" style="overflow-wrap:anywhere;">' + (c ? c.emoji : '🏷️') + ' ' + escapeHtml(r.category) + (r.note ? ' · ' + escapeHtml(r.note) : '') + '</div>'
+        + '<div class="log-date">' + escapeHtml(r.date) + ' · ' + typeLabel(r) + '</div></div>'
+        + '<div class="' + (r.type === 'income' ? 'amount-pos' : 'amount-neg') + '" style="margin:0 8px;white-space:nowrap;">'
+        + (r.type === 'income' ? '+' : '-') + '$' + Number(r.amount || 0).toLocaleString() + '</div>'
+        + '<div style="display:flex;gap:4px;">'
+        + '<button onclick="editRecord(' + idx + ')" style="padding:3px 8px;font-size:11px;border:1px solid #e0e0e0;border-radius:6px;background:#f8f8f8;color:#555;cursor:pointer;">✏️</button>'
+        + '<button onclick="deleteRecord(' + idx + ').then(()=>renderSearch())" style="padding:3px 8px;font-size:11px;border:1px solid #f5c0b0;border-radius:6px;background:#fff0f0;color:#c0392b;cursor:pointer;">🗑️</button>'
+        + '</div></div>';
+    }).join('');
+
+    keywordResults.innerHTML = '<div class="card">'
+      + '<div class="keyword-summary"><span>共 <strong style="color:#1a1a1a;">' + matches.length + '</strong> 筆符合</span>'
+      + '<span><span style="color:#2a7a4f;">收入 +$' + incomeTotal.toLocaleString() + '</span> · <span style="color:#c0392b;">支出 -$' + expenseTotal.toLocaleString() + '</span></span></div>'
+      + rows + '</div>';
+    return;
+  }
+
+  // 清除關鍵字後恢復原本的區間分析。
+  if (keywordResults) { keywordResults.style.display = 'none'; keywordResults.innerHTML = ''; }
+  if (rangeCard) rangeCard.style.display = '';
+  if (chartCard) chartCard.style.display = '';
+  if (catEl) catEl.style.display = '';
+  if (incomeBtn) incomeBtn.style.display = '';
 
   // 篩選 records
   const recs = state.records.filter(r => {
@@ -1430,7 +1513,6 @@ window.renderSearch = function() {
   }
 
   // ── 各類別卡片 ──
-  const catEl = document.getElementById('sr-cats');
   if (!expense.length) {
     catEl.innerHTML = '<div class="card" style="text-align:center;color:#aaa;font-size:13px;">此區間無支出記錄</div>';
   } else {
@@ -1498,6 +1580,14 @@ window.renderSearch = function() {
   }
   const btn = document.getElementById('sr-income-btn');
   if (btn) btn.textContent = srIncomeOpen ? '收起收入記錄 ▲' : '顯示收入記錄 ▼';
+};
+
+window.clearSearchKeyword = function() {
+  const input = document.getElementById('sr-keyword');
+  if (!input) return;
+  input.value = '';
+  renderSearch();
+  input.focus();
 };
 
 window.toggleCat = function(el) {
