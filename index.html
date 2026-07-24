@@ -174,6 +174,11 @@ select:focus,input:focus{border-color:#888;background:#fff;}
 /* Sync indicator */
 .sync-dot{width:7px;height:7px;border-radius:50%;background:#2a7a4f;display:inline-block;margin-left:6px;}
 .sync-dot.syncing{background:#b8860b;animation:pulse 1s infinite;}
+.sync-dot.error{background:#c0392b;}
+.sync-status{font-size:10px;color:#aaa;margin-left:4px;white-space:nowrap;}
+.sync-status.error{color:#c0392b;font-weight:600;}
+.load-more-btn{width:100%;padding:9px;margin-top:8px;background:#f8f8f8;color:#666;border:1px solid #e0e0e0;border-radius:9px;font-size:12px;cursor:pointer;}
+.load-more-btn:hover{background:#f0f0f0;}
 .search-box{position:relative;display:flex;gap:8px;}
 .search-box input{padding-right:38px;}
 .search-clear{position:absolute;right:9px;top:50%;transform:translateY(-50%);width:28px;height:28px;border:none;border-radius:50%;background:transparent;color:#aaa;font-size:18px;cursor:pointer;display:none;}
@@ -202,8 +207,7 @@ select:focus,input:focus{border-color:#888;background:#fff;}
     <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z"/></svg>
     使用 Google 登入
   </button>
-  <div id="login-status" style="font-size:13px;color:#888;margin-top:12px;min-height:18px;text-align:center;"></div>
-  <div class="login-status" id="login-status"></div>
+  <div id="login-status" class="login-status" style="font-size:13px;color:#888;margin-top:12px;min-height:18px;text-align:center;"></div>
 </div>
 
 <!-- 編輯記帳 modal -->
@@ -213,6 +217,7 @@ select:focus,input:focus{border-color:#888;background:#fff;}
     <div class="edit-row"><div class="edit-label">類型</div><select id="edit-type" onchange="updateEditCats()"><option value="expense">支出</option><option value="income">收入</option></select></div>
     <div class="edit-row"><div class="edit-label">金額</div><input type="number" id="edit-amount" min="1"></div>
     <div class="edit-row"><div class="edit-label">類別</div><select id="edit-cat"></select></div>
+    <div class="edit-row"><div class="edit-label">日期</div><input type="date" id="edit-date"></div>
     <div class="edit-row"><div class="edit-label">備註</div><input type="text" id="edit-note" placeholder="備註（可選）"></div>
     <div class="edit-btns"><button class="edit-save" onclick="saveEdit()">儲存</button><button class="edit-cancel" onclick="closeEdit()">取消</button></div>
   </div>
@@ -224,7 +229,8 @@ select:focus,input:focus{border-color:#888;background:#fff;}
       <div style="display:flex;align-items:baseline;">
         <div class="app-title">記帳勇者傳說</div>
         <span class="version-tag" id="version-tag"></span>
-        <span class="sync-dot" id="sync-dot" title="資料同步中"></span>
+        <span class="sync-dot" id="sync-dot" title="資料已同步"></span>
+        <span class="sync-status" id="sync-status">已同步</span>
       </div>
       <div style="display:flex;align-items:center;gap:8px;">
         <div class="coin-pill">🪙 <span id="coin-display">0</span> 金幣</div>
@@ -251,8 +257,8 @@ select:focus,input:focus{border-color:#888;background:#fff;}
   <div id="tab-record" class="section active">
     <div class="card">
       <div class="card-title">新增記帳</div>
-      <div class="row"><select id="type-select" onchange="syncCats()"><option value="expense">支出</option><option value="income">收入</option></select><input type="number" id="amount-input" placeholder="金額 (NT$)" min="1"></div>
-      <div class="row"><select id="cat-select"></select><input type="text" id="note-input" placeholder="備註（可選）"></div>
+      <div class="row"><select id="type-select" onchange="syncCats();saveRecordPrefs()"><option value="expense">支出</option><option value="income">收入</option></select><input type="number" id="amount-input" placeholder="金額 (NT$)" min="1"></div>
+      <div class="row"><select id="cat-select" onchange="saveRecordPrefs()"></select><input type="text" id="note-input" placeholder="備註（可選）"></div>
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
         <span style="font-size:12px;color:#888;white-space:nowrap;">消費日期</span>
         <input type="date" id="record-date" style="flex:1;font-size:13px;padding:8px 10px;border:1px solid #e0e0e0;border-radius:10px;background:#fafafa;">
@@ -411,7 +417,7 @@ select:focus,input:focus{border-color:#888;background:#fff;}
       <div class="card-title">帳號</div>
       <div id="user-info" style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
         <img id="user-avatar-profile" src="" width="40" height="40" style="border-radius:50%;display:none;">
-        <div><div id="user-name" style="font-size:14px;font-weight:600;"></div><div id="user-email" style="font-size:12px;color:#888;"></div></div>
+        <div><div id="profile-user-name" style="font-size:14px;font-weight:600;"></div><div id="user-email" style="font-size:12px;color:#888;"></div></div>
       </div>
       <button onclick="signOut()" style="width:100%;padding:10px;background:#f5f5f5;color:#888;border:1px solid #e0e0e0;border-radius:10px;font-size:13px;cursor:pointer;">登出</button>
     </div>
@@ -460,10 +466,28 @@ const provider = new GoogleAuthProvider();
 let currentUser = null;
 let unsubRecords = null;
 
-// ── 同步指示燈 ──
-function setSyncing(on) {
+// ── 同步狀態 ──
+let syncStatusTimer = null;
+function setSyncState(stateName, message) {
   const dot = document.getElementById('sync-dot');
-  if (dot) dot.className = 'sync-dot' + (on ? ' syncing' : '');
+  const label = document.getElementById('sync-status');
+  clearTimeout(syncStatusTimer);
+  if (dot) {
+    dot.className = 'sync-dot' + (stateName === 'syncing' ? ' syncing' : stateName === 'error' ? ' error' : '');
+    dot.title = message || (stateName === 'syncing' ? '資料同步中' : stateName === 'error' ? '同步失敗' : '資料已同步');
+  }
+  if (label) {
+    label.className = 'sync-status' + (stateName === 'error' ? ' error' : '');
+    label.textContent = message || (stateName === 'syncing' ? '同步中…' : stateName === 'error' ? '同步失敗' : '已同步');
+    if (stateName === 'success') {
+      syncStatusTimer = setTimeout(() => { label.textContent = '已同步'; }, 2500);
+    }
+  }
+}
+function setSyncing(on) { setSyncState(on ? 'syncing' : 'success'); }
+function reportSyncError(action, error) {
+  console.error(action + '失敗:', error);
+  setSyncState('error', action + '失敗，請檢查網路後重試');
 }
 
 // ── 登入/登出 ──
@@ -509,14 +533,14 @@ async function loadUserData() {
     state.records = [];
     state.totalRecords = 0;
     snap.forEach(d => {
-      state.records.push({ ...d.data(), docId: d.id });
+      state.records.push({ ...d.data(), id: d.id });
       state.totalRecords++;
     });
     // JS 端排序，不依賴 Firestore index
     state.records.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
     recalcRPG();
     syncCats(); renderLog(); renderPlayer();
-  } catch(e) { console.error('records 讀取失敗:', e); }
+  } catch(e) { reportSyncError('讀取記帳資料', e); }
 }
 
 onAuthStateChanged(auth, async (user) => {
@@ -527,8 +551,10 @@ onAuthStateChanged(auth, async (user) => {
     document.getElementById('user-avatar').src = user.photoURL || '';
     const pa=document.getElementById('user-avatar-profile');if(pa){pa.src=user.photoURL||'';pa.style.display=user.photoURL?'block':'none';}
     document.getElementById('user-name').textContent = (user.displayName || user.email || '').slice(0,8);
+    document.getElementById('profile-user-name').textContent = user.displayName || '冒險者';
+    document.getElementById('user-email').textContent = user.email || '';
     await loadUserData();
-    checkVersion();
+    checkVersionAndLaunch();
   } else {
     currentUser = null;
     state = freshState();
@@ -557,7 +583,7 @@ async function loadProfile() {
 }
 
 window.saveProfile = async function() {
-  if (!currentUser) return;
+  if (!currentUser) return true;
   setSyncing(true);
   try {
     const ref = doc(db, 'users', currentUser.uid, 'profile', 'data');
@@ -571,7 +597,12 @@ window.saveProfile = async function() {
       dailyClaimed:  state.dailyClaimed,
       coinLog:       state.coinLog.slice(0,30),
     });
-  } finally { setSyncing(false); }
+    setSyncing(false);
+    return true;
+  } catch(e) {
+    reportSyncError('同步玩家資料', e);
+    return false;
+  }
 }
 
 // ── Records 即時監聽 ──
@@ -581,13 +612,13 @@ function subscribeRecords() {
   setSyncing(true);
   const q = query(collection(db, 'users', currentUser.uid, 'records'), orderBy('date','asc'));
   unsubRecords = onSnapshot(q, (snap) => {
-    state.records = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    state.records = snap.docs.map(d => ({ ...d.data(), id: d.id }));
     state.totalRecords = state.records.length;
     recalcRPG();
     renderLog();
     renderPlayer();
     setSyncing(false);
-  }, () => setSyncing(false));
+  }, (e) => reportSyncError('即時同步記帳資料', e));
 }
 
 // ── 記帳寫入 Firebase ──
@@ -600,24 +631,38 @@ async function fbAddRecord(record) {
       category: record.category, note: record.note || '',
       date: record.date, createdAt: serverTimestamp()
     });
+    setSyncing(false);
     return ref.id;
-  } finally { setSyncing(false); }
+  } catch(e) {
+    reportSyncError('新增記帳同步', e);
+    return null;
+  }
 }
 
 async function fbUpdateRecord(id, data) {
-  if (!currentUser || !id) return;
+  if (!currentUser || !id) return false;
   setSyncing(true);
   try {
     await updateDoc(doc(db, 'users', currentUser.uid, 'records', id), data);
-  } finally { setSyncing(false); }
+    setSyncing(false);
+    return true;
+  } catch(e) {
+    reportSyncError('編輯記帳同步', e);
+    return false;
+  }
 }
 
 async function fbDeleteRecord(id) {
-  if (!currentUser || !id) return;
+  if (!currentUser || !id) return false;
   setSyncing(true);
   try {
     await deleteDoc(doc(db, 'users', currentUser.uid, 'records', id));
-  } finally { setSyncing(false); }
+    setSyncing(false);
+    return true;
+  } catch(e) {
+    reportSyncError('刪除記帳同步', e);
+    return false;
+  }
 }
 
 // ── 批次匯入（CSV）──
@@ -638,12 +683,24 @@ async function fbBatchImport(records) {
       await batch.commit();
     }
     return count;
-  } finally { setSyncing(false); }
+  } catch(e) {
+    reportSyncError('批次匯入同步', e);
+    return 0;
+  } finally {
+    if (document.getElementById('sync-dot')?.classList.contains('syncing')) setSyncing(false);
+  }
 }
 
 // ── 版本管理 ──
-const APP_VERSION = 'v2.0';
+const APP_VERSION = 'v2.1';
 const CHANGELOG = {
+  'v2.1': [
+    '🔎 新增跨日期關鍵字查詢與載入更多',
+    '📅 編輯記帳時可修改日期',
+    '💾 保留上次使用的收支類型與類別',
+    '🛡️ 強化文字安全、日期與 Firebase 同步處理',
+    '⚠️ 同步失敗時顯示明確提示',
+  ],
   'v2.0': [
     '🔥 改用 Firebase 架構，資料即時同步',
     '🔐 Google 帳號登入，跨裝置使用',
@@ -842,10 +899,61 @@ let state = {
 };
 let battle = null;
 let editingIdx = -1;
+const RECORD_PAGE_SIZE = 20;
+let logVisibleCount = RECORD_PAGE_SIZE;
+let keywordVisibleCount = RECORD_PAGE_SIZE;
+const searchGroupLimits = {};
 
 // ── 工具函數 ──
 function getJob(lv){let j=JOBS[0];for(let x of JOBS)if(lv>=x.min)j=x;return j;}
-function today(){return new Date().toISOString().slice(0,10);}
+function formatLocalDate(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return y + '-' + m + '-' + d;
+}
+function today(){return formatLocalDate(new Date());}
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, ch => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  })[ch]);
+}
+function safeColor(value, fallback='#888') {
+  return /^#[0-9a-f]{3,8}$/i.test(String(value || '')) ? value : fallback;
+}
+function renderRecordItem(r, options={}) {
+  const idx = state.records.indexOf(r);
+  const cat = ALL_CATS.find(c => c.key === r.category);
+  const typeLabel = r.type === 'income' ? '收入' : '支出';
+  const syncWarning = r._syncFailed ? '<span style="color:#c0392b;font-size:10px;margin-left:5px;">未同步</span>' : '';
+  const note = r.note ? ' · ' + escapeHtml(r.note) : '';
+  return '<div class="log-item">'
+    + '<div style="flex:1;min-width:0;"><div class="log-meta" style="overflow-wrap:anywhere;">'
+    + escapeHtml(cat ? cat.emoji : '🏷️') + ' ' + escapeHtml(r.category) + note + syncWarning + '</div>'
+    + '<div class="log-date">' + escapeHtml(r.date) + ' · ' + typeLabel + '</div></div>'
+    + '<div class="' + (r.type === 'income' ? 'amount-pos' : 'amount-neg') + '" style="margin:0 8px;white-space:nowrap;">'
+    + (r.type === 'income' ? '+' : '-') + '$' + Number(r.amount || 0).toLocaleString() + '</div>'
+    + '<div style="display:flex;gap:4px;">'
+    + '<button aria-label="編輯這筆記帳" onclick="editRecord(' + idx + ')" style="padding:3px 8px;font-size:11px;border:1px solid #e0e0e0;border-radius:6px;background:#f8f8f8;color:#555;cursor:pointer;">✏️</button>'
+    + '<button aria-label="刪除這筆記帳" onclick="deleteRecord(' + idx + ').then(()=>refreshActiveRecordsView())" style="padding:3px 8px;font-size:11px;border:1px solid #f5c0b0;border-radius:6px;background:#fff0f0;color:#c0392b;cursor:pointer;">🗑️</button>'
+    + '</div></div>';
+}
+function refreshActiveRecordsView() {
+  renderLog();
+  if (document.getElementById('tab-search')?.classList.contains('active')) renderSearch();
+}
+function loadRecordPrefs() {
+  let prefs = {};
+  try { prefs = JSON.parse(localStorage.getItem('accounting_record_prefs') || '{}'); } catch(e) {}
+  const type = prefs.type === 'income' ? 'income' : 'expense';
+  document.getElementById('type-select').value = type;
+  syncCats(prefs.category);
+}
+window.saveRecordPrefs = function() {
+  const type = document.getElementById('type-select').value;
+  const category = document.getElementById('cat-select').value;
+  localStorage.setItem('accounting_record_prefs', JSON.stringify({type, category}));
+};
 function calcMonthly(){const m=today().slice(0,7);let income=0,expense=0;for(let r of state.records)if(r.date.startsWith(m)){if(r.type==='income')income+=r.amount;else expense+=r.amount;}return{income,expense,hp:Math.max(0,income-expense),net:income-expense,maxHp:income};}
 function getCatCount(key,type='expense'){return state.records.filter(r=>r.category===key&&r.type===type).length;}
 function getCatLv(n){if(n>=300)return 16;if(n>=100)return 12;if(n>=30)return 8;if(n>=15)return 5;if(n>=5)return 3;if(n>=1)return 1;return 0;}
@@ -861,8 +969,19 @@ function addCoins(amt,reason){state.coins+=amt;state.coinLog.unshift({amount:amt
 function checkAch(){const msgs=[];for(let a of ACH){if(!state.claimedAch.includes(a.id)&&a.cond(state)){state.claimedAch.push(a.id);const c=ACH_COINS[a.size];addCoins(c,'成就「'+a.label+'」');msgs.push('🏆 '+a.label+' +'+c+'金幣');}}return msgs;}
 function checkCombo(){const msgs=[];for(let m of COMBO_MS){const key='c'+m.days;if(state.combo>=m.days&&!state.claimedCombos.includes(key)){state.claimedCombos.push(key);addCoins(m.coins,'連擊 '+m.days+' 天');msgs.push('🔥 連擊'+m.days+'天 +'+m.coins+'金幣');}}if(state.combo<7)state.claimedCombos=state.claimedCombos.filter(k=>k!=='c7');if(state.combo<30)state.claimedCombos=state.claimedCombos.filter(k=>k!=='c30');return msgs;}
 function checkDaily(){const t=today();if(state.dailyClaimed===t)return[];if(state.records.some(r=>r.date===t)){state.dailyClaimed=t;addCoins(50,'每日任務完成');return['📅 每日任務 +50金幣'];}return[];}
-window.syncCats = function syncCats(){const type=document.getElementById('type-select').value;const cats=type==='expense'?ECATS:ICATS;document.getElementById('cat-select').innerHTML=cats.map(c=>'<option value="'+c.key+'">'+c.emoji+' '+c.key+'</option>').join('');}
-window.updateEditCats=function(){const type=document.getElementById('edit-type').value;const cats=type==='income'?ICATS:ECATS;document.getElementById('edit-cat').innerHTML=cats.map(c=>'<option value="'+c.key+'">'+c.emoji+' '+c.key+'</option>').join('');};
+window.syncCats = function syncCats(preferredCategory){
+  const type=document.getElementById('type-select').value;
+  const select=document.getElementById('cat-select');
+  const previous=preferredCategory || select.value;
+  const cats=type==='expense'?ECATS:ICATS;
+  select.innerHTML=cats.map(c=>'<option value="'+escapeHtml(c.key)+'">'+escapeHtml(c.emoji)+' '+escapeHtml(c.key)+'</option>').join('');
+  if(cats.some(c=>c.key===previous))select.value=previous;
+}
+window.updateEditCats=function(){
+  const type=document.getElementById('edit-type').value;
+  const cats=type==='income'?ICATS:ECATS;
+  document.getElementById('edit-cat').innerHTML=cats.map(c=>'<option value="'+escapeHtml(c.key)+'">'+escapeHtml(c.emoji)+' '+escapeHtml(c.key)+'</option>').join('');
+};
 
 // ── addRecord ──
 window.addRecord = async function(){
@@ -901,13 +1020,21 @@ window.addRecord = async function(){
 
   document.getElementById('amount-input').value='';
   document.getElementById('note-input').value='';
-  syncCats();
+  saveRecordPrefs();
   fb.style.color='#2a7a4f';fb.textContent=msgs.join(' · ');
   setTimeout(()=>{fb.textContent='';},6000);
   renderLog();renderPlayer();
 
   // 寫入 Firebase（背景）
-  await fbAddRecord(record);
+  const newId = await fbAddRecord(record);
+  if (newId) {
+    record.id = newId;
+  } else if (currentUser) {
+    record._syncFailed = true;
+    fb.style.color='#c0392b';
+    fb.textContent='記帳已暫留在此裝置，但尚未同步到雲端';
+    refreshActiveRecordsView();
+  }
   await saveProfile();
 };
 
@@ -919,6 +1046,7 @@ window.editRecord = function(idx){
   updateEditCats();
   document.getElementById('edit-cat').value=r.category;
   document.getElementById('edit-amount').value=r.amount;
+  document.getElementById('edit-date').value=r.date||today();
   document.getElementById('edit-note').value=r.note||'';
   document.getElementById('edit-modal').style.display='flex';
 };
@@ -928,15 +1056,22 @@ window.saveEdit = async function(){
   const type=document.getElementById('edit-type').value;
   const amount=parseInt(document.getElementById('edit-amount').value);
   const category=document.getElementById('edit-cat').value;
+  const date=document.getElementById('edit-date').value;
   const note=document.getElementById('edit-note').value;
-  if(!amount||amount<=0)return;
+  if(!amount||amount<=0||!date)return;
+  const idx=editingIdx;
   const r=state.records[editingIdx];
-  const updated={...r,type,amount,category,note};
+  const updated={...r,type,amount,category,date,note};
   state.records[editingIdx]=updated;
   closeEdit();
-  recalcRPG();renderLog();renderPlayer();
-  if(document.getElementById('tab-search').classList.contains('active'))renderSearch();
-  if(r.id) await fbUpdateRecord(r.id,{type,amount,category,note});
+  recalcRPG();renderPlayer();refreshActiveRecordsView();
+  if(r.id) {
+    const ok=await fbUpdateRecord(r.id,{type,amount,category,date,note,updatedAt:serverTimestamp()});
+    if(!ok){
+      state.records[idx]=r;
+      recalcRPG();renderPlayer();refreshActiveRecordsView();
+    }
+  }
   await saveProfile();
 };
 window.deleteRecord = async function(idx){
@@ -944,35 +1079,36 @@ window.deleteRecord = async function(idx){
   const r=state.records[idx];
   state.records.splice(idx,1);
   state.totalRecords=Math.max(0,state.totalRecords-1);
-  recalcRPG();renderLog();renderPlayer();
-  if(r&&r.id) await fbDeleteRecord(r.id);
+  recalcRPG();renderPlayer();refreshActiveRecordsView();
+  if(r&&r.id) {
+    const ok=await fbDeleteRecord(r.id);
+    if(!ok){
+      state.records.splice(idx,0,r);
+      state.totalRecords++;
+      recalcRPG();renderPlayer();refreshActiveRecordsView();
+    }
+  }
   await saveProfile();
 };
 
 // ── renderLog ──
+let lastLogFilter = '';
 window.renderLog = function renderLog(){
   const el=document.getElementById('log-list');
   if(!state.records.length){el.innerHTML='<div style="font-size:13px;color:#aaa">尚無紀錄</div>';return;}
   const filterInput=document.getElementById('log-date-filter');
   const filterDate=(filterInput&&filterInput.value)||'';
-  let recs;
-  if(filterDate){
-    recs=state.records.filter(r=>(r.date||'')===filterDate).slice().reverse();
-  } else {
-    recs=state.records.slice(-20).reverse();
-  }
-  if(!recs.length){el.innerHTML='<div style="font-size:13px;color:#aaa;padding:8px 0;">'+(filterDate?filterDate+' 這天沒有記帳記錄':'尚無紀錄')+'</div>';return;}
-  el.innerHTML=recs.map(r=>{
-    const realIdx=state.records.indexOf(r);
-    const cat=ALL_CATS.find(c=>c.key===r.category);
-    return '<div class="log-item"><div style="flex:1;"><div class="log-meta">'+(cat?cat.emoji:'')+' '+r.category+(r.note?' · '+r.note:'')+'</div><div class="log-date">'+r.date+'</div></div>'
-      +'<div class="'+(r.type==='income'?'amount-pos':'amount-neg')+'" style="margin-right:8px;">'+(r.type==='income'?'+':'-')+'$'+r.amount.toLocaleString()+'</div>'
-      +'<div style="display:flex;gap:4px;">'
-      +'<button onclick="editRecord('+realIdx+')" style="padding:3px 8px;font-size:11px;border:1px solid #e0e0e0;border-radius:6px;background:#f8f8f8;color:#555;cursor:pointer;">✏️</button>'
-      +'<button onclick="deleteRecord('+realIdx+')" style="padding:3px 8px;font-size:11px;border:1px solid #f5c0b0;border-radius:6px;background:#fff0f0;color:#c0392b;cursor:pointer;">🗑️</button>'
-      +'</div></div>';
-  }).join('');
+  if(filterDate!==lastLogFilter){logVisibleCount=RECORD_PAGE_SIZE;lastLogFilter=filterDate;}
+  const recs=(filterDate
+    ? state.records.filter(r=>(r.date||'')===filterDate)
+    : state.records
+  ).slice().sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  if(!recs.length){el.innerHTML='<div style="font-size:13px;color:#aaa;padding:8px 0;">'+(filterDate?escapeHtml(filterDate)+' 這天沒有記帳記錄':'尚無紀錄')+'</div>';return;}
+  const visible=recs.slice(0,logVisibleCount);
+  el.innerHTML=visible.map(r=>renderRecordItem(r)).join('')
+    +(visible.length<recs.length?'<button class="load-more-btn" onclick="loadMoreLog()">載入更多（尚有 '+(recs.length-visible.length)+' 筆）</button>':'');
 }
+window.loadMoreLog=function(){logVisibleCount+=RECORD_PAGE_SIZE;renderLog();};
 
 // ── renderPlayer ──
 window.renderPlayer = function renderPlayer(){
@@ -1087,7 +1223,7 @@ window.renderStats = function renderStats(){
   ].map(a=>{const bonus=a.val-BASE[a.stat];const pct=Math.min(100,Math.round(a.val/a.max*100));return'<div class="attr-item"><div class="attr-icon">'+a.icon+'</div><div class="attr-bar-wrap"><div class="attr-name">'+a.name+'</div><div class="attr-bar-bg"><div class="attr-bar-fill" style="width:'+pct+'%;background:'+a.color+';"></div></div></div><div class="attr-val"><div class="attr-main" style="color:'+a.color+';">'+a.val+a.unit+'</div><div class="attr-bonus">基礎'+BASE[a.stat]+' +'+bonus+'</div></div></div>';}).join('');
   const cl=document.getElementById('coin-log');
   if(!state.coinLog.length){cl.innerHTML='<div style="font-size:13px;color:#aaa">尚無紀錄</div>';return;}
-  cl.innerHTML=state.coinLog.slice(0,15).map(c=>'<div class="coin-log-item"><span>'+c.date+' · '+c.reason+'</span><span class="'+(c.amount>0?'coin-plus':'coin-minus')+'">'+(c.amount>0?'+':'')+c.amount+'</span></div>').join('');
+  cl.innerHTML=state.coinLog.slice(0,15).map(c=>'<div class="coin-log-item"><span>'+escapeHtml(c.date)+' · '+escapeHtml(c.reason)+'</span><span class="'+(c.amount>0?'coin-plus':'coin-minus')+'">'+(c.amount>0?'+':'')+Number(c.amount||0).toLocaleString()+'</span></div>').join('');
 }
 
 // ── renderMastery ──
@@ -1274,7 +1410,7 @@ window.exportCSV = function() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = '記帳勇者_' + new Date().toISOString().slice(0, 10) + '.csv';
+  a.download = '記帳勇者_' + today() + '.csv';
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
@@ -1288,7 +1424,7 @@ window.exportCSV = function() {
 window.setQuickRange = function(range) {
   const now = new Date();
   let start, end;
-  const fmt = d => d.toISOString().slice(0,10);
+  const fmt = d => formatLocalDate(d);
 
   if (range === 'today') {
     start = end = fmt(now);
@@ -1332,19 +1468,8 @@ window.runQuery = function() {
     return;
   }
 
-  el.innerHTML = filtered.map((r, i) => {
-    const realIdx = state.records.indexOf(r);
-    const c = ALL_CATS.find(x => x.key === r.category);
-    return '<div class="log-item">'
-      + '<div style="flex:1;"><div class="log-meta">' + (c ? c.emoji : '') + ' ' + r.category + (r.note ? ' · ' + r.note : '') + '</div>'
-      + '<div class="log-date">' + r.date + '</div></div>'
-      + '<div class="' + (r.type==='income'?'amount-pos':'amount-neg') + '" style="margin-right:8px;">'
-      + (r.type==='income'?'+':'-') + '$' + r.amount.toLocaleString() + '</div>'
-      + '<div style="display:flex;gap:4px;">'
-      + '<button onclick="editRecord(' + realIdx + ');runQuery()" style="padding:3px 8px;font-size:11px;border:1px solid #e0e0e0;border-radius:6px;background:#f8f8f8;color:#555;cursor:pointer;">✏️</button>'
-      + '<button onclick="deleteRecord(' + realIdx + ').then(()=>runQuery())" style="padding:3px 8px;font-size:11px;border:1px solid #f5c0b0;border-radius:6px;background:#fff0f0;color:#c0392b;cursor:pointer;">🗑️</button>'
-      + '</div></div>';
-  }).join('');
+  el.innerHTML = filtered.slice(0, RECORD_PAGE_SIZE).map(r => renderRecordItem(r)).join('')
+    + (filtered.length > RECORD_PAGE_SIZE ? '<div style="font-size:12px;color:#aaa;padding-top:8px;">結果較多，請使用新版關鍵字查詢的「載入更多」。</div>' : '');
 };
 
 // 初始化查詢類別下拉選單
@@ -1371,10 +1496,11 @@ window.clearLogFilter = function() {
 // 查詢分頁
 // ══════════════════════════════════
 let srIncomeOpen = false;
+let lastSearchKeyword = '';
 
 window.setSearchRange = function(range) {
   const now = new Date();
-  const fmt = d => d.toISOString().slice(0,10);
+  const fmt = d => formatLocalDate(d);
   let start, end;
   const btns = ['week','month','lastmonth','year','all'];
   btns.forEach(b => {
@@ -1418,6 +1544,10 @@ window.renderSearch = function() {
   const incomeBtn = document.getElementById('sr-income-btn');
 
   if (clearBtn) clearBtn.style.display = keyword ? 'block' : 'none';
+  if (keyword !== lastSearchKeyword) {
+    keywordVisibleCount = RECORD_PAGE_SIZE;
+    lastSearchKeyword = keyword;
+  }
 
   // 有關鍵字時跨全部日期搜尋，不受下方日期區間限制。
   if (keyword) {
@@ -1433,9 +1563,6 @@ window.renderSearch = function() {
       return fields.some(value => String(value ?? '').toLocaleLowerCase('zh-TW').includes(keyword));
     }).slice().sort((a, b) => (b.date || '').localeCompare(a.date || ''));
 
-    const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, ch => ({
-      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-    })[ch]);
     const expenseTotal = matches.filter(r => r.type === 'expense').reduce((sum, r) => sum + Number(r.amount || 0), 0);
     const incomeTotal = matches.filter(r => r.type === 'income').reduce((sum, r) => sum + Number(r.amount || 0), 0);
 
@@ -1446,24 +1573,15 @@ window.renderSearch = function() {
       return;
     }
 
-    const rows = matches.map(r => {
-      const idx = state.records.indexOf(r);
-      const c = ALL_CATS.find(x => x.key === r.category);
-      return '<div class="log-item">'
-        + '<div style="flex:1;min-width:0;"><div class="log-meta" style="overflow-wrap:anywhere;">' + (c ? c.emoji : '🏷️') + ' ' + escapeHtml(r.category) + (r.note ? ' · ' + escapeHtml(r.note) : '') + '</div>'
-        + '<div class="log-date">' + escapeHtml(r.date) + ' · ' + typeLabel(r) + '</div></div>'
-        + '<div class="' + (r.type === 'income' ? 'amount-pos' : 'amount-neg') + '" style="margin:0 8px;white-space:nowrap;">'
-        + (r.type === 'income' ? '+' : '-') + '$' + Number(r.amount || 0).toLocaleString() + '</div>'
-        + '<div style="display:flex;gap:4px;">'
-        + '<button onclick="editRecord(' + idx + ')" style="padding:3px 8px;font-size:11px;border:1px solid #e0e0e0;border-radius:6px;background:#f8f8f8;color:#555;cursor:pointer;">✏️</button>'
-        + '<button onclick="deleteRecord(' + idx + ').then(()=>renderSearch())" style="padding:3px 8px;font-size:11px;border:1px solid #f5c0b0;border-radius:6px;background:#fff0f0;color:#c0392b;cursor:pointer;">🗑️</button>'
-        + '</div></div>';
-    }).join('');
+    const visibleMatches = matches.slice(0, keywordVisibleCount);
+    const rows = visibleMatches.map(r => renderRecordItem(r)).join('');
 
     keywordResults.innerHTML = '<div class="card">'
       + '<div class="keyword-summary"><span>共 <strong style="color:#1a1a1a;">' + matches.length + '</strong> 筆符合</span>'
       + '<span><span style="color:#2a7a4f;">收入 +$' + incomeTotal.toLocaleString() + '</span> · <span style="color:#c0392b;">支出 -$' + expenseTotal.toLocaleString() + '</span></span></div>'
-      + rows + '</div>';
+      + rows
+      + (visibleMatches.length < matches.length ? '<button class="load-more-btn" onclick="loadMoreKeyword()">載入更多（尚有 '+(matches.length-visibleMatches.length)+' 筆）</button>' : '')
+      + '</div>';
     return;
   }
 
@@ -1526,21 +1644,18 @@ window.renderSearch = function() {
     catEl.innerHTML = sorted.map(([cat, data]) => {
       const c = ALL_CATS.find(x=>x.key===cat);
       const emoji = c ? c.emoji : '🏷️';
-      const color = c ? c.color : '#888';
-      const recHtml = data.records.slice().reverse().map(r => {
-        const idx = state.records.indexOf(r);
-        return '<div class="log-item">'
-          + '<div style="flex:1;"><div class="log-meta">' + r.date + (r.note?' · '+r.note:'') + '</div></div>'
-          + '<div class="amount-neg" style="margin-right:8px;">-$'+r.amount.toLocaleString()+'</div>'
-          + '<div style="display:flex;gap:4px;">'
-          + '<button onclick="editRecord('+idx+');renderSearch()" style="padding:3px 8px;font-size:11px;border:1px solid #e0e0e0;border-radius:6px;background:#f8f8f8;color:#555;cursor:pointer;">✏️</button>'
-          + '<button onclick="deleteRecord('+idx+').then(()=>renderSearch())" style="padding:3px 8px;font-size:11px;border:1px solid #f5c0b0;border-radius:6px;background:#fff0f0;color:#c0392b;cursor:pointer;">🗑️</button>'
-          + '</div></div>';
-      }).join('');
-      return '<div class="card" style="margin-bottom:8px;">'
+      const color = safeColor(c ? c.color : '#888');
+      const groupKey='expense|'+cat;
+      const limit=searchGroupLimits[groupKey]||RECORD_PAGE_SIZE;
+      const groupRecords=data.records.slice().sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+      const visibleGroup=groupRecords.slice(0,limit);
+      const encodedCat=encodeURIComponent(cat).replace(/'/g,'%27');
+      const recHtml = visibleGroup.map(r => renderRecordItem(r)).join('')
+        +(visibleGroup.length<groupRecords.length?'<button class="load-more-btn" onclick="loadMoreSearchGroup(\'expense\',\''+encodedCat+'\')">載入更多（尚有 '+(groupRecords.length-visibleGroup.length)+' 筆）</button>':'');
+      return '<div class="card" id="sr-group-expense-'+encodedCat+'" style="margin-bottom:8px;">'
         + '<div onclick="toggleCat(this)" style="display:flex;align-items:center;gap:8px;cursor:pointer;">'
-        + '<span style="font-size:18px;">'+emoji+'</span>'
-        + '<span style="font-size:14px;font-weight:600;flex:1;">'+cat+'</span>'
+        + '<span style="font-size:18px;">'+escapeHtml(emoji)+'</span>'
+        + '<span style="font-size:14px;font-weight:600;flex:1;">'+escapeHtml(cat)+'</span>'
         + '<span style="font-size:14px;font-weight:700;color:'+color+';">$'+data.total.toLocaleString()+'</span>'
         + '<span style="font-size:12px;color:#aaa;margin-left:6px;">'+data.records.length+'筆 ▼</span>'
         + '</div>'
@@ -1560,18 +1675,15 @@ window.renderSearch = function() {
       inCats[r.category].records.push(r);
     });
     incEl.innerHTML = Object.entries(inCats).map(([cat, data]) => {
-      const recHtml = data.records.slice().reverse().map(r => {
-        const idx = state.records.indexOf(r);
-        return '<div class="log-item">'
-          + '<div style="flex:1;"><div class="log-meta">'+r.date+(r.note?' · '+r.note:'')+'</div></div>'
-          + '<div class="amount-pos" style="margin-right:8px;">+$'+r.amount.toLocaleString()+'</div>'
-          + '<div style="display:flex;gap:4px;">'
-          + '<button onclick="editRecord('+idx+');renderSearch()" style="padding:3px 8px;font-size:11px;border:1px solid #e0e0e0;border-radius:6px;background:#f8f8f8;color:#555;cursor:pointer;">✏️</button>'
-          + '<button onclick="deleteRecord('+idx+').then(()=>renderSearch())" style="padding:3px 8px;font-size:11px;border:1px solid #f5c0b0;border-radius:6px;background:#fff0f0;color:#c0392b;cursor:pointer;">🗑️</button>'
-          + '</div></div>';
-      }).join('');
+      const groupKey='income|'+cat;
+      const limit=searchGroupLimits[groupKey]||RECORD_PAGE_SIZE;
+      const groupRecords=data.records.slice().sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+      const visibleGroup=groupRecords.slice(0,limit);
+      const encodedCat=encodeURIComponent(cat).replace(/'/g,'%27');
+      const recHtml = visibleGroup.map(r => renderRecordItem(r)).join('')
+        +(visibleGroup.length<groupRecords.length?'<button class="load-more-btn" onclick="loadMoreSearchGroup(\'income\',\''+encodedCat+'\')">載入更多（尚有 '+(groupRecords.length-visibleGroup.length)+' 筆）</button>':'');
       return '<div style="margin-bottom:12px;">'
-        + '<div style="font-size:13px;font-weight:600;color:#2a7a4f;margin-bottom:6px;">💵 '+cat+' · $'+data.total.toLocaleString()+'</div>'
+        + '<div style="font-size:13px;font-weight:600;color:#2a7a4f;margin-bottom:6px;">💵 '+escapeHtml(cat)+' · $'+data.total.toLocaleString()+'</div>'
         + recHtml + '</div>';
     }).join('');
     document.getElementById('sr-income-wrap').style.display = 'block';
@@ -1588,6 +1700,25 @@ window.clearSearchKeyword = function() {
   input.value = '';
   renderSearch();
   input.focus();
+};
+
+window.loadMoreKeyword = function() {
+  keywordVisibleCount += RECORD_PAGE_SIZE;
+  renderSearch();
+};
+
+window.loadMoreSearchGroup = function(type, encodedCat) {
+  const cat=decodeURIComponent(encodedCat);
+  const key=type+'|'+cat;
+  searchGroupLimits[key]=(searchGroupLimits[key]||RECORD_PAGE_SIZE)+RECORD_PAGE_SIZE;
+  renderSearch();
+  if(type==='expense'){
+    const card=document.getElementById('sr-group-expense-'+encodedCat);
+    const detail=card?.querySelector('.cat-detail');
+    if(detail)detail.style.display='block';
+    const arrow=card?.querySelector('div[onclick="toggleCat(this)"] span:last-child');
+    if(arrow)arrow.textContent=arrow.textContent.replace('▼','▲');
+  }
 };
 
 window.toggleCat = function(el) {
@@ -1618,7 +1749,7 @@ window.switchTab=function(name,el){
 };
 
 // ── 初始化（不需要等 Firebase，Auth 監聽會觸發）──
-syncCats();initQueryCats();
+loadRecordPrefs();initQueryCats();
 const _rd=document.getElementById('record-date');
 if(_rd)_rd.value=today();
 document.getElementById('version-tag').textContent=APP_VERSION;
